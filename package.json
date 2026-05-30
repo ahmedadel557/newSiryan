@@ -1,0 +1,14 @@
+{
+  "name": "siryan",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "packageManager": "npm@11.15.0",
+  "devDependencies": {
+    "turbo": "latest"
+  }
+}

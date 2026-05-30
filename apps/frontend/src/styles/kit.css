@@ -1,0 +1,414 @@
+/* Shared kit styles for the Patient app + Staff dashboards.
+   Adds component-level CSS on top of the design tokens.            */
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  color: var(--fg-1);
+  background: var(--bg-page);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0 14px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast);
+  white-space: nowrap;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--brand-hover);
+}
+.btn-primary:active {
+  background: var(--brand-press);
+  transform: scale(0.98);
+}
+.btn-secondary {
+  background: var(--bg-surface);
+  color: var(--fg-1);
+  border-color: var(--border-2);
+}
+.btn-secondary:hover {
+  background: var(--sand-100);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fg-1);
+}
+.btn-ghost:hover {
+  background: var(--sand-100);
+}
+.btn-danger {
+  background: var(--critical-soft-bg);
+  color: var(--critical-soft-fg);
+}
+.btn-danger:hover {
+  background: var(--coral-100);
+}
+.btn-sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+.btn-lg {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+.btn-icon {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+
+/*data-theme="dark" overrides for buttons */
+
+.dark .btn-ghost:hover {
+  background: var(--sand-100);
+  color: black;
+}
+
+/* ---------- INPUTS ---------- */
+.input,
+.select,
+textarea.input {
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg-1);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  height: 38px;
+  width: 100%;
+}
+textarea.input {
+  padding: 10px 12px;
+  height: auto;
+  line-height: 1.4;
+  resize: vertical;
+}
+.input:focus,
+.select:focus,
+textarea.input:focus {
+  outline: none;
+  border-color: var(--forest-500);
+  box-shadow: var(--shadow-focus);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.field-help {
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+/* ---------- SURFACES ---------- */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-pad {
+  padding: 18px 20px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.card-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-3);
+  font-weight: 600;
+}
+
+/* ---------- CHIPS ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.85;
+}
+.chip-pos {
+  background: var(--positive-soft-bg);
+  color: var(--positive-soft-fg);
+}
+.chip-caut {
+  background: var(--caution-soft-bg);
+  color: var(--caution-soft-fg);
+}
+.chip-crit {
+  background: var(--critical-soft-bg);
+  color: var(--critical-soft-fg);
+}
+.chip-info {
+  background: var(--info-soft-bg);
+  color: var(--info-soft-fg);
+}
+.chip-neut {
+  background: var(--sand-100);
+  color: var(--fg-2);
+}
+.chip-brand {
+  background: var(--brand-soft-bg);
+  color: var(--brand-soft-fg);
+}
+
+/* Dark mode chips */
+.dark .chip-neut {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg-1);
+}
+.dark .chip-pos {
+  background: rgba(22, 134, 74, 0.2);
+  color: #5cc183;
+}
+.dark .chip-caut {
+  background: rgba(193, 133, 26, 0.2);
+  color: #f1c878;
+}
+.dark .chip-crit {
+  background: rgba(198, 74, 50, 0.2);
+  color: #efa593;
+}
+.dark .chip-info {
+  background: rgba(62, 68, 160, 0.2);
+  color: #b0b4ec;
+}
+.dark .chip-brand {
+  background: rgba(35, 83, 71, 0.25);
+  color: #8eb69b;
+}
+
+/* Input wrapper with leading icon (shared) */
+.auth-input-wrap {
+  position: relative;
+}
+.auth-input-wrap > .lucide,
+.auth-input-wrap > svg.lucide {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--fg-3);
+  pointer-events: none;
+}
+.auth-input-wrap .input {
+  padding-left: 38px;
+}
+
+/* ---------- LAYOUT helpers ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stack-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stack-8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stack-12 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stack-16 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.stack-24 {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.divider {
+  height: 1px;
+  background: var(--border-1);
+}
+.spacer {
+  flex: 1;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ---------- AVATAR ---------- */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--forest-100);
+  color: var(--forest-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.avatar.sm {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+.avatar.lg {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* ---------- TABLE ---------- */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tbl th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--fg-3);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-1);
+}
+.tbl td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-1);
+  color: var(--fg-1);
+}
+.tbl tr:last-child td {
+  border-bottom: none;
+}
+.tbl tr:hover td {
+  background: var(--sand-50);
+}
+
+/* ---------- LUCIDE ---------- */
+.lucide {
+  stroke-width: 1.75;
+}
+
+@media (max-width: 767px) {
+  .btn {
+    min-height: 44px;
+  }
+  .btn-sm {
+    min-height: 36px;
+  }
+  .input,
+  .select {
+    height: 44px;
+    min-height: 44px;
+  }
+  textarea.input {
+    height: auto;
+    min-height: 44px;
+  }
+  .card-pad {
+    padding: 12px 16px;
+  }
+}
+
+/* ---------- THEME TOGGLE ---------- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border-1);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--fg-2);
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast),
+    border-color var(--dur-fast);
+}
+.theme-toggle:hover {
+  background: var(--bg-sunken);
+  color: var(--fg-1);
+  border-color: var(--border-2);
+}

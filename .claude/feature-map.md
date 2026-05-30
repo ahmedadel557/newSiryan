@@ -1,0 +1,84 @@
+# Feature Map
+
+## Patient
+ ├── appointments (book, view, cancel, reschedule, pay, online)
+ ├── medical records (view own records, shared records)
+ ├── pharmacy (view prescriptions, pharmacy orders)
+ ├── billing (view invoices, payments)
+ ├── rooms (book, view)
+ ├── lab results (view)
+ ├── requests (staff assistance requests)
+ ├── AI assistant (chatbot)
+ └── settings (profile, notifications)
+
+## Doctor
+ ├── patients (view assigned patients, patient detail)
+ ├── medical records (create, update, view)
+ ├── prescriptions (create, manage)
+ ├── lab orders (order, view results)
+ ├── radiology orders (order, view results)
+ ├── schedule (view/manage availability, blocked slots)
+ ├── shared records (receive shared patient records)
+ ├── record (create new medical record)
+ └── real-time alerts (patient:checked_in, emergency:flag, lab/radiology results banners)
+
+## Nurse
+ ├── patients (view assigned patients, detail)
+ ├── medications (administer, track)
+ ├── vital signs (record, monitor)
+ └── alerts (critical patient alerts)
+
+## Receptionist
+ ├── appointments (manage all appointments — confirm, cancel, reschedule)
+ ├── check-in (patient arrival check-in — walk-in + existing appointment)
+ ├── patients (search, register walk-in)
+ ├── lab orders (coordinate)
+ ├── radiology orders (coordinate)
+ ├── requests (doctor-initiated cancel/reschedule requests — real-time via socket)
+ ├── orders (general order management)
+ └── real-time alerts (doctor:request:new, appointment:conflict banners on dashboard)
+
+## Pharmacist
+ ├── prescriptions (view, dispense)
+ ├── pharmacy orders (fulfill)
+ └── dispensed (history)
+
+## Inventory Manager
+ ├── items (manage inventory items, stock levels)
+ ├── supply requests (approve/reject)
+ ├── warehouse (entries, shipments)
+ └── rooms (manage room inventory)
+
+## Lab Technician
+ ├── orders (view pending lab orders)
+ ├── completed (mark complete, upload results)
+ └── schedule (lab schedule)
+
+## Radiology Technician
+ ├── orders (view pending radiology orders)
+ ├── completed (mark complete, upload results)
+ └── schedule (radiology schedule)
+
+## Cashier  [Backend ✓ | Frontend ✓ | Parts 1–3 complete]
+ ├── pending (cross-patient dashboard — checked-in appointments, approved pharmacy, active rooms)
+ ├── invoices (list with filters, create manual invoice, view by id, cancel with stock reversal)
+ ├── payments (full pay, partial pay — incremental with auto-promote)
+ ├── reports (daily report — this cashier only, by method + category + transaction list, PDF export)
+ ├── patient history (all invoices per patient with remaining balance)
+ └── real-time alerts (payment:pending banner on dashboard, useCashierPending auto-refresh)
+
+## Admin  [Backend ✓ | Frontend ✓ | Parts 1–4 complete]
+ ├── users (manage all users, roles, status; edit staff profiles; cannot modify own account)
+ ├── staff-requests (approve/reject; real-time staff_request:new socket alert + toast)
+ ├── appointments (system-wide oversight — filter by status/date/search; emergency cancel with reason + patient+doctor notification)
+ ├── insurance (CRUD; cascade delete clears patient profiles + notifies affected patients)
+ ├── departments (CRUD)
+ ├── invoices (view all + create manual invoice with patient selector + line items)
+ ├── reports (revenue chart live-updated on payment:received; ratings, doctors, occupancy, pharmacy)
+ ├── audit log (system-wide audit trail)
+ └── temp-password flow (admin-created accounts get password_changed=false; JWT pwc claim forces change-password page on first login)
+
+## Cross-Role
+ ├── notifications (real-time, Socket.io)
+ ├── settings (profile, password, preferences)
+ └── auth (login, register, OAuth, password reset, complete-profile)

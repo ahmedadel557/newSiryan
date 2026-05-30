@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+out/
+
+# Environment variables — never commit real secrets
+.env
+.env.local
+.env*.local
+
+# Logs
+logs/
+*.log
+
+# Turbo cache
+.turbo/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Backend uploads (keep placeholder)
+apps/backend/uploads/avatars/*
+!apps/backend/uploads/avatars/.gitkeep
+
+# Misc
+.DS_Store
+*.pem

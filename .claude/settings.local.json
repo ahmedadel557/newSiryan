@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(findstr jose *)",
+      "Bash(node -e \"const p = require\\('./node_modules/jose/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(node -e \"require\\('http'\\).get\\('http://localhost:5000/api/auth/me', r => console.log\\('backend up:', r.statusCode\\)\\).on\\('error', \\(\\) => console.log\\('backend down'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('scripts',{}\\)\\)\")",
+      "Bash(where npx *)",
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "Bash(echo \"backend started with PID $!\")",
+      "PowerShell(Start-Process -FilePath \"cmd.exe\" -ArgumentList \"/c\", \"cd /d C:\\\\Users\\\\AHMED\\\\Desktop\\\\NewSiryan\\\\newSiryan_backEnd && npm run dev > C:\\\\Temp\\\\backend.log 2>&1\" -WindowStyle Hidden -PassThru | Select-Object Id)",
+      "PowerShell(Start-Process -FilePath \"cmd.exe\" -ArgumentList \"/c\", \"cd /d C:\\\\Users\\\\AHMED\\\\Desktop\\\\NewSiryan\\\\newSiryan_frontEnd && npm run dev > C:\\\\Temp\\\\frontend.log 2>&1\" -WindowStyle Hidden -PassThru | Select-Object Id)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(node -e \"require.resolve\\('playwright'\\)\" 2>&1)",
+      "PowerShell(ls \"$env:APPDATA\\\\npm\\\\node_modules\\\\\")",
+      "PowerShell(ls \"C:\\\\Temp\\\\pw-test\\\\node_modules\\\\playwright\" -ErrorAction SilentlyContinue | Select-Object Name; node -e \"require\\('C:/Temp/pw-test/node_modules/playwright'\\)\" 2>&1 | Select-Object -First 3)",
+      "PowerShell(netstat *)",
+      "PowerShell(node -e \"const p=require\\('C:/Users/AHMED/Desktop/NewSiryan/newSiryan_frontEnd/node_modules/jose/package.json'\\); console.log\\(p.exports['.'].import ?? p.main ?? p.module\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\AHMED\\\\Desktop\\\\NewSiryan\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\AHMED\\\\Desktop\\\\NewSiryan\" -Recurse -Directory -Depth 2)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Head -30)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(npx eslint *)",
+      "Bash(node -e ' *)",
+      "PowerShell(node -v)",
+      "PowerShell(npm -v)"
+    ]
+  }
+}

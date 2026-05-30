@@ -1,0 +1,682 @@
+/* ============================================================
+   Auth pages — animated background + glassmorphism card
+   Ported from design-system-v2/ui_kits/patient/styles.css
+============================================================ */
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Animated gradient layers */
+.auth-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.auth-bg-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+.auth-bg-layer.is-active {
+  opacity: 1;
+}
+
+/* Floating feature pills */
+.auth-floats {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.auth-float {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  animation: authFloat 6s ease-in-out infinite;
+  opacity: 0.85;
+}
+.auth-float .lucide {
+  width: 14px;
+  height: 14px;
+}
+@keyframes authFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Pulse line decoration */
+.auth-pulse {
+  position: absolute;
+  bottom: 10%;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Watermark logo */
+.auth-watermark {
+  position: absolute;
+  top: 50%;
+  left: 28%;
+  transform: translate(-50%, -50%);
+  opacity: 0.08;
+  z-index: 1;
+  pointer-events: none;
+}
+.auth-watermark img {
+  width: 320px;
+  height: 320px;
+  object-fit: contain;
+}
+
+/* Card wrapper */
+.auth-card-wrap {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 24px;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Glassmorphism card */
+.auth-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 24px 64px -16px rgba(46, 20, 12, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+.auth-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px 0;
+}
+.auth-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.auth-brand {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg-1);
+}
+
+.auth-form-content {
+  padding: 20px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--fg-1);
+}
+.auth-lede {
+  color: var(--fg-2);
+  font-size: 14px;
+  margin: -4px 0 4px;
+}
+.auth-note {
+  color: var(--fg-3);
+  font-size: 12px;
+  margin: -8px 0 0;
+}
+
+/* Input with icon */
+.auth-input-wrap {
+  position: relative;
+}
+.auth-input-wrap .lucide {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--fg-3);
+}
+.auth-input-wrap .input {
+  padding-left: 38px;
+}
+
+/* Inline field error */
+.auth-field-error {
+  font-size: 12px;
+  color: var(--critical);
+  margin-top: 4px;
+}
+
+/* Forgot password link */
+.auth-forgot {
+  font-size: 12px;
+  color: var(--fg-3);
+  margin-top: 4px;
+  display: inline-block;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.auth-forgot:hover {
+  color: var(--brand);
+}
+
+/* Submit button */
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+}
+
+/* API error banner */
+.auth-err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--critical-soft-bg);
+  color: var(--critical-soft-fg);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+/* Mode switch link */
+.auth-switch {
+  font-size: 13px;
+  color: var(--fg-3);
+  text-align: center;
+  margin: 0;
+}
+.auth-switch a {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* Trust signals */
+.auth-trust {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+.auth-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+.auth-trust .lucide {
+  width: 13px;
+  height: 13px;
+}
+
+/* Remember me row */
+.auth-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+}
+.auth-remember-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--fg-2);
+  cursor: pointer;
+  user-select: none;
+}
+.auth-checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--forest-900);
+  cursor: pointer;
+}
+
+/* Dark sign-in button */
+.auth-submit-dark {
+  background: var(--forest-900) !important;
+}
+.auth-submit-dark:hover:not(:disabled) {
+  background: var(--forest-800) !important;
+}
+
+/* Or continue with divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--fg-3);
+  font-size: 12px;
+  margin: 4px 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-1);
+}
+
+/* Social auth row */
+.auth-social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.auth-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-2);
+  background: var(--bg-surface);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-1);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.auth-social-btn:hover {
+  background: var(--sand-50);
+  border-color: var(--border-strong);
+}
+
+/* Back button for phone/OTP steps */
+.auth-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--fg-3);
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 2px;
+  cursor: pointer;
+  transition: color var(--dur-fast);
+}
+.auth-back-btn:hover {
+  color: var(--brand);
+}
+
+/* OTP code input */
+.auth-otp-input {
+  letter-spacing: 0.35em;
+  font-size: 22px !important;
+  text-align: center;
+  font-weight: 600;
+  font-family: var(--font-mono) !important;
+}
+
+/* Resend code link */
+.auth-resend-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  color: var(--brand);
+  text-align: center;
+  cursor: pointer;
+  transition: opacity var(--dur-fast);
+}
+.auth-resend-btn:hover {
+  opacity: 0.75;
+}
+.auth-resend-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ================================================================
+   Responsive — mobile
+================================================================ */
+@media (max-width: 767px) {
+  .auth-floats {
+    display: none;
+  }
+  .auth-watermark {
+    display: none;
+  }
+  .auth-pulse {
+    display: none;
+  }
+
+  .auth-card-wrap {
+    padding: 0;
+    max-width: 100%;
+    min-height: 100dvh;
+    justify-content: flex-start;
+  }
+  .auth-card {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    min-height: 100dvh;
+  }
+  .auth-card-header {
+    padding: 20px 16px 0;
+  }
+  .auth-form-content {
+    padding: 16px 16px 24px;
+  }
+  .auth-trust {
+    display: none;
+  }
+
+  .auth-social-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Register card */
+  .reg-page {
+    padding: 0;
+    align-items: flex-start;
+  }
+  .reg-card {
+    max-width: 100%;
+    border-radius: 0;
+    min-height: 100dvh;
+    padding: 24px 16px 32px;
+  }
+}
+
+/* Dark mode */
+.dark .auth-card {
+  background: rgba(21, 26, 24, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.5);
+}
+.dark .auth-trust span {
+  color: rgba(255, 255, 255, 0.5);
+}
+.dark .auth-social-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--fg-1);
+}
+.dark .auth-social-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ================================================================
+   Register — 3-step wizard
+================================================================ */
+
+/* Page shell: plain sand bg, no animated gradient */
+.reg-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-page);
+  padding: 32px 16px;
+}
+
+/* Card */
+.reg-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: var(--radius-xl);
+  padding: 36px 36px 32px;
+}
+
+/* Logo row */
+.reg-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+.reg-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.reg-brand {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg-1);
+}
+
+/* Heading */
+.reg-title {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg-1);
+  margin: 0 0 4px;
+}
+.reg-lede {
+  font-size: 13px;
+  color: var(--fg-2);
+  margin: 0 0 24px;
+}
+
+/* ── Step indicator ── */
+.reg-steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.reg-step-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.reg-step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
+}
+.reg-step-circle.done {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+}
+.reg-step-circle.current {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+}
+.reg-step-circle.upcoming {
+  background: #fff;
+  border: 1.5px solid var(--border-2);
+  color: var(--fg-3);
+}
+
+.reg-step-label {
+  font-size: 11px;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+.reg-step-label.current {
+  font-weight: 600;
+  color: var(--fg-1);
+}
+.reg-step-label.done {
+  text-decoration: line-through;
+  color: var(--fg-3);
+}
+
+.reg-step-line {
+  flex: 1;
+  height: 1px;
+  margin-bottom: 24px; /* descend to align with circles, not labels */
+  transition: background var(--dur-fast);
+}
+.reg-step-line.done {
+  background: var(--brand);
+}
+.reg-step-line.upcoming {
+  background: var(--border-2);
+}
+
+/* ── Form helpers ── */
+.reg-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reg-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Button row (Back + Continue) ── */
+.reg-btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+.reg-btn-row .btn-ghost-back {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--dur-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.reg-btn-row .btn-ghost-back:hover {
+  color: var(--fg-1);
+}
+
+/* ── Password strength hints ── */
+.reg-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.reg-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fg-3);
+  transition: color var(--dur-fast);
+}
+.reg-hint.met {
+  color: var(--positive);
+}
+
+/* ── Terms checkbox row ── */
+.reg-terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+.reg-terms-row input[type='checkbox'] {
+  margin-top: 2px;
+  accent-color: var(--brand);
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+.reg-terms-row a {
+  color: var(--brand);
+  font-weight: 500;
+}
+
+/* ── Footer sign-in link ── */
+.reg-switch {
+  font-size: 13px;
+  color: var(--fg-3);
+  text-align: center;
+  margin: 20px 0 0;
+}
+.reg-switch a {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* ── API error banner ── */
+.reg-err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--critical-soft-bg);
+  color: var(--critical-soft-fg);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+/* Dark mode adjustments */
+.dark .reg-card {
+  background: var(--bg-surface);
+}
+.dark .reg-step-circle.upcoming {
+  background: var(--bg-surface);
+}
