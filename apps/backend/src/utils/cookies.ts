@@ -5,11 +5,9 @@ import { Response } from 'express';
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.COOKIE_SECURE === "true",
-  sameSite: process.env.COOKIE_SAME_SITE as
-    | "none"
-    | "lax"
-    | "strict",
+  sameSite: process.env.COOKIE_SAME_SITE as "none" | "lax" | "strict",
   path: "/",
+  domain: process.env.NODE_ENV === "production" ? ".siryan.xyz" : undefined,
 };
 export const setAuthCookies = (
   res: Response,

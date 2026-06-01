@@ -1,0 +1,1810 @@
+{
+  "info": {
+    "_postman_id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+    "name": "Siryan Hospital API",
+    "description": "Complete REST API collection for the Siryan Hospital Management System.\n\nBase URL: http://localhost:5000/api\n\nAuthentication: Bearer token populated automatically after login via the collection-level pre-request script.\n\nFolders: Auth, Patient, Doctor, Nurse, Receptionist, Pharmacist, Inventory, Lab, Radiology, Cashier, Admin, Notifications",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.variables.get('token');",
+          "if (token) {",
+          "  pm.request.headers.add({",
+          "    key: 'Authorization',",
+          "    value: 'Bearer ' + token",
+          "  });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"profile\": {\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"+1234567890\",\n    \"date_of_birth\": \"1990-01-15\",\n    \"gender\": \"male\",\n    \"blood_type\": \"A+\",\n    \"insurance_provider\": \"HealthCare Inc\",\n    \"insurance_number\": \"HC-123456\",\n    \"allergies\": \"penicillin\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Save token\", () => {",
+                  "  const { accessToken } = pm.response.json().data;",
+                  "  pm.environment.set(\"token\", accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh-token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"<your_refresh_token_here>\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/profile",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/patient/profile",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"date_of_birth\": \"1990-01-15\",\n  \"gender\": \"male\",\n  \"blood_type\": \"A+\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Main St, City\",\n  \"insurance_provider\": \"HealthCare Inc\",\n  \"insurance_number\": \"HC-123456\",\n  \"national_id\": \"NID-789012\",\n  \"emergency_contact_name\": \"Jane Doe\",\n  \"emergency_contact_phone\": \"+0987654321\",\n  \"allergies\": [\"penicillin\", \"pollen\"],\n  \"chronic_conditions\": [\"hypertension\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Medical Record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/medical-record",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "medical-record"]
+            }
+          }
+        },
+        {
+          "name": "Get Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/appointments",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "appointments"]
+            }
+          }
+        },
+        {
+          "name": "Book Appointment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/patient/appointments",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "appointments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": \"507f1f77bcf86cd799439011\",\n  \"type\": \"physical\",\n  \"scheduled_at\": \"2026-06-15T10:00:00Z\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/appointments/:id",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "appointments", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Get Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/prescriptions",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "prescriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Lab Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/lab-results",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "lab-results"]
+            }
+          }
+        },
+        {
+          "name": "Get Radiology Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/radiology-results",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "radiology-results"]
+            }
+          }
+        },
+        {
+          "name": "Create Pharmacy Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/patient/pharmacy/order",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "pharmacy", "order"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"medication_id\": \"507f1f77bcf86cd799439011\", \"quantity\": 2 },\n    { \"medication_id\": \"507f1f77bcf86cd799439012\", \"quantity\": 1 }\n  ],\n  \"delivery_type\": \"pickup\",\n  \"prescription_id\": \"507f1f77bcf86cd799439013\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Pharmacy Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/pharmacy/orders",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "pharmacy", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Book Room",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/patient/rooms/book",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "rooms", "book"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": \"507f1f77bcf86cd799439011\",\n  \"doctor_id\": \"507f1f77bcf86cd799439012\",\n  \"check_in\": \"2026-06-01T09:00:00Z\",\n  \"check_out\": \"2026-06-05T09:00:00Z\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Room Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/patient/rooms/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "rooms", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Chatbot",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/patient/chatbot",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "chatbot"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I have a headache and mild fever. What should I do?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Doctor",
+      "item": [
+        {
+          "name": "Get Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients"]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients/:id/record",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients", ":id", "record"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Create Diagnosis",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients/:id/diagnosis",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients", ":id", "diagnosis"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diagnosis\": \"Seasonal allergic rhinitis\",\n  \"notes\": \"Patient presents with nasal congestion and sneezing for 5 days.\",\n  \"appointment_id\": \"507f1f77bcf86cd799439012\",\n  \"vital_signs\": [\n    {\n      \"blood_pressure_sys\": 120,\n      \"blood_pressure_dia\": 80,\n      \"temperature\": 37.2,\n      \"heart_rate\": 75,\n      \"blood_sugar\": 95,\n      \"oxygen_level\": 98\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Create Prescription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients/:id/prescription",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients", ":id", "prescription"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medical_record_id\": \"507f1f77bcf86cd799439013\",\n  \"items\": [\n    {\n      \"medication_id\": \"507f1f77bcf86cd799439014\",\n      \"dosage\": \"500mg\",\n      \"frequency\": \"twice daily\",\n      \"duration_days\": 7,\n      \"instructions\": \"Take with food\"\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Create Lab Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients/:id/lab-order",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients", ":id", "lab-order"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medical_record_id\": \"507f1f77bcf86cd799439013\",\n  \"test_name\": \"Complete Blood Count (CBC)\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Create Radiology Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/patients/:id/radiology-order",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "patients", ":id", "radiology-order"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medical_record_id\": \"507f1f77bcf86cd799439013\",\n  \"scan_type\": \"Chest X-Ray\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctor/schedule",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "Reschedule Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/appointments/:id/reschedule-request",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "appointments", ":id", "reschedule-request"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"new_date\": \"2026-06-20T10:00:00Z\",\n  \"reason\": \"Schedule conflict\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Cancel Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/appointments/:id/cancel-request",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "appointments", ":id", "cancel-request"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancel_reason\": \"Doctor emergency — unavailable on that day\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctor/profile",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/doctor/profile",
+              "host": ["{{base_url}}"],
+              "path": ["doctor", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alice\",\n  \"last_name\": \"Smith\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Specialist in internal medicine with 10 years of experience.\",\n  \"avatar_url\": \"https://example.com/avatars/alice.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nurse",
+      "item": [
+        {
+          "name": "Get Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nurse/patients",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "patients"]
+            }
+          }
+        },
+        {
+          "name": "Add Vitals",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/nurse/patients/:id/vitals",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "patients", ":id", "vitals"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blood_pressure_sys\": 118,\n  \"blood_pressure_dia\": 76,\n  \"temperature\": 36.8,\n  \"heart_rate\": 72,\n  \"blood_sugar\": 90,\n  \"oxygen_level\": 99\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Medication Schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nurse/patients/:id/medication-schedule",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "patients", ":id", "medication-schedule"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Mark Medication Given",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/nurse/patients/:id/medication/:med_id/given",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "patients", ":id", "medication", ":med_id", "given"],
+              "variable": [
+                { "key": "id", "value": "507f1f77bcf86cd799439011" },
+                { "key": "med_id", "value": "507f1f77bcf86cd799439012" }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Patient tolerated medication well, no adverse reactions.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Emergency Flag",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/nurse/patients/:id/emergency-flag",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "patients", ":id", "emergency-flag"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Sudden drop in blood pressure — patient unresponsive\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nurse/profile",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/nurse/profile",
+              "host": ["{{base_url}}"],
+              "path": ["nurse", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Sara\",\n  \"last_name\": \"Connor\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"ICU specialist nurse with 8 years of experience.\",\n  \"avatar_url\": \"https://example.com/avatars/sara.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Receptionist",
+      "item": [
+        {
+          "name": "Get Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/patients",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "patients"]
+            }
+          }
+        },
+        {
+          "name": "Get Patient Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/patients/:id/appointments",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "patients", ":id", "appointments"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Confirm Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/appointments/:id/confirm",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "appointments", ":id", "confirm"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/receptionist/appointments/:id/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "appointments", ":id", "cancel"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancel_reason\": \"Patient requested cancellation via phone\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Reschedule Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/receptionist/appointments/:id/reschedule",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "appointments", ":id", "reschedule"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_at\": \"2026-06-20T14:00:00Z\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Pending Lab Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/lab-orders",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "lab-orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Pending Radiology Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/radiology-orders",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "radiology-orders"]
+            }
+          }
+        },
+        {
+          "name": "Check-in Patient",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/checkin/:patient_id",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "checkin", ":patient_id"],
+              "variable": [{ "key": "patient_id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/receptionist/profile",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/receptionist/profile",
+              "host": ["{{base_url}}"],
+              "path": ["receptionist", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Mary\",\n  \"last_name\": \"Johnson\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Front desk specialist.\",\n  \"avatar_url\": \"https://example.com/avatars/mary.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pharmacist",
+      "item": [
+        {
+          "name": "Get Prescriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/prescriptions",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "prescriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Prescription by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/prescriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "prescriptions", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Approve Pharmacy Order",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/orders/:id/approve",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "orders", ":id", "approve"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Reject Pharmacy Order",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/orders/:id/reject",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "orders", ":id", "reject"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Get Medications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/medications",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "medications"]
+            }
+          }
+        },
+        {
+          "name": "Create Supply Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/supply-request",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "supply-request"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medication_id\": \"507f1f77bcf86cd799439011\",\n  \"quantity_requested\": 100,\n  \"notes\": \"Running low on paracetamol 500mg stock\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/profile",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pharmacist/profile",
+              "host": ["{{base_url}}"],
+              "path": ["pharmacist", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"David\",\n  \"last_name\": \"Lee\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Clinical pharmacist specializing in oncology medications.\",\n  \"avatar_url\": \"https://example.com/avatars/david.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Items",
+          "item": [
+            {
+              "name": "Get Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items"]
+                }
+              }
+            },
+            {
+              "name": "Create Item",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Surgical Gloves (M)\",\n  \"category\": \"supply\",\n  \"unit\": \"box\",\n  \"quantity\": 200,\n  \"low_stock_threshold\": 20,\n  \"expiry_date\": \"2027-12-31\",\n  \"room_id\": \"507f1f77bcf86cd799439011\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Update Item",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 250,\n  \"low_stock_threshold\": 30\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Delete Item",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                }
+              }
+            },
+            {
+              "name": "Get Low Stock Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/low-stock",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "low-stock"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Suppliers",
+          "item": [
+            {
+              "name": "Get Suppliers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers"]
+                }
+              }
+            },
+            {
+              "name": "Add Supplier",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"MedSupply Co.\",\n  \"contact_person\": \"Jane Smith\",\n  \"email\": \"jane@medsupply.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"456 Industry Rd, Business City\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Update Supplier",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contact_person\": \"Bob Johnson\",\n  \"phone\": \"+0987654321\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Delete Supplier",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Supply Requests",
+          "item": [
+            {
+              "name": "Get Supply Requests",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/supply-requests",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "supply-requests"]
+                }
+              }
+            },
+            {
+              "name": "Create Supply Request",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/supply-requests",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "supply-requests"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"item_id\": \"507f1f77bcf86cd799439011\",\n  \"quantity_requested\": 50,\n  \"notes\": \"Urgent restock needed before next week\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Fulfill Supply Request",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/supply-requests/:id/fulfill",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "supply-requests", ":id", "fulfill"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notes\": \"Fulfilled from warehouse stock\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Receive Shipment",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/supply-requests/:id/receive",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "supply-requests", ":id", "receive"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notes\": \"Shipment received and inspected\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Warehouse",
+          "item": [
+            {
+              "name": "Get Warehouse Entries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/warehouse",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "warehouse"]
+                }
+              }
+            },
+            {
+              "name": "Assign Warehouse Entry",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/warehouse/:id/assign",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "warehouse", ":id", "assign"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"room_id\": \"507f1f77bcf86cd799439012\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rooms",
+          "item": [
+            {
+              "name": "Get Rooms",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms"]
+                }
+              }
+            },
+            {
+              "name": "Add Room",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms"]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Room 201\",\n  \"type\": \"general\",\n  \"floor\": 2,\n  \"capacity\": 2,\n  \"price_per_day\": 150.00,\n  \"status\": \"available\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Get Room by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                }
+              }
+            },
+            {
+              "name": "Update Room",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"price_per_day\": 175.00,\n  \"capacity\": 3\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Update Room Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id", "status"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"maintenance\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Delete Room",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                }
+              }
+            },
+            {
+              "name": "Get Room Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id", "items"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                }
+              }
+            },
+            {
+              "name": "Add Item to Room",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id", "items"],
+                  "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"item_id\": \"507f1f77bcf86cd799439012\",\n  \"quantity\": 10\n}",
+                  "options": { "raw": { "language": "json" } }
+                }
+              }
+            },
+            {
+              "name": "Remove Item from Room",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/rooms/:id/items/:itemId",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "rooms", ":id", "items", ":itemId"],
+                  "variable": [
+                    { "key": "id", "value": "507f1f77bcf86cd799439011" },
+                    { "key": "itemId", "value": "507f1f77bcf86cd799439012" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/profile",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/inventory/profile",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Tom\",\n  \"last_name\": \"Baker\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Inventory manager with 5 years experience.\",\n  \"avatar_url\": \"https://example.com/avatars/tom.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lab",
+      "item": [
+        {
+          "name": "Get Lab Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lab/orders",
+              "host": ["{{base_url}}"],
+              "path": ["lab", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Upload Lab Results",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/lab/orders/:id/results",
+              "host": ["{{base_url}}"],
+              "path": ["lab", "orders", ":id", "results"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"results\": \"Hemoglobin: 13.5 g/dL, WBC: 7.2 x10^3/uL, Platelets: 250 x10^3/uL — All within normal range.\",\n  \"file_url\": \"https://storage.example.com/lab-results/cbc-20260520.pdf\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lab/profile",
+              "host": ["{{base_url}}"],
+              "path": ["lab", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/lab/profile",
+              "host": ["{{base_url}}"],
+              "path": ["lab", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Chris\",\n  \"last_name\": \"Evans\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Certified laboratory technician.\",\n  \"avatar_url\": \"https://example.com/avatars/chris.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Radiology",
+      "item": [
+        {
+          "name": "Get Radiology Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/radiology/orders",
+              "host": ["{{base_url}}"],
+              "path": ["radiology", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Upload Radiology Results",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/radiology/orders/:id/results",
+              "host": ["{{base_url}}"],
+              "path": ["radiology", "orders", ":id", "results"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_url\": \"https://storage.example.com/radiology/chest-xray-20260520.dcm\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/radiology/profile",
+              "host": ["{{base_url}}"],
+              "path": ["radiology", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/radiology/profile",
+              "host": ["{{base_url}}"],
+              "path": ["radiology", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Lisa\",\n  \"last_name\": \"Park\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Radiology technician specializing in MRI and CT scans.\",\n  \"avatar_url\": \"https://example.com/avatars/lisa.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cashier",
+      "item": [
+        {
+          "name": "Get Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cashier/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cashier/invoices/:id",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "invoices", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/cashier/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "invoices"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient\": \"507f1f77bcf86cd799439011\",\n  \"items\": [\n    { \"description\": \"Consultation fee\", \"category\": \"appointment\", \"amount\": 100.00 },\n    { \"description\": \"Blood test CBC\", \"category\": \"lab\", \"amount\": 50.00 },\n    { \"description\": \"Paracetamol 500mg x10\", \"category\": \"pharmacy\", \"amount\": 15.00 }\n  ],\n  \"insurance_coverage\": 80.00,\n  \"insurance_provider\": \"HealthCare Inc\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Pay Invoice",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/cashier/invoices/:id/pay",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "invoices", ":id", "pay"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"card\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cashier/profile",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/cashier/profile",
+              "host": ["{{base_url}}"],
+              "path": ["cashier", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Paul\",\n  \"last_name\": \"Martin\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"Billing specialist with expertise in insurance claims.\",\n  \"avatar_url\": \"https://example.com/avatars/paul.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/reports/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "reports", "doctors"]
+            }
+          }
+        },
+        {
+          "name": "Get Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/reports/revenue?from=2026-01-01&to=2026-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "reports", "revenue"],
+              "query": [
+                { "key": "from", "value": "2026-01-01" },
+                { "key": "to", "value": "2026-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/users?page=1&limit=20&role=doctor",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "role", "value": "doctor", "description": "Optional: patient | doctor | nurse | receptionist | pharmacist | inventory_manager | lab_technician | radiology_technician | cashier | admin" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Create Staff",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"dr.alice\",\n  \"email\": \"alice.smith@hospital.com\",\n  \"role\": \"doctor\",\n  \"first_name\": \"Alice\",\n  \"last_name\": \"Smith\",\n  \"phone\": \"+1234567890\",\n  \"specialization\": \"Internal Medicine\",\n  \"department\": \"General Medicine\",\n  \"shift\": \"morning\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Change User Role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/admin/users/:id/role",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", ":id", "role"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"nurse\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Set User Active Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/admin/users/:id/activate",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", ":id", "activate"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Get Audit Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/audit-log",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "audit-log"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Admin\",\n  \"last_name\": \"User\",\n  \"phone\": \"+1234567890\",\n  \"bio\": \"System administrator.\",\n  \"avatar_url\": \"https://example.com/avatars/admin.jpg\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/:id/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id", "read"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id"],
+              "variable": [{ "key": "id", "value": "507f1f77bcf86cd799439011" }]
+            }
+          }
+        },
+        {
+          "name": "Clear All Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -25,9 +25,7 @@
       "Bash(Head -30)",
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
       "Bash(npx eslint *)",
-      "Bash(node -e ' *)",
-      "PowerShell(node -v)",
-      "PowerShell(npm -v)"
+      "Bash(node -e ' *)"
     ]
   }
 }
