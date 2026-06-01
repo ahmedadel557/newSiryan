@@ -1,5 +1,58 @@
 # Changelog
 
+## [2026-06-01] Auth Pages Component Architecture Refactor
+
+### Goal
+Refactored 3 monolithic auth pages (login: 436 lines, register: 1540 lines, complete-profile: 305 lines)
+into clean micro-component architecture. Pages now serve as thin orchestrators (40/48/23 lines).
+
+### New Files (Frontend)
+
+**Shared auth components (`src/components/auth/shared/`):**
+- `AuthInput.tsx` — Reusable input field with icon, error display, hint, and status slot
+- `AuthButton.tsx` — Reusable submit button with loading state
+- `AuthDivider.tsx` — "or continue with" divider
+- `GoogleIcon.tsx` — Shared Google SVG icon (was duplicated in login + register)
+- `UsernameField.tsx` — Username input with availability status display
+- `PasswordStrength.tsx` — Password strength indicator (was duplicated 3x)
+- `StepIndicator.tsx` — Multi-step form indicator (was duplicated 2x in register)
+
+**Login components (`src/components/auth/login/`):**
+- `LoginHeader.tsx` — Logo + brand header
+- `LoginForm.tsx` — Email/password form with error handling + social login
+- `SocialLogin.tsx` — Google + Phone OTP buttons
+- `PhoneLogin.tsx` — Self-contained phone OTP flow (enter-phone + enter-otp states)
+
+**Register components (`src/components/auth/register/`):**
+- `registerTypes.ts` — All schemas, types, constants (patientSchema, staffSchema, DEPARTMENT_SPECIALIZATIONS, STAFF_ROLES, etc.)
+- `RegisterHeader.tsx` — Logo + Patient/Staff tab switcher
+- `PatientForm.tsx` — Patient registration orchestrator (3-step state machine)
+- `StaffForm.tsx` — Staff registration orchestrator (2-step state machine)
+- `StaffSuccessScreen.tsx` — Post-submission success screen
+- `steps/PersonalInfoStep.tsx` — Patient step 1: name, email, phone, username
+- `steps/MedicalInfoStep.tsx` — Patient step 2: DOB, gender, blood type, insurance, national ID
+- `steps/SecurityStep.tsx` — Patient step 3: password, confirm, terms
+- `steps/StaffProfessionalStep.tsx` — Staff step 1: name, email, phone, role, department, specialization, national ID
+- `steps/StaffSecurityStep.tsx` — Staff step 2: username, password, terms, professional confirm
+
+**Complete-profile components (`src/components/auth/complete-profile/`):**
+- `ProfileHeader.tsx` — Logo + Google avatar + title
+- `CompleteProfileForm.tsx` — Account + personal info form
+
+**Hook (`src/hooks/`):**
+- `useUsernameCheck.ts` — Debounced username availability check (was duplicated 3x)
+
+### Modified Files (Frontend)
+- `src/app/auth/login/page.tsx` — Rewritten as thin orchestrator (436→40 lines)
+- `src/app/auth/register/page.tsx` — Rewritten as thin orchestrator (1540→48 lines)
+- `src/app/auth/complete-profile/page.tsx` — Rewritten as thin orchestrator (305→23 lines)
+
+### Notes
+- Zero logic changes — all API calls, validation schemas, and form submission logic preserved exactly
+- All components under 150 lines; no prop drilling beyond 2 levels
+- Fixed `CompleteProfileForm` TS assignment mismatch (`UseFormRegister<FormValues>` vs `UseFormRegister<PersonalFieldsValues>`) by exporting `FormValues` and importing/using it in the `ProfilePersonalFields` sub-component.
+- `npx tsc --noEmit` → 0 errors; `npx eslint` → 0 errors, 3 warnings (pre-existing react-hook-form incompatible-library)
+
 ## [2026-05-30] Pharmacy Part 3 — Real-time & Edge Cases + Flow Testing
 
 ### Backend
