@@ -18,6 +18,9 @@ import {
   Truck,
   Building2,
   Warehouse,
+  ShoppingCart,
+  DollarSign,
+  FileBarChart,
   CheckCircle,
   CreditCard,
   BarChart2,
@@ -94,12 +97,17 @@ export const pharmacistNav: NavItem[] = [
 ];
 
 export const inventoryNav: NavItem[] = [
-  { label: 'Overview', href: '/dashboard/inventory', icon: <Package {...I} /> },
-  { label: 'Items', href: '/dashboard/inventory/items', icon: <AlertTriangle {...I} /> },
-  { label: 'Supply Requests', href: '/dashboard/inventory/requests', icon: <Truck {...I} /> },
-  { label: 'Warehouse', href: '/dashboard/inventory/warehouse', icon: <Warehouse {...I} /> },
-  { label: 'Rooms', href: '/dashboard/inventory/rooms', icon: <Building2 {...I} /> },
-  { label: 'Settings', href: '/dashboard/settings', icon: <Settings {...I} /> },
+  { label: 'Overview',        href: '/dashboard/inventory',                 icon: <Package {...I} /> },
+  { label: 'Items',           href: '/dashboard/inventory/items',            icon: <AlertTriangle {...I} /> },
+  { label: 'Purchase Orders', href: '/dashboard/inventory/purchase-orders',  icon: <ShoppingCart {...I} /> },
+  { label: 'Supply Requests', href: '/dashboard/inventory/requests',         icon: <Truck {...I} /> },
+  { label: 'Suppliers',       href: '/dashboard/inventory/suppliers',        icon: <Building2 {...I} /> },
+  { label: 'Warehouse',       href: '/dashboard/inventory/warehouse',        icon: <Warehouse {...I} /> },
+  { label: 'Analytics',       href: '/dashboard/inventory/analytics',        icon: <BarChart2 {...I} /> },
+  { label: 'Budget',          href: '/dashboard/inventory/budget',           icon: <DollarSign {...I} /> },
+  { label: 'Reports',         href: '/dashboard/inventory/reports',          icon: <FileBarChart {...I} /> },
+  { label: 'Rooms',           href: '/dashboard/inventory/rooms',            icon: <BedDouble {...I} /> },
+  { label: 'Settings',        href: '/dashboard/settings',                  icon: <Settings {...I} /> },
 ];
 
 export const labNav: NavItem[] = [

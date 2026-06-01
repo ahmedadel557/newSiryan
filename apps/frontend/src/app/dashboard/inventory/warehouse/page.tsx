@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Warehouse } from 'lucide-react';
+import { Warehouse, Trash2 } from 'lucide-react';
 import { useInventory } from '@/hooks/useInventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { WarehouseEntry, Room } from '@/types';
+import { LogWasteModal } from '@/components/staff/inventory/LogWasteModal';
+import { inventoryService } from '@/services/inventory.service';
+import { useToast } from '@/hooks/useToast';
+import type { WarehouseEntry, Room, WasteEntry } from '@/types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -194,18 +197,47 @@ function AssignModal({ entry, rooms, onClose, onSubmit }: AssignModalProps) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
+type PageTab = 'entries' | 'waste';
 const COLS = ['Item', 'Type', 'Received', 'Assigned', 'Remaining', 'Unit', 'Status', 'Date', 'Actions'];
+const WASTE_COLS = ['Item', 'Quantity', 'Reason', 'Department', 'Logged By', 'Date'];
 
 export default function WarehousePage() {
-  const { warehouseEntries, rooms, isLoading, fetchWarehouseEntries, assignWarehouseEntry } = useInventory();
+  const { showToast } = useToast();
+  const { warehouseEntries, items, rooms, isLoading, fetchWarehouseEntries, assignWarehouseEntry } = useInventory();
 
+  const [pageTab, setPageTab] = useState<PageTab>('entries');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [assignEntry, setAssignEntry] = useState<WarehouseEntry | null>(null);
+  const [logWasteOpen, setLogWasteOpen] = useState(false);
+  const [wasteEntries, setWasteEntries] = useState<WasteEntry[]>([]);
+  const [wasteLoading, setWasteLoading] = useState(false);
 
   useEffect(() => {
     fetchWarehouseEntries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (pageTab === 'waste' && wasteEntries.length === 0) {
+      setWasteLoading(true);
+      inventoryService.getWasteEntries()
+        .then(setWasteEntries)
+        .catch(() => showToast('Failed to load waste entries', 'error'))
+        .finally(() => setWasteLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageTab]);
+
+  async function handleLogWaste(data: Parameters<typeof inventoryService.logWaste>[0]) {
+    try {
+      const entry = await inventoryService.logWaste(data);
+      setWasteEntries((prev) => [entry, ...prev]);
+      showToast('Waste logged', 'success');
+    } catch {
+      showToast('Failed to log waste', 'error');
+      throw new Error('failed');
+    }
+  }
 
   const filtered = statusFilter === 'all' ? warehouseEntries : warehouseEntries.filter((e) => e.status === statusFilter);
 
@@ -236,13 +268,65 @@ export default function WarehousePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">Warehouse</h1>
-        <p className="text-[14px] text-[var(--fg-3)] mt-[2px]">Items received from shipments, pending assignment to stock or rooms</p>
+      <div className="flex items-start gap-4">
+        <div className="flex-1">
+          <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">Warehouse</h1>
+          <p className="text-[14px] text-[var(--fg-3)] mt-[2px]">Items received from shipments, pending assignment to stock or rooms</p>
+        </div>
+        <button className="btn btn-ghost text-[13px] flex items-center gap-1" onClick={() => setLogWasteOpen(true)}>
+          <Trash2 size={14} /> Log Waste
+        </button>
       </div>
 
       <DoctorKPIStrip cards={kpiCards} />
 
+      <div className="flex gap-[2px] bg-[var(--sand-100)] p-[3px] rounded-[8px] w-fit">
+        {(['entries', 'waste'] as PageTab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setPageTab(t)}
+            className={[
+              'px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors capitalize',
+              pageTab === t ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-black/80',
+            ].join(' ')}
+          >
+            {t === 'entries' ? 'Warehouse Entries' : 'Waste Log'}
+          </button>
+        ))}
+      </div>
+
+      {pageTab === 'waste' ? (
+        <div className="card overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>{WASTE_COLS.map((h) => <th key={h} className={thClass}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {wasteLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>{WASTE_COLS.map((__, j) => <td key={j} className={tdClass}><div className="h-4 w-20 rounded bg-[var(--sand-100)] animate-pulse" /></td>)}</tr>
+                ))
+              ) : wasteEntries.length === 0 ? (
+                <tr><td colSpan={WASTE_COLS.length} className="py-12">
+                  <EmptyState icon={<Trash2 />} title="No waste entries" description="Waste logged from inventory will appear here." />
+                </td></tr>
+              ) : wasteEntries.map((w) => (
+                <tr key={w.id} className="hover:bg-[var(--sand-50)] transition-colors">
+                  <td className={`${tdClass} font-medium text-[var(--fg-1)]`}>{w.item_name}</td>
+                  <td className={tdClass}>{w.quantity}</td>
+                  <td className={tdClass}>
+                    <Badge variant={w.reason === 'expired' ? 'critical' : w.reason === 'damaged' ? 'caution' : 'neutral'} dot>{w.reason}</Badge>
+                  </td>
+                  <td className={`${tdClass} text-[var(--fg-3)]`}>{w.department ?? '—'}</td>
+                  <td className={`${tdClass} text-[var(--fg-3)]`}>{typeof w.logged_by === 'object' ? w.logged_by.username : '—'}</td>
+                  <td className={`${tdClass} text-[var(--fg-3)]`}>{w.createdAt?.slice(0, 10)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+      <>
       <div className="flex gap-[2px] bg-[var(--sand-100)] p-[3px] rounded-[8px] w-fit">
         {filterTabs.map((tab) => (
           <button
@@ -330,6 +414,10 @@ export default function WarehousePage() {
       </div>
 
       <AssignModal entry={assignEntry} rooms={rooms} onClose={() => setAssignEntry(null)} onSubmit={handleAssign} />
+      </>
+      )}
+
+      <LogWasteModal open={logWasteOpen} items={items} onClose={() => setLogWasteOpen(false)} onSubmit={handleLogWaste} />
     </div>
   );
 }

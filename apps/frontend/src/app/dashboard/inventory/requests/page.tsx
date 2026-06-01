@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Plus, Truck, Users } from 'lucide-react';
 import { useInventory } from '@/hooks/useInventory';
+import { RejectSupplyRequestModal } from '@/components/staff/inventory/RejectSupplyRequestModal';
+import { inventoryService } from '@/services/inventory.service';
+import { useToast } from '@/hooks/useToast';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -550,6 +553,7 @@ type TabId = 'requests' | 'suppliers';
 type ReqFilter = 'all' | 'pending' | 'fulfilled' | 'urgent';
 
 export default function InventoryRequestsPage() {
+  const { showToast } = useToast();
   const {
     supplyRequests,
     items,
@@ -562,6 +566,7 @@ export default function InventoryRequestsPage() {
     fulfillRequest,
     createSupplyRequest,
     receiveShipment,
+    fetchSupplyRequests,
     addSupplier,
     updateSupplier,
     deleteSupplier,
@@ -577,6 +582,18 @@ export default function InventoryRequestsPage() {
   const [reqFilter, setReqFilter] = useState<ReqFilter>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [receiveRequest, setReceiveRequest] = useState<SupplyRequest | null>(null);
+  const [rejectRequest, setRejectRequest] = useState<SupplyRequest | null>(null);
+
+  async function handleReject(id: string, reason: string) {
+    try {
+      await inventoryService.rejectSupplyRequest(id, { reason });
+      showToast('Request rejected', 'success');
+      fetchSupplyRequests();
+    } catch {
+      showToast('Failed to reject request', 'error');
+      throw new Error('failed');
+    }
+  }
 
   const medications = lowStock.medications;
 
@@ -716,9 +733,18 @@ export default function InventoryRequestsPage() {
                       <td className={`${tdClass} text-right`}>
                         <div className="flex items-center justify-end gap-1 flex-wrap">
                           {r.status === 'pending' && (
-                            <button onClick={() => setReceiveRequest(r)} className="btn btn-ghost text-[12px] py-[4px]">
-                              Receive shipment
-                            </button>
+                            <>
+                              <button onClick={() => setReceiveRequest(r)} className="btn btn-ghost text-[12px] py-[4px]">
+                                Receive shipment
+                              </button>
+                              <button
+                                onClick={() => setRejectRequest(r)}
+                                className="btn btn-ghost text-[12px] py-[4px]"
+                                style={{ color: 'var(--critical-soft-fg)' }}
+                              >
+                                Reject
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -808,6 +834,7 @@ export default function InventoryRequestsPage() {
       />
 
       <ReceiveShipmentModal request={receiveRequest} onClose={() => setReceiveRequest(null)} onSubmit={receiveShipment} />
+      <RejectSupplyRequestModal request={rejectRequest} onClose={() => setRejectRequest(null)} onConfirm={handleReject} />
 
       <SupplierModal open={addSupplierModalOpen} onClose={() => setAddSupplierModalOpen(false)} onSubmit={addSupplier} />
 

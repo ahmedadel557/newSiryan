@@ -1,5 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IItemLocation {
+  department: string;
+  quantity: number;
+}
+
 export interface IInventoryItem extends Document {
   name: string;
   category: 'equipment' | 'supply' | 'bed' | 'oxygen' | 'other';
@@ -9,7 +14,16 @@ export interface IInventoryItem extends Document {
   expiry_date?: Date;
   room?: mongoose.Types.ObjectId | null;
   max_per_room?: number | null;
+  locations: IItemLocation[];
 }
+
+const ItemLocationSchema = new Schema<IItemLocation>(
+  {
+    department: { type: String, required: true },
+    quantity:   { type: Number, min: 0, default: 0 },
+  },
+  { _id: false }
+);
 
 const InventoryItemSchema = new Schema<IInventoryItem>(
   {
@@ -21,6 +35,7 @@ const InventoryItemSchema = new Schema<IInventoryItem>(
     expiry_date:         { type: Date },
     room:                { type: Schema.Types.ObjectId, ref: 'Room', default: null },
     max_per_room:        { type: Number, default: null },
+    locations:           { type: [ItemLocationSchema], default: [] },
   },
   {
     timestamps: true,

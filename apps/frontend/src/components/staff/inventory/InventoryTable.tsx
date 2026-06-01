@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Package, Pencil, Trash2 } from 'lucide-react';
+import { Package, Pencil, Trash2, ArrowLeftRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useIsMobile } from '@/hooks/useMediaQuery';
@@ -37,9 +37,11 @@ interface InventoryTableProps {
   isLoading: boolean;
   onEdit: (item: InventoryItem) => void;
   onDelete: (id: string) => void;
+  onTransfer?: (item: InventoryItem) => void;
+  linkToDetail?: boolean;
 }
 
-export function InventoryTable({ items, isLoading, onEdit, onDelete }: InventoryTableProps) {
+export function InventoryTable({ items, isLoading, onEdit, onDelete, onTransfer, linkToDetail }: InventoryTableProps) {
   const cols = ['Item', 'Category', 'Stock', 'Expiry', 'Room', 'Status', ''];
   const isMobile = useIsMobile();
 
@@ -164,7 +166,13 @@ export function InventoryTable({ items, isLoading, onEdit, onDelete }: Inventory
             const room = item.room && typeof item.room === 'object' && 'name' in item.room ? (item.room as Room) : null;
             return (
               <tr key={item.id} className="hover:bg-[var(--sand-50)] dark:hover:bg-[var(--forest-900)] transition-colors">
-                <td className={`${tdClass} font-semibold text-[var(--fg-1)]`}>{item.name}</td>
+                <td className={`${tdClass} font-semibold text-[var(--fg-1)]`}>
+                  {linkToDetail ? (
+                    <Link href={`/dashboard/inventory/items/${item.id}`} className="hover:text-[var(--brand)] hover:underline transition-colors">
+                      {item.name}
+                    </Link>
+                  ) : item.name}
+                </td>
                 <td className={`${tdClass} text-[var(--fg-2)] capitalize`}>{item.category}</td>
                 <td className={tdClass}>
                   <div className="flex flex-col gap-1 min-w-[120px]">
@@ -202,12 +210,17 @@ export function InventoryTable({ items, isLoading, onEdit, onDelete }: Inventory
                 </td>
                 <td className={`${tdClass} text-right`}>
                   <div className="flex items-center justify-end gap-[4px]">
+                    {onTransfer && (
+                      <button onClick={() => onTransfer(item)} className="btn btn-ghost text-[12px] py-[4px] flex items-center gap-1">
+                        <ArrowLeftRight size={12} /> Transfer
+                      </button>
+                    )}
                     <button onClick={() => onEdit(item)} className="btn btn-ghost text-[12px] py-[4px] flex items-center gap-1">
                       <Pencil size={12} /> Edit
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
-                      className="btn btn-ghost text-[12px] py-[4px] flex items-center  gap-1"
+                      className="btn btn-ghost text-[12px] py-[4px] flex items-center gap-1"
                       style={{ color: 'var(--critical-soft-fg)' }}
                     >
                       <Trash2 size={12} /> Delete

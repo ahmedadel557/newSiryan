@@ -354,6 +354,11 @@ export interface PharmacistPatientOrder {
    Inventory
 ---------------------------------------------------------------- */
 
+export interface ItemLocation {
+  department: string;
+  quantity: number;
+}
+
 export interface InventoryItem {
   id: string;
   _id?: string;
@@ -366,8 +371,13 @@ export interface InventoryItem {
   is_low_stock?: boolean;
   room?: Room | string | null;
   max_per_room?: number | null;
+  locations?: ItemLocation[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface InventoryItemDetail extends InventoryItem {
+  history: WarehouseEntry[];
 }
 
 /* ----------------------------------------------------------------
@@ -994,6 +1004,12 @@ export interface Supplier {
   category: 'medications' | 'equipment' | 'supplies' | 'all';
   is_active: boolean;
   notes?: string;
+  payment_terms?: string;
+  categories_supplied?: string[];
+  delivery_time_avg?: number;
+  quality_score?: number;
+  on_time_rate?: number;
+  total_orders?: number;
 }
 
 export interface SupplyRequest {
@@ -1368,4 +1384,125 @@ export interface PharmacyLowStockPayload {
 
 export interface PharmacyExpiryAlertPayload {
   items: Array<{ name: string; expiry_date: string; type: string; urgent: boolean }>;
+}
+
+/* ----------------------------------------------------------------
+   Inventory — Extended Types (Part 2)
+---------------------------------------------------------------- */
+
+export interface PurchaseOrderItem {
+  item_id: string;
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+  unit: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  _id?: string;
+  supplier: Supplier | string;
+  items: PurchaseOrderItem[];
+  status: 'draft' | 'ordered' | 'shipped' | 'received' | 'cancelled';
+  expected_delivery_date?: string;
+  total_amount: number;
+  created_by: { id: string; username: string } | string;
+  received_at?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePurchaseOrderDto {
+  supplier_id: string;
+  items: { item_id: string; quantity: number; unit_price: number }[];
+  expected_delivery_date?: string;
+  notes?: string;
+}
+
+export interface WasteEntry {
+  id: string;
+  _id?: string;
+  item: string;
+  item_name: string;
+  quantity: number;
+  reason: 'expired' | 'damaged' | 'lost';
+  department?: string;
+  notes?: string;
+  logged_by: { id: string; username: string } | string;
+  createdAt: string;
+}
+
+export interface LogWasteDto {
+  item_id: string;
+  quantity: number;
+  reason: 'expired' | 'damaged' | 'lost';
+  department?: string;
+  notes?: string;
+}
+
+export interface BudgetSummary {
+  month: number;
+  year: number;
+  budget: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+}
+
+export interface BudgetHistoryEntry {
+  month: number;
+  year: number;
+  budget: number;
+  spent: number;
+  remaining: number;
+}
+
+export interface ForecastItem {
+  item_id: string;
+  item_name: string;
+  unit: string;
+  current_stock: number;
+  avg_daily_consumption: number;
+  predicted_consumption: number;
+  recommended_reorder_qty: number;
+  suggested_reorder_date: string | null;
+}
+
+export interface ItemPrice {
+  id: string;
+  _id?: string;
+  supplier: Supplier;
+  unit_price: number;
+  last_updated: string;
+}
+
+export interface SupplierPerformance {
+  supplier_id: string;
+  supplier_name: string;
+  delivery_time_avg: number;
+  quality_score: number;
+  on_time_rate: number;
+  total_orders: number;
+  recent_orders: PurchaseOrder[];
+}
+
+export interface TransferStockDto {
+  item_id: string;
+  from_department: string;
+  to_department: string;
+  quantity: number;
+  notes?: string;
+}
+
+export interface ConsumptionAnalytics {
+  period: string;
+  period_start: string;
+  items: { item_id: string; item_name: string; total_consumed: number }[];
+}
+
+export interface PriceSuggestion {
+  item_id: string;
+  item_name: string;
+  cheapest_supplier: ItemPrice | null;
 }

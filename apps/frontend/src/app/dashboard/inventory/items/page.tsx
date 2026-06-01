@@ -7,11 +7,15 @@ import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { InventoryTable } from '@/components/staff/inventory/InventoryTable';
 import { AddItemModal } from '@/components/staff/inventory/AddItemModal';
 import { EditItemModal } from '@/components/staff/inventory/EditItemModal';
-import type { InventoryItem } from '@/types';
+import { TransferStockModal } from '@/components/staff/inventory/TransferStockModal';
+import { inventoryService } from '@/services/inventory.service';
+import { useToast } from '@/hooks/useToast';
+import type { InventoryItem, TransferStockDto } from '@/types';
 
 const CATEGORIES: (InventoryItem['category'] | 'all')[] = ['all', 'equipment', 'supply', 'bed', 'oxygen', 'other'];
 
 export default function InventoryItemsPage() {
+  const { showToast } = useToast();
   const {
     items,
     rooms,
@@ -24,12 +28,35 @@ export default function InventoryItemsPage() {
     setDeleteConfirmId,
     addItem,
     updateItem,
-    deleteItem,
+    fetchItems,
     stats,
   } = useInventory();
 
+  async function handleDeleteConfirm(id: string) {
+    try {
+      await inventoryService.deleteItem(id);
+      fetchItems();
+      showToast('Item removed', 'success');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Failed to delete item';
+      showToast(msg, 'error');
+    }
+    setDeleteConfirmId(null);
+  }
+
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<InventoryItem['category'] | 'all'>('all');
+  const [transferItem, setTransferItem] = useState<InventoryItem | null>(null);
+
+  async function handleTransfer(data: TransferStockDto) {
+    try {
+      await inventoryService.transferStock(data);
+      showToast('Stock transferred', 'success');
+    } catch {
+      showToast('Failed to transfer stock', 'error');
+      throw new Error('failed');
+    }
+  }
 
   const filtered = items
     .filter((i) => categoryFilter === 'all' || i.category === categoryFilter)
@@ -83,7 +110,7 @@ export default function InventoryItemsPage() {
         </div>
       </div>
 
-      <InventoryTable items={filtered} isLoading={isLoading} onEdit={setEditItem} onDelete={setDeleteConfirmId} />
+      <InventoryTable items={filtered} isLoading={isLoading} onEdit={setEditItem} onDelete={setDeleteConfirmId} onTransfer={setTransferItem} linkToDetail />
 
       {deleteConfirmId && deleteTarget && (
         <div
@@ -105,10 +132,7 @@ export default function InventoryItemsPage() {
               <button
                 className="btn btn-primary"
                 style={{ background: 'var(--critical-soft-fg)' }}
-                onClick={() => {
-                  deleteItem(deleteConfirmId);
-                  setDeleteConfirmId(null);
-                }}
+                onClick={() => handleDeleteConfirm(deleteConfirmId!)}
               >
                 Delete
               </button>
@@ -119,6 +143,7 @@ export default function InventoryItemsPage() {
 
       <AddItemModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onSubmit={addItem} rooms={rooms} />
       <EditItemModal item={editItem} onClose={() => setEditItem(null)} onSubmit={updateItem} rooms={rooms} />
+      <TransferStockModal open={!!transferItem} items={items} preselectedItem={transferItem} onClose={() => setTransferItem(null)} onSubmit={handleTransfer} />
     </div>
   );
 }

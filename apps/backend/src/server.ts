@@ -9,6 +9,8 @@ import { connectRedis, redisClient } from "./config/redis";
 import { initSocket, attachRedisAdapter, getIO, emitToRole } from "./config/socket";
 
 import { startInventoryAlertJob } from "./jobs/inventoryAlert.job";
+import { startInventoryExpiryJob } from "./jobs/inventoryExpiry.job";
+import { startInventoryReportJob } from "./jobs/inventoryReport.job";
 import { startAppointmentReminderJob } from "./jobs/appointmentReminder.job";
 import { startProfileCleanupJob } from "./jobs/profileCleanup.job";
 import { startPharmacyExpiryJob } from "./jobs/pharmacyExpiry.job";
@@ -85,6 +87,8 @@ const start = async () => {
   // ==========================
 
   const inventoryJob = startInventoryAlertJob();
+  const inventoryExpiryJob = startInventoryExpiryJob();
+  const inventoryReportJob = startInventoryReportJob();
   const appointmentJob = startAppointmentReminderJob();
   const profileCleanupJob = startProfileCleanupJob();
   const pharmacyExpiryJob = startPharmacyExpiryJob();
@@ -165,6 +169,8 @@ const start = async () => {
       clearInterval(healthInterval);
 
       inventoryJob?.stop?.();
+      inventoryExpiryJob?.stop?.();
+      inventoryReportJob?.stop?.();
       appointmentJob?.stop?.();
       profileCleanupJob?.stop?.();
       pharmacyExpiryJob?.stop?.();
