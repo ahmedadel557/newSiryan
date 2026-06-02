@@ -1,5 +1,72 @@
 # Changelog
 
+## [2026-06-02] Bugfix — Staff registration response held by inline `await sendEmail`
+
+### Symptom
+`POST /auth/register/staff` eventually returned 2xx but took tens of seconds. The frontend
+`StaffForm` correctly awaited the response, so "Submitting…" lingered the whole time and
+`StaffSuccessScreen` rendered only after the email round-trip settled. Looked like the form
+was "stuck" but it was just blocked on SMTP.
+
+### Root cause
+`authService.registerStaff` (`apps/backend/src/services/auth.service.ts`) had
+`await sendEmail(...).catch(() => {})` inline before `return { pending, message }`.
+`sendEmail` opens an SMTP connection to `smtp.sendgrid.net:587` (nodemailer) with no
+`connectionTimeout`/`socketTimeout` configured. If SendGrid is slow / throttling / API key
+bad, the HTTP response is held until the SMTP layer settles. The notification insert and
+socket emit immediately above are already wrapped as fire-and-forget — email belongs in the
+same bucket.
+
+### Changed Files
+- `apps/backend/src/services/auth.service.ts` — removed `await` from the `sendEmail` call in
+  `registerStaff`. `.catch(() => {})` already swallows rejection. Added a one-line comment
+  explaining the intent.
+
+### Verification
+- `npx tsc --noEmit` (backend) → 0 errors. No frontend changes.
+
+### Follow-up (not done — intentionally out of scope)
+- Audit other call sites that `await` `sendEmail`/`sendTemplatedEmail` inside request handlers.
+- Consider setting `connectionTimeout` + `socketTimeout` on the nodemailer transport in
+  `apps/backend/src/utils/mailer.ts` so a misconfigured `SENDGRID_API_KEY` fails fast.
+
+## [2026-06-02] Bugfix — Pending-staff sidebar badge stale + row stays after approve/reject
+
+### Symptom
+(1) Admin sidebar pending-staff badge fetched once on mount; never updated after approve/reject
+or after the `staff_request:new` socket event. (2) On `/dashboard/admin/staff-requests`, the
+row for the just-approved/rejected request lingered until the network refetch completed.
+
+### Root cause
+`StaffShell.tsx` predates the TanStack Query migration and used a local `useState` +
+one-shot `useEffect` to fetch `pendingStaffCount` via `adminService.getStaffRequests('pending')`.
+After yesterday's migration the staff-requests page invalidates the shared
+`['admin','staff-requests']` cache key on every mutation, and the hook already listens to
+`staff_request:new` — but StaffShell wasn't reading from that cache, so the badge never saw the
+invalidation. Bug (2) was just refetch latency (no optimistic update).
+
+### Changed Files
+- `apps/frontend/src/hooks/admin/useAdminStaffRequests.ts` — added `enabled?: boolean` option;
+  added `onMutate` optimistic updates to `approve` and `reject` (drop the request from every
+  cached staff-requests page; snapshot for rollback in `onError`; `onSettled` re-invalidates to
+  reconcile with server truth).
+- `apps/frontend/src/components/layouts/StaffShell.tsx` — replaced the local `useState` +
+  `useEffect` fetch with `useAdminStaffRequests('pending', { enabled: user?.role === 'admin' })`.
+  The shared cache + the hook's existing socket listener now keep the badge live; optimistic
+  updates make both the row AND the badge decrement instantly on action.
+
+### Why no window event / parallel fetch
+The original prompt suggested a `window.dispatchEvent('staff-request-updated')` bridge between
+the page and StaffShell. The TanStack Query cache the page already invalidates is exactly the
+cross-component live-state mechanism — using it costs zero lines in the page, no new
+dependencies, and removes the dangling-listener class of bugs.
+
+### Verification
+- `npx tsc --noEmit` (frontend) → 0 errors.
+- `npm run lint` (frontend) → 296 problems (baseline; 0 new). The 2 errors in StaffShell
+  flagged near the changed lines are pre-existing (`setCollapsed`/`setDrawerOpen` inside
+  effects), unrelated to this fix.
+
 ## [2026-06-02] Data layer — TanStack Query v5 integration (Admin + Cashier)
 
 ### Goal

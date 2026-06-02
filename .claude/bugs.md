@@ -1,5 +1,27 @@
 # Bugs
 
+## [BUG-AUTH-1] Staff registration "stuck on Submitting…" then jumps to success after ~30s
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Submit `/auth/register` (staff tab). Button shows "Submitting…" for tens of seconds, then suddenly transitions to `StaffSuccessScreen`. API does eventually return 2xx — it's slow, not failing.
+- **Root Cause:** `authService.registerStaff` (`apps/backend/src/services/auth.service.ts`) awaited `sendEmail(...)` inline before returning. `sendEmail` opens an SMTP connection to `smtp.sendgrid.net:587` via nodemailer with no `connectionTimeout`/`socketTimeout` configured (`apps/backend/src/utils/mailer.ts`). If SendGrid is slow / throttling / API key bad, the HTTP response is held until the SMTP round-trip settles. The frontend `await apiClient.post(...)` was correctly waiting — there was just nothing to wait *for* until the email finished.
+- **Misleading symptom:** Looked like the form was "stuck" because the response sometimes took longer than a user expects a click to last. The form was actually working correctly the whole time; the success screen just rendered after the email round-trip.
+- **Fix:** Drop the `await` on the `sendEmail` call in `registerStaff` so the email is fire-and-forget, matching the surrounding notification insert + socket emit which are already wrapped as `try/catch { /* non-fatal */ }`. The pre-existing `.catch(() => {})` still swallows rejection. Added a one-line comment explaining the intent so future readers don't "fix" it by re-adding `await`.
+- **File:** `apps/backend/src/services/auth.service.ts` (function `registerStaff`)
+- **Hypotheses checked and ruled out:** (a) frontend `api.client.ts` response interceptor — identity on 2xx, doesn't throw; (b) backend setting auth cookies for pending staff — verified `registerStaff` returns `{pending, message}` with NO `setAuthCookies` call; (c) `middleware.ts` redirect — `/auth/register` is in `publicPaths`, never read. None matched.
+- **Follow-up (not done):** other call sites also `await` `sendEmail` / `sendTemplatedEmail` inside request handlers; consider auditing. Also consider setting `connectionTimeout` + `socketTimeout` on the nodemailer transport so a bad `SENDGRID_API_KEY` fails fast instead of stalling.
+
+## [BUG-ADMIN-2] Pending-staff sidebar badge stale + row stays after approve/reject
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** (1) Open admin sidebar — pending count badge correct on mount. Approve or reject any pending request on `/dashboard/admin/staff-requests` → badge stays at the old number. (2) Same page: row for the just-approved request stays in the list until manual refresh.
+- **Root Cause:** Bug (1) — `StaffShell.tsx` fetched `pendingStaffCount` once on mount via `adminService.getStaffRequests('pending')` + `useState` + `useEffect`, never re-ran. The yesterday's TanStack Query migration moved the staff-requests page onto `useAdminStaffRequests`, whose mutations invalidate `['admin','staff-requests']`, but StaffShell wasn't on the shared cache so it never saw the invalidation. Bug (2) — cache invalidation refetches in the background; the row only disappears after the network RTT, which feels laggy on slow connections.
+- **Fix:**
+  - `apps/frontend/src/hooks/admin/useAdminStaffRequests.ts` — added `enabled?: boolean` option; added optimistic-update `onMutate` to both `approve` and `reject` (remove the request from every cached staff-requests page; snapshot for rollback in `onError`; `onSettled` re-invalidates to reconcile with server).
+  - `apps/frontend/src/components/layouts/StaffShell.tsx` — replaced the local `useState`+`useEffect` fetch with `useAdminStaffRequests('pending', { enabled: user?.role === 'admin' })`. The shared cache + the hook's existing `staff_request:new` socket listener now keep the badge live, and optimistic mutations make both the row AND the badge decrement instantly.
+- **Why no window event / parallel fetch:** the prompt suggested a `window.dispatchEvent('staff-request-updated')` bridge; the TanStack Query cache that the page already invalidates is the exact mechanism for cross-component live state, so using it costs zero lines in the page, no new dependencies, and removes the dangling-listener class of bugs entirely.
+- **Files:**
+  - `apps/frontend/src/hooks/admin/useAdminStaffRequests.ts`
+  - `apps/frontend/src/components/layouts/StaffShell.tsx`
+
 ## [BUG-PH3-1] Pharmacy delivery socket payload field mismatch (found during Part 3 flow testing)
 - **Status:** resolved
 - **Reproduction:** Pharmacist updates delivery status → backend emits `pharmacy:delivery:update` with field `status`, but the patient frontend listener reads `data.delivery_status`. Patient order's `delivery_status` became `undefined` and toast showed "Delivery update: undefined".
