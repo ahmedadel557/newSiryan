@@ -1,5 +1,7 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/queryKeys';
 import { patientService } from '@/services/patient.service';
 import { useAuth } from '@/hooks/shared';
 import { useToast } from '@/hooks/shared';
@@ -12,42 +14,38 @@ export type DeliveryType = 'pickup' | 'home';
 export function usePharmacy() {
   const { showToast } = useToast();
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
 
-  const [medications, setMedications] = useState<Medication[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [orders, setOrders] = useState<PharmacyOrder[]>([]);
-  const [insuranceCompanies, setInsuranceCompanies] = useState<InsuranceCompany[]>([]);
   const [activeTab, setActiveTab] = useState<PharmTab>('catalog');
   const [searchQuery, setSearchQuery] = useState('');
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('pickup');
-  const [isLoading, setIsLoading] = useState(true);
   const [rxModalMedId, setRxModalMedId] = useState<string | null>(null);
   const [pendingMed, setPendingMed] = useState<Medication | null>(null);
 
-  useEffect(() => {
-    Promise.allSettled([
-      patientService.getMedications(),
-      patientService.getPrescriptions(),
-      patientService.getPharmacyOrders(),
-      patientService.getInsuranceCompanies(),
-    ])
-      .then(([medsResult, rxsResult, ordsResult, insResult]) => {
-        if (medsResult.status === 'fulfilled' && medsResult.value.length > 0) {
-          setMedications(medsResult.value);
-        } else {
-          setMedications([]);
-        }
-        if (rxsResult.status === 'fulfilled') setPrescriptions(rxsResult.value);
-        if (ordsResult.status === 'fulfilled') setOrders(ordsResult.value);
-        if (insResult.status === 'fulfilled') setInsuranceCompanies(insResult.value);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { data: medications = [], isPending: medicationsPending } = useQuery({
+    queryKey: queryKeys.patientPharmacyMedications(),
+    queryFn: () => patientService.getMedications(),
+  });
+
+  const { data: prescriptions = [], isPending: prescriptionsPending } = useQuery({
+    queryKey: queryKeys.patientPrescriptions(),
+    queryFn: () => patientService.getPrescriptions(),
+  });
+
+  const { data: orders = [], isPending: ordersPending } = useQuery({
+    queryKey: queryKeys.patientPharmacyOrders(),
+    queryFn: () => patientService.getPharmacyOrders(),
+  });
+
+  const { data: insuranceCompanies = [], isPending: insurancePending } = useQuery({
+    queryKey: queryKeys.patientInsuranceCompanies(),
+    queryFn: () => patientService.getInsuranceCompanies(),
+  });
 
   useSocketEvent<PharmacyDeliveryUpdatePayload>('pharmacy:delivery:update', useCallback((data) => {
-    setOrders((prev) =>
-      prev.map((o) =>
+    queryClient.setQueryData(queryKeys.patientPharmacyOrders(), (old: PharmacyOrder[] | undefined) =>
+      (old ?? []).map((o) =>
         o.id === data.order_id
           ? {
               ...o,
@@ -55,11 +53,35 @@ export function usePharmacy() {
               tracking_notes: data.tracking_notes,
               estimated_delivery_time: data.estimated_delivery_time,
             }
-          : o
-      )
+          : o,
+      ),
     );
     showToast(`Delivery update: ${data.delivery_status}`, 'info');
-  }, [showToast]));
+  }, [queryClient, showToast]));
+
+  useSocketEvent('pharmacy:order:updated', useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.patientPharmacyOrders() });
+  }, [queryClient]));
+
+  const placeOrderMutation = useMutation({
+    mutationFn: () =>
+      patientService.orderMedication({
+        items: cart.map((c) => ({
+          medication_id: c.medicationId,
+          quantity: c.quantity,
+          ...(c.prescriptionId ? { prescription_id: c.prescriptionId } : {}),
+        })),
+        delivery_type: deliveryType === 'home' ? 'delivery' : 'pickup',
+      }),
+    onSuccess: () => {
+      setCart([]);
+      queryClient.invalidateQueries({ queryKey: queryKeys.patientPharmacyOrders() });
+      showToast('Order sent to pharmacy!', 'success');
+    },
+    onError: (err: any) => {
+      showToast(err?.response?.data?.message ?? 'Order failed. Try again.', 'error');
+    },
+  });
 
   const addToCart = useCallback((med: Medication, prescriptionId?: string) => {
     if (med.requires_prescription && !prescriptionId) {
@@ -94,7 +116,7 @@ export function usePharmacy() {
       }
       setRxModalMedId(null);
     },
-    [addToCart, pendingMed]
+    [addToCart, pendingMed],
   );
 
   const removeFromCart = useCallback((medicationId: string) => {
@@ -102,28 +124,17 @@ export function usePharmacy() {
   }, []);
 
   const updateQuantity = useCallback((medicationId: string, delta: number) => {
-    setCart((prev) => prev.map((c) => (c.medicationId === medicationId ? { ...c, quantity: c.quantity + delta } : c)).filter((c) => c.quantity > 0));
+    setCart((prev) =>
+      prev
+        .map((c) => (c.medicationId === medicationId ? { ...c, quantity: c.quantity + delta } : c))
+        .filter((c) => c.quantity > 0),
+    );
   }, []);
 
   const placeOrder = useCallback(async () => {
     if (cart.length === 0) return;
-    try {
-      await patientService.orderMedication({
-        items: cart.map((c) => ({
-          medication_id: c.medicationId,
-          quantity: c.quantity,
-          ...(c.prescriptionId ? { prescription_id: c.prescriptionId } : {}),
-        })),
-        delivery_type: deliveryType === 'home' ? 'delivery' : 'pickup',
-      });
-      setCart([]);
-      showToast('Order sent to pharmacy!', 'success');
-    } catch (err) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Order failed. Try again.';
-      showToast(message, 'error');
-    }
-  }, [cart, deliveryType, showToast]);
+    await placeOrderMutation.mutateAsync();
+  }, [cart, placeOrderMutation]);
 
   const filteredMeds = medications.filter((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const cartTotal = cart.reduce((s, c) => s + c.unitPrice * c.quantity, 0);
@@ -144,7 +155,7 @@ export function usePharmacy() {
     setSearchQuery,
     deliveryType,
     setDeliveryType,
-    isLoading,
+    isLoading: medicationsPending || prescriptionsPending || ordersPending || insurancePending,
     addToCart,
     confirmRxAdd,
     removeFromCart,

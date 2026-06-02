@@ -46,9 +46,10 @@ async function notifyRoles(roles: string[], type: string, title: string, message
 
 export const getDoctorList = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { specialization } = req.query as { specialization?: string };
+    const { specialization, department } = req.query as { specialization?: string; department?: string };
     const profileQuery: Record<string, any> = {};
     if (specialization) profileQuery.specialization = specialization;
+    if (department)     profileQuery.department    = department;
 
     const profiles = await Profile.find(profileQuery)
       .populate<{ user: { _id: any; username: string; is_active: boolean; role: string } }>('user', '_id username is_active role')

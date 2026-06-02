@@ -9,6 +9,7 @@ import {
   updateProfile,
   getMedicalRecord,
   getAppointments,
+  getAppointment,
   bookAppointment,
   mockPayAppointment,
   scheduleLabOrder,
@@ -34,6 +35,7 @@ import {
   getInsuranceCompanies,
 } from '../controllers/patient';
 import { getNotifications, markOneRead, markAllRead } from '../controllers/notification';
+import { getDepartments } from '../controllers/admin';
 
 const chatbotRateLimiter = createRedisRateLimiter({
   keyPrefix: 'chatbot',
@@ -54,6 +56,7 @@ router.get('/medical-record-shares', listMyShares);
 router.delete('/medical-record-shares/:id', revokeShare);
 router.get('/appointments', getAppointments);
 router.post('/appointments', validateRequest(bookAppointmentSchema), bookAppointment);
+router.get('/appointments/:id', getAppointment);
 router.post('/appointments/:id/pay-mock', mockPayAppointment);
 router.delete('/appointments/:id', cancelAppointment);
 router.post('/appointments/:id/rate', rateAppointment);
@@ -72,6 +75,7 @@ router.post('/rooms/book', validateRequest(bookRoomSchema), bookRoom);
 router.get('/rooms/bookings', getRoomBookings);
 router.get('/invoices', getInvoices);
 router.get('/insurance-companies', getInsuranceCompanies);
+router.get('/departments', getDepartments);
 router.get('/notifications', getNotifications);
 router.patch('/notifications/read-all', markAllRead);
 router.patch('/notifications/:id/read', markOneRead);

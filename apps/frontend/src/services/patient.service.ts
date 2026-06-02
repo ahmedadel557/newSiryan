@@ -89,6 +89,12 @@ export const patientService = {
     });
   },
 
+  async getAppointment(id: string): Promise<Appointment> {
+    const res = await apiClient.get<ApiResponse<any>>(`/patient/appointments/${id}`);
+    const raw = res.data.data;
+    return { ...normalize<Appointment>(raw), visit_type: raw.type ?? raw.visit_type, doctor_name: raw.doctor_name };
+  },
+
   async bookAppointment(data: BookAppointmentDto): Promise<BookingResult> {
     const res = await apiClient.post<ApiResponse<any>>('/patient/appointments', data);
     const raw = res.data.data ?? {};
@@ -235,6 +241,14 @@ export const patientService = {
   async getInsuranceCompanies(): Promise<InsuranceCompany[]> {
     const res = await apiClient.get<ApiResponse<InsuranceCompany[]>>('/patient/insurance-companies');
     return res.data.data.map((c) => ({ ...c, id: (c as any)._id ?? c.id })) as InsuranceCompany[];
+  },
+
+  async getDepartments(): Promise<{ id: string; name: string }[]> {
+    const res = await apiClient.get<ApiResponse<any>>('/patient/departments');
+    const raw: any[] = Array.isArray(res.data.data)
+      ? res.data.data
+      : (res.data.data?.departments ?? []);
+    return raw.map((d) => ({ id: d._id ?? d.id ?? d.name, name: d.name ?? String(d) }));
   },
 
   // Video token for an online appointment — backend GET /doctor/video/token/:id authorizes patients too.

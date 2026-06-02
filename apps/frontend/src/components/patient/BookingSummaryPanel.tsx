@@ -64,7 +64,6 @@ export function BookingSummaryPanel({ formData, selectedDoctor, step, onConfirm,
           : `Confirm — ${formatEGP(fee)}`}
       </button>
 
-      <button className="btn btn-ghost w-full text-[13px]">Save as draft</button>
     </div>
   );
 }

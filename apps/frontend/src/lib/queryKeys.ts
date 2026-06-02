@@ -54,12 +54,17 @@ export const queryKeys = {
   // Patient
   patientProfile: () => ['patient', 'profile'] as const,
   patientAppointments: () => ['patient', 'appointments'] as const,
+  patientAppointment: (id: string) => ['patient', 'appointments', id] as const,
   patientMedicalRecords: () => ['patient', 'medical-records'] as const,
   patientLabResults: () => ['patient', 'lab-results'] as const,
   patientRadiologyResults: () => ['patient', 'radiology-results'] as const,
   patientPrescriptions: () => ['patient', 'prescriptions'] as const,
   patientInvoices: () => ['patient', 'invoices'] as const,
   patientRoomBookings: () => ['patient', 'rooms', 'bookings'] as const,
+  patientPharmacyMedications: () => ['patient', 'pharmacy', 'medications'] as const,
+  patientPharmacyOrders: () => ['patient', 'pharmacy', 'orders'] as const,
+  patientInsuranceCompanies: () => ['patient', 'insurance-companies'] as const,
+  patientPharmacyCart: () => ['patient', 'pharmacy', 'cart'] as const,
 
   // Nurse
   nursePatients: () => ['nurse', 'patients'] as const,
@@ -103,6 +108,10 @@ export const queryKeys = {
   inventorySuppliers: () => ['inventory', 'suppliers'] as const,
   inventoryWarehouse: (filters?: Record<string, unknown>) =>
     (filters ? ['inventory', 'warehouse', filters] : ['inventory', 'warehouse']) as readonly unknown[],
+
+  // Booking (shared across patient booking flow)
+  bookingDepartments: () => ['booking', 'departments'] as const,
+  bookingDoctors: (department: string) => ['booking', 'doctors', department] as const,
 
   // Notifications
   notifications: () => ['notifications'] as const,

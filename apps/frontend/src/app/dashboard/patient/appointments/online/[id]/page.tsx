@@ -13,13 +13,13 @@ export default function OnlineAppointmentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    patientService.getAppointments()
-      .then(appts => {
-        const found = appts.find(a => a.id === id);
-        setAppointment(found ?? null);
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
+    let cancelled = false;
+    patientService
+      .getAppointment(id)
+      .then((appt) => { if (!cancelled) setAppointment(appt); })
+      .catch(() => { if (!cancelled) setAppointment(null); })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
   }, [id]);
 
   const scheduledAt = appointment

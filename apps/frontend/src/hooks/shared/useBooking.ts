@@ -1,14 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/services/api.client';
 import { patientService } from '@/services/patient.service';
+import { queryKeys } from '@/lib/queryKeys';
 import { useToast } from './useToast';
 import type { ApiResponse, DoctorAvailability, TimeSlot } from '@/types';
-
-const FALLBACK_DOCTORS: DoctorAvailability[] = [
-  { id: 'fallback', name: 'Dr. Sarah Hassan', specialty: 'Cardiologist', specialization: 'Cardiologist', next_available: null },
-];
 
 export type BookingStep = 1 | 2 | 3 | 4;
 
@@ -31,7 +29,7 @@ export function useBooking() {
 
   const [step, setStep] = useState<BookingStep>(1);
   const [formData, setFormData] = useState<BookingFormData>({
-    department: 'Cardiology',
+    department: '',
     visitType: 'physical',
     notes: '',
     doctorId: '',
@@ -43,20 +41,62 @@ export function useBooking() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDoctorsLoading, setIsDoctorsLoading] = useState(false);
   const [isSlotsLoading, setIsSlotsLoading] = useState(false);
+  const [doctorsError, setDoctorsError] = useState(false);
+  const [doctorsRetryKey, setDoctorsRetryKey] = useState(0);
 
+  // Track whether the initial mount has passed so department-change effect doesn't fire on mount
+  const mountedRef = useRef(false);
+
+  const retryDoctors = useCallback(() => setDoctorsRetryKey((k) => k + 1), []);
+
+  // ── Departments (TanStack Query) ──────────────────────────────────────────
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
+    queryKey: queryKeys.bookingDepartments(),
+    queryFn: () => patientService.getDepartments(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Set first department as default once list loads
   useEffect(() => {
-    if (step !== 2) return;
+    if (departments.length > 0 && formData.department === '') {
+      setFormData((prev) => ({ ...prev, department: departments[0].name }));
+    }
+  }, [departments, formData.department]);
+
+  // Clear selected doctor whenever department changes (skip initial mount)
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    if (formData.department) {
+      setFormData((prev) => ({ ...prev, doctorId: '' }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.department]);
+
+  // ── Doctor list ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (step !== 2 || !formData.department) return;
     setIsDoctorsLoading(true);
+    setDoctorsError(false);
     apiClient
-      .get<ApiResponse<DoctorAvailability[]>>('/doctor/list')
+      .get<ApiResponse<DoctorAvailability[]>>('/doctor/list', {
+        params: { department: formData.department },
+      })
       .then((r) => {
         const data = r.data.data;
-        setDoctors(Array.isArray(data) && data.length > 0 ? data : FALLBACK_DOCTORS);
+        setDoctors(Array.isArray(data) ? data : []);
+        setDoctorsError(false);
       })
-      .catch(() => setDoctors(FALLBACK_DOCTORS))
+      .catch(() => {
+        setDoctors([]);
+        setDoctorsError(true);
+      })
       .finally(() => setIsDoctorsLoading(false));
-  }, [step]);
+  }, [step, formData.department, doctorsRetryKey]);
 
+  // ── Slot availability ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!formData.doctorId || !formData.selectedDate) return;
     setIsSlotsLoading(true);
@@ -66,15 +106,16 @@ export function useBooking() {
         params: { date: formData.selectedDate },
       })
       .then((r) => {
-          const resp = r.data.data as unknown as { available_slots: string[]; all_slots: string[] };
-          const allSlots: string[] = Array.isArray(resp?.all_slots) ? resp.all_slots : [];
-          const available: string[] = Array.isArray(resp?.available_slots) ? resp.available_slots : [];
-          setSlots(allSlots.map(time => ({ time, available: available.includes(time) })));
-        })
+        const resp = r.data.data as unknown as { available_slots: string[]; all_slots: string[] };
+        const allSlots: string[] = Array.isArray(resp?.all_slots) ? resp.all_slots : [];
+        const available: string[] = Array.isArray(resp?.available_slots) ? resp.available_slots : [];
+        setSlots(allSlots.map((time) => ({ time, available: available.includes(time) })));
+      })
       .catch(() => {})
       .finally(() => setIsSlotsLoading(false));
   }, [formData.doctorId, formData.selectedDate]);
 
+  // ── Form helpers ──────────────────────────────────────────────────────────
   const update = useCallback((patch: Partial<BookingFormData>) => {
     setFormData((prev) => ({ ...prev, ...patch }));
   }, []);
@@ -86,9 +127,10 @@ export function useBooking() {
     setStep((s) => Math.max(1, s - 1) as BookingStep);
   }, []);
 
+  // ── Submit ────────────────────────────────────────────────────────────────
   const submitBooking = useCallback(async () => {
-    if (formData.doctorId === 'fallback') {
-      showToast('Doctor data unavailable — please try again.', 'error');
+    if (!formData.doctorId) {
+      showToast('Please select a doctor.', 'error');
       return;
     }
     setIsLoading(true);
@@ -96,7 +138,7 @@ export function useBooking() {
       const result = await patientService.bookAppointment({
         doctor_id: formData.doctorId,
         scheduled_at: `${formData.selectedDate}T${formData.selectedSlot}:00`,
-        reason: formData.notes || formData.department,
+        reason: formData.notes || '',
         visit_type: formData.visitType,
         department: formData.department,
       });
@@ -114,7 +156,13 @@ export function useBooking() {
     }
   }, [formData, router, showToast]);
 
-  const selectedDoctor = doctors.find((d) => d.id === formData.doctorId);
+  // ── selectedDoctor with back-nav cache ────────────────────────────────────
+  const cachedDoctorRef = useRef<DoctorAvailability | undefined>(undefined);
+  const selectedDoctor = useMemo(() => {
+    const found = doctors.find((d) => d.id === formData.doctorId);
+    if (found) cachedDoctorRef.current = found;
+    return found ?? cachedDoctorRef.current;
+  }, [doctors, formData.doctorId]);
 
   return {
     step,
@@ -124,10 +172,14 @@ export function useBooking() {
     isLoading,
     isDoctorsLoading,
     isSlotsLoading,
+    doctorsError,
     selectedDoctor,
+    departments,
+    departmentsLoading,
     update,
     nextStep,
     prevStep,
     submitBooking,
+    retryDoctors,
   };
 }

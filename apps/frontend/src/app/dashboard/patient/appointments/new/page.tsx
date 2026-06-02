@@ -28,11 +28,15 @@ export default function NewAppointmentPage() {
     isLoading,
     isDoctorsLoading,
     isSlotsLoading,
+    doctorsError,
     selectedDoctor,
+    departments,
+    departmentsLoading,
     update,
     nextStep,
     prevStep,
     submitBooking,
+    retryDoctors,
   } = useBooking();
 
   return (
@@ -48,7 +52,15 @@ export default function NewAppointmentPage() {
       <div className="grid gap-4 grid-cols-1 md:grid-cols-[1fr_360px]">
         <div>
           {step === 1 && (
-            <ReasonStep department={formData.department} visitType={formData.visitType} notes={formData.notes} onChange={update} onNext={nextStep} />
+            <ReasonStep
+                department={formData.department}
+                visitType={formData.visitType}
+                notes={formData.notes}
+                departments={departments}
+                departmentsLoading={departmentsLoading}
+                onChange={update}
+                onNext={nextStep}
+              />
           )}
           {step === 2 && (
             <DoctorStep
@@ -58,6 +70,8 @@ export default function NewAppointmentPage() {
               isLoading={isDoctorsLoading}
               onNext={nextStep}
               onBack={prevStep}
+              error={doctorsError}
+              onRetry={retryDoctors}
             />
           )}
           {step === 3 && (

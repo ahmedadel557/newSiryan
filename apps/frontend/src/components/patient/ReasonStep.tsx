@@ -1,32 +1,16 @@
-﻿import type { BookingFormData } from '@/hooks/shared';
-
-const DEPARTMENTS = [
-  'Cardiology',
-  'Dermatology',
-  'Endocrinology',
-  'Gastroenterology',
-  'General Practice',
-  'Neurology',
-  'Obstetrics',
-  'Oncology',
-  'Ophthalmology',
-  'Orthopedics',
-  'Pediatrics',
-  'Psychiatry',
-  'Pulmonology',
-  'Rheumatology',
-  'Urology',
-];
+import type { BookingFormData } from '@/hooks/shared';
 
 interface ReasonStepProps {
   department: string;
   visitType: 'physical' | 'online';
   notes: string;
+  departments: { id: string; name: string }[];
+  departmentsLoading: boolean;
   onChange: (patch: Partial<BookingFormData>) => void;
   onNext: () => void;
 }
 
-export function ReasonStep({ department, visitType, notes, onChange, onNext }: ReasonStepProps) {
+export function ReasonStep({ department, visitType, notes, departments, departmentsLoading, onChange, onNext }: ReasonStepProps) {
   return (
     <div className="card p-6 flex flex-col gap-5">
       <div className="flex items-center gap-3">
@@ -39,17 +23,23 @@ export function ReasonStep({ department, visitType, notes, onChange, onNext }: R
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
           <label className="text-[12px] font-medium text-[var(--fg-2)]">Department</label>
-          <select
-            value={department}
-            onChange={(e) => onChange({ department: e.target.value })}
-            className="border border-[var(--border-1)] rounded-[var(--radius-md)] px-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
-          >
-            {DEPARTMENTS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+          {departmentsLoading ? (
+            <div className="h-9 rounded-[var(--radius-md)] bg-[var(--sand-100)] animate-pulse" />
+          ) : departments.length === 0 ? (
+            <p className="text-[13px] text-[var(--fg-3)] py-2">No departments configured.</p>
+          ) : (
+            <select
+              value={department}
+              onChange={(e) => onChange({ department: e.target.value })}
+              className="border border-[var(--border-1)] rounded-[var(--radius-md)] px-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
+            >
+              {departments.map((d) => (
+                <option key={d.id} value={d.name}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -82,7 +72,11 @@ export function ReasonStep({ department, visitType, notes, onChange, onNext }: R
       </div>
 
       <div className="flex justify-end">
-        <button onClick={onNext} className="btn btn-primary">
+        <button
+          onClick={onNext}
+          disabled={!department || departmentsLoading}
+          className="btn btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           Next
         </button>
       </div>

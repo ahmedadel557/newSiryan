@@ -1,10 +1,39 @@
 # Current Task
 
 ## Task
-B1–B8 Backend Gap Fixes — re-apply all 8 missing route/controller additions (2026-06-02).
+Patient System Fixes — Part 2 (2026-06-02): Book Appointment Improvements.
 
 ## Status
 COMPLETE.
+
+## What was done
+- **FIX 1** Removed dead "Save as draft" button from `BookingSummaryPanel`
+- **FIX 2** Departments now fetched from `GET /patient/departments` (TanStack Query); hardcoded `DEPARTMENTS` array removed; loading skeleton + "no departments" fallback added; Next disabled while loading
+- **FIX 3** Doctor list now filtered by selected department (`GET /doctor/list?department=...`); re-fetches on department change; selecting a new department clears previous doctor selection
+- **FIX 4** `reason` fallback no longer uses `formData.department` — sends empty string instead
+- **FIX 5** Removed duplicate outer `div` in DoctorStep filter bar; onWheel now fires once
+- **FIX 6** Extracted `DoctorCard` + `DoctorFilterBar` components; DoctorStep now ≤100 lines; added empty-state ("Change department" button) separate from error state; helper text below Next when no doctor selected
+- **FIX 7** `cachedDoctorRef` in `useBooking` preserves last resolved doctor on re-fetch failure (back navigation resilience)
+- **FIX 8** Notes row icon in `ConfirmStep` changed from `Calendar` → `FileText`
+- **FIX 9** `BookingProgress` wrapped in `overflow-x-auto` container with `min-w-max` inner row — no overflow on narrow screens
+- **FIX 10** Department initialises as `''`; first real department from backend becomes default once loaded
+- **FIX 11** Distinct empty-state in `DoctorStep`: fetch success + 0 results shows "No doctors available for this department" + "Change department" back-button
+- **BACKEND** `GET /patient/departments` route added (reuses admin `getDepartments` controller)
+- **BACKEND** `getDoctorList` now accepts `?department` query param and filters by it
+- **KEYS** Added `bookingDepartments` + `bookingDoctors` to `queryKeys.ts`
+
+## Verification
+- `npm run audit:routes`: ❌ 0 (GET /patient/departments now ✅ matched)
+- `npx tsc --noEmit` backend: 0 errors
+- `npx tsc --noEmit` frontend: 0 errors
+
+## Next Steps
+- Integration testing: smoke-test the full booking flow end-to-end in the browser
+
+---
+
+## Previous Task
+B1–B8 Backend Gap Fixes — re-apply all 8 missing route/controller additions (2026-06-02).
 
 ## What was done
 - **B1** `GET /lab/orders/:id` — added `getLabOrderById` controller + route

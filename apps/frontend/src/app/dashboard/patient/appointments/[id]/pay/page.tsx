@@ -28,14 +28,10 @@ export default function MockPaymentPage() {
   useEffect(() => {
     let cancelled = false;
     patientService
-      .getAppointments()
-      .then((list) => {
-        if (cancelled) return;
-        const found = list.find((a) => a.id === appointmentId);
-        setAppointment(found ?? null);
-      })
-      .catch(() => {})
-      .finally(() => !cancelled && setIsLoading(false));
+      .getAppointment(appointmentId)
+      .then((appt) => { if (!cancelled) setAppointment(appt); })
+      .catch(() => { if (!cancelled) setAppointment(null); })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
     return () => {
       cancelled = true;
     };

@@ -1,5 +1,63 @@
 # Changelog
 
+## [2026-06-02] Patient System Fixes — Part 2 (Book Appointment Improvements)
+
+### Goal
+Fix all remaining bugs in the book-appointment flow and improve UX: dynamic departments, department-filtered doctor list, component extraction, mobile overflow, icon fix, dead button removal.
+
+### Backend Changes
+- `apps/backend/src/routes/patient.routes.ts` — imported `getDepartments` from admin controller; added `GET /patient/departments` route
+- `apps/backend/src/controllers/doctor/index.ts` — `getDoctorList` now reads `?department` query param and adds it to the profile query filter
+
+### Frontend Changes
+- `apps/frontend/src/lib/queryKeys.ts` — added `bookingDepartments` and `bookingDoctors` keys
+- `apps/frontend/src/services/patient.service.ts` — added `getDepartments()` method → `GET /patient/departments`
+- `apps/frontend/src/hooks/shared/useBooking.ts` — full rewrite: departments via TanStack Query; department default set from first loaded item; doctor fetch passes `?department`; department change clears doctorId (skips mount); `reason` fallback removed (sends `''`); `cachedDoctorRef` for back-nav resilience; returns `departments` + `departmentsLoading`
+- `apps/frontend/src/components/patient/ReasonStep.tsx` — hardcoded DEPARTMENTS array removed; props extended with `departments` + `departmentsLoading`; loading skeleton + empty fallback; Next disabled while loading
+- `apps/frontend/src/components/patient/DoctorCard.tsx` — **NEW** extracted doctor row card component
+- `apps/frontend/src/components/patient/DoctorFilterBar.tsx` — **NEW** extracted specialization filter chip bar (single scroll container)
+- `apps/frontend/src/components/patient/DoctorStep.tsx` — refactored: uses DoctorCard + DoctorFilterBar; duplicate outer div removed; distinct empty-state with "Change department" button; helper hint below disabled Next
+- `apps/frontend/src/components/patient/ConfirmStep.tsx` — Notes row icon: Calendar → FileText
+- `apps/frontend/src/components/patient/BookingProgress.tsx` — wrapped in `overflow-x-auto` outer div; inner row uses `min-w-max`
+- `apps/frontend/src/components/patient/BookingSummaryPanel.tsx` — removed dead "Save as draft" button
+- `apps/frontend/src/app/dashboard/patient/appointments/new/page.tsx` — destructures `departments` + `departmentsLoading`; passes both to ReasonStep
+
+### Result
+- `npm run audit:routes`: ❌ 0 (GET /patient/departments now ✅ matched)
+- `npx tsc --noEmit` (backend): 0 errors
+- `npx tsc --noEmit` (frontend): 0 errors
+
+
+
+## [2026-06-02] Patient System Fixes — Part 1 (7 bugs + 1 TanStack migration)
+
+### Goal
+Fix all confirmed bugs in the Patient dashboard, migrate usePharmacy to TanStack Query, and enable the Join Call button.
+
+### Backend Changes
+- `apps/backend/src/controllers/patient/index.ts` — added `getAppointment` export (single appointment by id with ownership check + doctor populate)
+- `apps/backend/src/routes/patient.routes.ts` — imported `getAppointment`, added `GET /appointments/:id` route
+
+### Frontend Changes
+- `apps/frontend/src/app/dashboard/patient/page.tsx` — FIX 1: `a.updated_at` → `a.updatedAt ?? a.updated_at` (Invalid Date fix); hardcoded `'your doctor'` → reads `upcoming[0].doctor_name`
+- `apps/frontend/src/hooks/patient/usePatientRequests.ts` — FIX 2: removed `|| !(l as any).scheduled_at` from both pendingLabs and pendingImaging filters
+- `apps/frontend/src/app/dashboard/patient/appointments/page.tsx` — FIX 3: Join Call button replaced with 5-min-window gate using `VIDEO_WINDOW_MS`; active = Link to online room, inactive = disabled with tooltip
+- `apps/frontend/src/services/patient.service.ts` — FIX 4: added `getAppointment(id)` method
+- `apps/frontend/src/app/dashboard/patient/appointments/[id]/pay/page.tsx` — FIX 4: replaced `getAppointments()` + filter with `getAppointment(id)` direct fetch
+- `apps/frontend/src/app/dashboard/patient/appointments/online/[id]/page.tsx` — FIX 5: same single-fetch replacement
+- `apps/frontend/src/lib/queryKeys.ts` — added `patientAppointment`, `patientPharmacyMedications`, `patientPharmacyOrders`, `patientInsuranceCompanies`, `patientPharmacyCart` keys
+- `apps/frontend/src/hooks/patient/usePharmacy.ts` — FIX 6: full TanStack Query migration (4 useQuery + 1 useMutation); cart/UI state stays useState; socket delivery:update uses setQueryData; pharmacy:order:updated invalidates orders; return shape unchanged
+- `apps/frontend/src/hooks/shared/useBooking.ts` — FIX 7: removed FALLBACK_DOCTORS; added doctorsError + retryDoctors; on fetch fail → empty array + error flag
+- `apps/frontend/src/components/patient/DoctorStep.tsx` — FIX 7: added error/onRetry props; empty+error state shows retry button; Next disabled when doctors empty
+- `apps/frontend/src/app/dashboard/patient/appointments/new/page.tsx` — FIX 7: destructures doctorsError + retryDoctors, passes to DoctorStep
+
+### Result
+- `npm run audit:routes`: ❌ 0 (GET /patient/appointments/:id now in ✅ matched)
+- `npx tsc --noEmit` (backend): 0 errors
+- `npx tsc --noEmit` (frontend): 0 errors
+
+
+
 ## [2026-06-02] B1–B8 Backend Gap Fixes — All 8 Missing Routes Implemented
 
 ### Goal

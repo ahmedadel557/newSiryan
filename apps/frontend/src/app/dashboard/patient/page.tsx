@@ -61,7 +61,7 @@ export default function PatientHomePage() {
           month: 'long',
           day: 'numeric',
         }),
-        doctorName: 'your doctor',
+        doctorName: upcoming[0].doctor_name ?? (upcoming[0] as any).doctorName ?? 'your doctor',
         type: 'physical' as const,
       }
     : undefined;
@@ -72,7 +72,7 @@ export default function PatientHomePage() {
     .map((a) => ({
       icon: <CalendarDays size={16} strokeWidth={1.75} />,
       description: `${a.status === 'completed' ? 'Visit completed' : 'Appointment cancelled'}: ${a.reason}`,
-      timestamp: new Date(a.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      timestamp: new Date((a as any).updatedAt ?? a.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     }));
 
   return (

@@ -81,8 +81,8 @@ export function usePatientRequests() {
     queryClient.invalidateQueries({ queryKey: queryKeys.patientRoomBookings() });
   };
 
-  const pendingLabs = labs.filter((l) => l.status === 'pending' || !(l as any).scheduled_at);
-  const pendingImaging = imaging.filter((r) => r.status === 'pending' || !(r as any).scheduled_at);
+  const pendingLabs = labs.filter((l) => l.status === 'pending');
+  const pendingImaging = imaging.filter((r) => r.status === 'pending');
   const pendingRooms = rooms.filter((r) => r.status === ('requested' as any));
 
   return {

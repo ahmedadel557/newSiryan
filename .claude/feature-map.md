@@ -1,7 +1,7 @@
 # Feature Map
 
 ## Patient
- ├── appointments (book, view, cancel, reschedule, pay, online)
+ ├── appointments (book, view, cancel, reschedule, pay, online)  [booking flow ✓ Part 2 — depts from BE, dept-filtered doctors, extracted components]
  ├── medical records (view own records, shared records)
  ├── pharmacy (view prescriptions, pharmacy orders)
  ├── billing (view invoices, payments)

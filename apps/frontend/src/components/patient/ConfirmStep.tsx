@@ -1,4 +1,4 @@
-﻿import { Calendar, Clock, User, Stethoscope, Wallet } from 'lucide-react';
+﻿import { Calendar, Clock, User, Stethoscope, Wallet, FileText } from 'lucide-react';
 import type { BookingFormData } from '@/hooks/shared';
 import type { DoctorAvailability } from '@/types';
 import { feeForVisitType, formatEGP } from '@/lib/pricing';
@@ -41,7 +41,7 @@ export function ConfirmStep({ formData, selectedDoctor, onBack, onConfirm, isLoa
         {formData.notes && (
           <div className="flex items-start gap-3 py-2">
             <span className="text-[var(--fg-3)] shrink-0 mt-[2px]">
-              <Calendar size={16} />
+              <FileText size={16} />
             </span>
             <span className="text-[13px] text-[var(--fg-3)] w-24 shrink-0">Notes</span>
             <span className="text-[14px] text-[var(--fg-2)]">{formData.notes}</span>

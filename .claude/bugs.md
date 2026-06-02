@@ -187,6 +187,57 @@
 
 ---
 
+## [BUG-PATIENT-1] Home page: "Invalid Date" in Recent Activity + hardcoded doctor name
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Patient home page Recent Activity timestamps showed "Invalid Date". HeroCard always showed "your doctor" instead of the actual doctor's name.
+- **Root Cause:** Mongoose lean returns `updatedAt` (camelCase), but the page read `a.updated_at` (snake_case). Doctor name was hardcoded as the string literal `'your doctor'` instead of reading from `upcoming[0].doctor_name`.
+- **Fix:** `new Date(a.updatedAt ?? a.updated_at)` + `upcoming[0].doctor_name ?? ... ?? 'your doctor'`.
+- **File:** `apps/frontend/src/app/dashboard/patient/page.tsx`
+
+## [BUG-PATIENT-2] Requests page: scheduled labs/imaging appeared in "pending" counts
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** A lab order with `status='scheduled'` and a non-null `scheduled_at` would show up in the "pending" badge count on the Requests page.
+- **Root Cause:** Filter was `l.status === 'pending' || !(l as any).scheduled_at` — the second condition was always truthy for fresh orders (before the patient had set a date), making it include scheduled items.
+- **Fix:** Removed the `|| !(l as any).scheduled_at` clause from both `pendingLabs` and `pendingImaging` filters.
+- **File:** `apps/frontend/src/hooks/patient/usePatientRequests.ts`
+
+## [BUG-PATIENT-3] Join Call button: always disabled (video calls marked "coming soon")
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Confirmed, paid online appointment showed a permanently-disabled "Video calls coming soon" button.
+- **Fix:** Replaced with a 5-minute window gate (same `VIDEO_WINDOW_MS = 5 * 60 * 1000` pattern as QueueItem.tsx). Within window → active Link to `/appointments/online/:id`. Before window → disabled button with tooltip "Available 5 minutes before your appointment".
+- **File:** `apps/frontend/src/app/dashboard/patient/appointments/page.tsx`
+
+## [BUG-PATIENT-4] Pay page + online waiting room: fetched ALL appointments to find one
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** `/appointments/:id/pay` and `/appointments/online/:id` called `getAppointments()` (fetches full list) then filtered by id — wasteful and broke if list was large.
+- **Fix:** Added `GET /patient/appointments/:id` backend route with ownership check. Added `patientService.getAppointment(id)` frontend method. Both pages now call the single-item endpoint directly.
+- **Files:** `apps/backend/src/controllers/patient/index.ts`, `apps/backend/src/routes/patient.routes.ts`, `apps/frontend/src/services/patient.service.ts`, pay page, online page
+
+## [BUG-BOOKING-1] Hardcoded department list + department not filtering doctors
+- **Status:** resolved (2026-06-02)
+- **Root Cause (a):** `useBooking` initialised `department: 'Cardiology'` and `ReasonStep` had a hardcoded 15-item `DEPARTMENTS` array — out of sync with the backend `Department` collection.
+- **Root Cause (b):** `GET /doctor/list` was called without any `?department=` param, so step 2 always showed all doctors regardless of what was selected in step 1.
+- **Fix:** Added `GET /patient/departments` backend route (reuses admin `getDepartments` controller). `patientService.getDepartments()` + TanStack Query in `useBooking` replaces the hardcoded list. `getDoctorList` now accepts `?department` filter. Doctor fetch passes the current department; changing department clears `doctorId` and re-fetches.
+- **Files:** `apps/backend/src/routes/patient.routes.ts`, `apps/backend/src/controllers/doctor/index.ts`, `apps/frontend/src/services/patient.service.ts`, `apps/frontend/src/hooks/shared/useBooking.ts`, `apps/frontend/src/components/patient/ReasonStep.tsx`
+
+## [BUG-BOOKING-2] Duplicate specialization filter bar (nested identical divs)
+- **Status:** resolved (2026-06-02)
+- **Root Cause:** `DoctorStep.tsx` had the entire scrollable filter bar copy-pasted inside itself — outer div + inner div with identical className and `onWheel` handler. `onWheel` fired twice (bubbled inner → outer).
+- **Fix:** Extracted filter bar into `DoctorFilterBar` component with a single scroll container. `DoctorStep` now imports `<DoctorFilterBar>`.
+- **Files:** `apps/frontend/src/components/patient/DoctorFilterBar.tsx` (new), `apps/frontend/src/components/patient/DoctorStep.tsx`
+
+## [BUG-BOOKING-3] reason fallback incorrectly sent department name as visit reason
+- **Status:** resolved (2026-06-02)
+- **Root Cause:** `submitBooking` in `useBooking` sent `reason: formData.notes || formData.department` — if notes were empty, "Cardiology" would be submitted as the visit reason.
+- **Fix:** Changed to `reason: formData.notes || ''`.
+- **File:** `apps/frontend/src/hooks/shared/useBooking.ts`
+
+## [BUG-PATIENT-5] FALLBACK_DOCTORS ghost doctor selectable when /doctor/list fails
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** If `GET /doctor/list` failed, booking step 2 showed "Dr. Sarah Hassan (Cardiologist)" as a fake fallback doctor. Selecting her and confirming would pass the `doctorId === 'fallback'` guard (with a toast), but the booking step was confusing.
+- **Fix:** Removed `FALLBACK_DOCTORS`. On fetch error → empty list + `doctorsError=true`. DoctorStep shows "Unable to load doctors" + Retry button. Next button disabled when list is empty.
+- **Files:** `apps/frontend/src/hooks/shared/useBooking.ts`, `apps/frontend/src/components/patient/DoctorStep.tsx`, `apps/frontend/src/app/dashboard/patient/appointments/new/page.tsx`
+
 ## Template
 
 ### [BUG-N] Title

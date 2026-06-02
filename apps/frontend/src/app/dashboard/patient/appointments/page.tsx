@@ -24,6 +24,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { formatEGP, feeForVisitType } from '@/lib/pricing';
 import type { Appointment } from '@/types';
 
+const VIDEO_WINDOW_MS = 5 * 60 * 1000;
+
 const TABS: { key: AppointmentTab; label: string }[] = [
   { key: 'upcoming', label: 'Upcoming' },
   { key: 'past', label: 'Past' },
@@ -183,15 +185,25 @@ function AppointmentCard({
             <X size={12} /> Cancel
           </button>
         )}
-        {isUpcomingCancellable && isOnline && appt.status === 'confirmed' && payment === 'paid' && (
-          <button
-            disabled
-            title="Video calls coming soon"
-            className="btn btn-primary text-[12px] py-[5px] px-3 flex items-center gap-1 opacity-50 cursor-not-allowed"
-          >
-            <Video size={12} /> Join call
-          </button>
-        )}
+        {isUpcomingCancellable && isOnline && appt.status === 'confirmed' && payment === 'paid' && (() => {
+          const isWithinWindow = Date.now() >= new Date(appt.scheduled_at).getTime() - VIDEO_WINDOW_MS;
+          return isWithinWindow ? (
+            <Link
+              href={`/dashboard/patient/appointments/online/${appt.id}`}
+              className="btn btn-primary text-[12px] py-[5px] px-3 flex items-center gap-1"
+            >
+              <Video size={12} /> Join call
+            </Link>
+          ) : (
+            <button
+              disabled
+              title="Available 5 minutes before your appointment"
+              className="btn btn-primary text-[12px] py-[5px] px-3 flex items-center gap-1 opacity-50 cursor-not-allowed"
+            >
+              <Video size={12} /> Join call
+            </button>
+          );
+        })()}
         {isCompletedPast && !appt.my_rating && (
           <button
             onClick={() => onRate(appt)}

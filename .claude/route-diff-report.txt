@@ -1,7 +1,7 @@
-Route-Diff Report — 2026-06-02T16:46:43.656Z
+Route-Diff Report — 2026-06-02T17:41:30.655Z
 ────────────────────────────────────────────────────────────────
-Backend routes:  287
-Frontend calls:  270 parsed, 4 unparseable
+Backend routes:  289
+Frontend calls:  272 parsed, 4 unparseable
 
 ❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
 
@@ -48,7 +48,7 @@ Frontend calls:  270 parsed, 4 unparseable
   PUT     /api/radiology/profile  [radiology.routes.ts]
   PUT     /api/receptionist/profile  [receptionist.routes.ts]
 
-✅  MATCHED  (247)
+✅  MATCHED  (249)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/announcements/:param
   DELETE  /api/admin/appointments/:param
@@ -154,8 +154,10 @@ Frontend calls:  270 parsed, 4 unparseable
   GET     /api/nurse/patients/:param/medication-schedule
   GET     /api/nurse/patients/:param/vitals
   GET     /api/patient/appointments
+  GET     /api/patient/appointments/:param
   GET     /api/patient/appointments/:param/rating
   GET     /api/patient/appointments/:param/waiting-estimate
+  GET     /api/patient/departments
   GET     /api/patient/insurance-companies
   GET     /api/patient/invoices
   GET     /api/patient/lab-results

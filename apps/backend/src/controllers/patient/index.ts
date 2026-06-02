@@ -921,6 +921,36 @@ export const revokeShare = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
+export const getAppointment = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      patient: req.user!.id,
+    }).lean();
+    if (!appointment) return sendError(res, 'Appointment not found', 404);
+
+    const sp = appointment.doctor
+      ? await Profile.findOne({ user: appointment.doctor })
+          .select('first_name last_name specialization')
+          .lean()
+      : null;
+    const doctorName = sp ? `${sp.first_name ?? ''} ${sp.last_name ?? ''}`.trim() : undefined;
+
+    sendSuccess(res, {
+      ...appointment,
+      id: (appointment as any)._id.toString(),
+      visit_type: (appointment as any).type,
+      doctor_name: doctorName,
+      doctor: sp
+        ? { id: appointment.doctor?.toString(), first_name: sp.first_name, last_name: sp.last_name, specialization: sp.specialization }
+        : { id: appointment.doctor?.toString() },
+    });
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid appointment ID', 400);
+    next(err);
+  }
+};
+
 export const chatbot = async (_req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     sendSuccess(res, { message: "Siryan Assistant coming soon", is_placeholder: true });
