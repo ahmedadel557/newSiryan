@@ -1,9 +1,9 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText, Download } from 'lucide-react';
-import { useCashierInvoice } from '@/hooks/useCashierInvoice';
+import { useCashierInvoice } from '@/hooks/cashier';
 import { PaymentModal } from '@/components/staff/cashier/PaymentModal';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
@@ -19,7 +19,6 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/** Opens a print window with the invoice formatted for "Save as PDF". Dependency-free. */
 function exportInvoicePdf(invoice: CashierInvoice) {
   const remaining = Math.max(0, invoice.total_due - invoice.amount_paid);
   const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
@@ -157,11 +156,10 @@ const STATUS_BADGE: Record<CashierInvoiceStatus, { variant: 'positive' | 'cautio
 
 export default function CashierInvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const {
-    invoice, loading, error,
-    paymentOpen, setPaymentOpen, processPayment,
-    cancelConfirm, setCancelConfirm, cancelInvoice,
-  } = useCashierInvoice(id);
+  const { invoice, loading, error, processPayment, cancel } = useCashierInvoice(id);
+
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
 
   const remaining = invoice ? Math.max(0, invoice.total_due - invoice.amount_paid) : 0;
   const canPay = invoice?.status === 'unpaid' || invoice?.status === 'partially_paid';
@@ -225,7 +223,9 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
                   <button
                     className="btn-ghost text-[13px]"
                     style={{ color: 'var(--critical)' }}
-                    onClick={cancelInvoice}
+                    onClick={() => {
+                      cancel.mutate(undefined, { onSettled: () => setCancelConfirm(false) });
+                    }}
                   >
                     Yes, cancel
                   </button>
@@ -237,7 +237,6 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
             </div>
           </div>
 
-          {/* Breakdown */}
           <div className="card p-5 flex flex-col gap-1">
             <p className="text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] mb-1">Items</p>
             {invoice.items.map((item, i) => (
@@ -273,7 +272,6 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
             </div>
           </div>
 
-          {/* Totals summary */}
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Total due', value: fmtEGP(invoice.total_due) },
@@ -291,7 +289,10 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
             key={paymentOpen ? invoice.id : 'closed'}
             invoice={paymentOpen ? invoice : null}
             onClose={() => setPaymentOpen(false)}
-            onSubmit={processPayment}
+            onSubmit={async (_id, input) => {
+              await processPayment.mutateAsync(input);
+              setPaymentOpen(false);
+            }}
           />
         </>
       )}

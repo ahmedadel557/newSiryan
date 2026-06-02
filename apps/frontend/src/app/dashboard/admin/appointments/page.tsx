@@ -1,9 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Calendar, Search, AlertTriangle, X } from 'lucide-react';
-import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
+import { useAdminAppointments } from '@/hooks/admin';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -107,12 +106,8 @@ const thClass = 'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(-
 const tdClass = 'py-3 px-4 border-b border-[var(--border-1)] text-[13px]';
 
 export default function AdminAppointmentsPage() {
-  const { showToast } = useToast();
-  const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFilter, setDateFilter] = useState('');
-  // Pre-fill the search box when arrived via a deep link (e.g. from the schedule grid).
   const [search, setSearch] = useState(() =>
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('search') ?? ''
@@ -120,18 +115,7 @@ export default function AdminAppointmentsPage() {
   );
   const [cancelTarget, setCancelTarget] = useState<AdminAppointment | null>(null);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      setAppointments(await adminService.getAppointments());
-    } catch {
-      showToast('Failed to load appointments', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => { load(); }, [load]);
+  const { appointments, loading: isLoading, cancel } = useAdminAppointments();
 
   const filtered = useMemo(() => {
     let list = appointments;
@@ -151,13 +135,7 @@ export default function AdminAppointmentsPage() {
   async function handleCancel(reason: string) {
     if (!cancelTarget) return;
     try {
-      await adminService.cancelAppointment(cancelTarget.id, reason);
-      setAppointments((prev) =>
-        prev.map((a) => a.id === cancelTarget.id ? { ...a, status: 'cancelled', cancel_reason: reason } : a)
-      );
-      showToast('Appointment cancelled', 'success');
-    } catch {
-      showToast('Failed to cancel appointment', 'error');
+      await cancel.mutateAsync({ id: cancelTarget.id, reason });
     } finally {
       setCancelTarget(null);
     }
@@ -182,7 +160,6 @@ export default function AdminAppointmentsPage() {
         { label: 'Cancelled', value: cancelled, tone: cancelled > 0 ? ('critical' as const) : undefined },
       ]} />
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-1 bg-[var(--bg-sunken)] p-1 rounded-[var(--radius-lg)] border border-[var(--border-1)] overflow-x-auto">
           {STATUS_TABS.map((tab) => (
@@ -221,7 +198,6 @@ export default function AdminAppointmentsPage() {
         )}
       </div>
 
-      {/* Table */}
       <div className="card overflow-hidden">
         {isLoading ? (
           <div className="flex flex-col divide-y divide-[var(--border-1)]">

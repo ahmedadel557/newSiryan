@@ -47,12 +47,21 @@ context/AuthContext.tsx
 ```
 Page (app/dashboard/[role]/...)
  └── hook (src/hooks/use*.ts)
+      ├── [Admin + Cashier modules] TanStack Query layer:
+      │    src/hooks/admin/*  |  src/hooks/cashier/*
+      │     └── useQuery / useMutation
+      │          └── singleton queryClient (src/lib/queryClient.ts)
+      │          └── shared cache keyed via src/lib/queryKeys.ts
+      │          └── socket events → queryClient.invalidateQueries(...)
+      │          └── QueryProvider wraps app in src/app/layout.tsx (outermost)
       └── service (src/services/*.service.ts)
            └── api.client.ts (axios instance)
                 └── NEXT_PUBLIC_API_URL + /api/...
                 └── 401 interceptor → POST /api/auth/refresh → retry
                 └── refresh fails → redirect /auth/login
 ```
+Other modules (doctor/patient/nurse/pharmacist/lab/radiology/reception) still use the older
+`useState`+`useEffect`+manual `reload()` pattern; same service/apiClient chain.
 
 ## Frontend Socket Chain
 ```

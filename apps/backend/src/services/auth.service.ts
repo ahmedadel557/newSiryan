@@ -132,7 +132,8 @@ export const registerStaff = async (data: {
     });
   } catch { /* non-fatal */ }
 
-  await sendEmail(
+  // Fire-and-forget — SMTP latency must not block the HTTP response.
+  sendEmail(
     data.email,
     'Your registration request has been received',
     `<p>Thank you for registering at Siryan. Your account is pending admin approval.</p><p>You will be notified by email once your account is approved.</p>`,

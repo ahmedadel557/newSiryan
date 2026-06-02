@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Download, BarChart2 } from 'lucide-react';
-import { useCashierReport } from '@/hooks/useCashierReport';
+import { useCashierReport } from '@/hooks/cashier';
 import { TodaysTransactions } from '@/components/staff/cashier/TodaysTransactions';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -18,7 +19,6 @@ function fmtDate(iso: string) {
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Unknown');
 
-/** Opens a print window with the report laid out for "Save as PDF". Dependency-free. */
 function exportPdf(report: DailyReport) {
   const rows = (arr: { label: string; value: string }[]) =>
     arr.map((r) => `<tr><td>${r.label}</td><td style="text-align:right">${r.value}</td></tr>`).join('');
@@ -64,7 +64,8 @@ function exportPdf(report: DailyReport) {
 
 export default function CashierReportsPage() {
   const today = new Date().toISOString().slice(0, 10);
-  const { date, setDate, report, loading, error } = useCashierReport(today);
+  const [date, setDate] = useState(today);
+  const { report, loading, error } = useCashierReport(date);
 
   return (
     <div className="flex flex-col gap-5">
@@ -101,7 +102,6 @@ export default function CashierReportsPage() {
         </div>
       ) : (
         <>
-          {/* Total + breakdowns */}
           <div className="card p-5 flex flex-col gap-1">
             <p className="text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)]">Total collected</p>
             <p className="text-[32px] font-semibold text-[var(--fg-1)] tabular-nums leading-none mt-1">

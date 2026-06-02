@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ShieldCheck, Search, X } from 'lucide-react';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useAdminAuditLog, useAdminUsers } from '@/hooks/admin';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
@@ -44,7 +44,8 @@ function actionColor(action: string): string {
 }
 
 export default function AdminAuditLogPage() {
-  const { logs, allUsers, isLoading } = useAdmin();
+  const { logs, loading: isLoading } = useAdminAuditLog();
+  const { allUsers } = useAdminUsers();
   const [searchQuery, setSearchQuery] = useState('');
   const [userFilter, setUserFilter] = useState('');
   const [actionCat, setActionCat] = useState<ActionCategory>('all');

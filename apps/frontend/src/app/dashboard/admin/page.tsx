@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, BarChart2 } from 'lucide-react';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useAdminUsers, useAdminDashboardStats, useAdminStaffRequests, useAdminAuditLog } from '@/hooks/admin';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { RevenueChart } from '@/components/staff/admin/RevenueChart';
 import { OccupancySection } from '@/components/staff/admin/OccupancySection';
@@ -19,7 +20,14 @@ function actionColor(action: string): string {
 
 export default function AdminOverviewPage() {
   const router = useRouter();
-  const { allUsers, stats, logs, isLoading, createModalOpen, setCreateModalOpen, createUser, pendingStaffCount } = useAdmin();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  const { allUsers, createUser } = useAdminUsers();
+  const { stats, loading: statsLoading } = useAdminDashboardStats();
+  const { logs, loading: logsLoading } = useAdminAuditLog();
+  const { total: pendingStaffCount } = useAdminStaffRequests('pending');
+
+  const isLoading = statsLoading || logsLoading;
 
   const kpiCards = [
     { label: 'Total users', value: allUsers.length, meta: 'all roles' },
@@ -114,7 +122,14 @@ export default function AdminOverviewPage() {
         </div>
       </div>
 
-      <CreateStaffModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} onSubmit={createUser} />
+      <CreateStaffModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSubmit={async (data) => {
+          await createUser.mutateAsync(data);
+          setCreateModalOpen(false);
+        }}
+      />
     </div>
   );
 }

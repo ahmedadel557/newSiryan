@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { adminService } from '@/services/admin.service';
+import { useMemo } from 'react';
+import { useAdminOccupancyReport } from '@/hooks/admin';
 import type { BedOccupancy } from '@/types';
 
 function barColor(pct: number): string {
@@ -11,24 +11,18 @@ function barColor(pct: number): string {
 }
 
 export function OccupancySection() {
-  const [beds, setBeds] = useState<BedOccupancy[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useAdminOccupancyReport();
 
-  useEffect(() => {
-    adminService.getOccupancyReport()
-      .then((report) => {
-        const mapped: BedOccupancy[] = Object.entries(report.by_type).map(([unit, data]) => ({
-          unit,
-          occupied: data.occupied,
-          total: data.total_capacity,
-        }));
-        setBeds(mapped);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const beds: BedOccupancy[] = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.by_type).map(([unit, d]) => ({
+      unit,
+      occupied: d.occupied,
+      total: d.total_capacity,
+    }));
+  }, [data]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
         {Array.from({ length: 4 }).map((_, i) => (

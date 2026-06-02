@@ -1,40 +1,60 @@
 # Current Task
 
 ## Task
-Doctor System — Part 3 (Frontend): Video Call + In-Call Chat (2026-06-02)
+Data layer — TanStack Query v5 integration for Admin + Cashier modules (2026-06-02)
 
 ## Status
-COMPLETE. **The full 3-part Doctor system is now done.**
+COMPLETE.
 
 ## Context / Decision
-Part 3 was genuinely greenfield (the Part-2 video page was a placeholder). Built a fully custom
-video UI (no prebuilt Stream visual components) + in-call-only chat for both doctor and patient,
-on `@stream-io/video-react-sdk` (1.37.4) + `stream-chat`.
+Hand-rolled `useState` + `useEffect` + `reload()` patterns in Admin and Cashier caused (a) duplicate
+fetches across pages, (b) stale data after mutations, (c) inconsistent socket-driven refresh, and
+(d) bulky hooks like `useAdmin` that mixed data, mutations, and modal/filter UI state. Migrated
+both modules to TanStack Query v5; UI state (modals, filters, search, tab) moved into pages.
+Doctor / patient / nurse / pharmacist / lab / radiology / receptionist hooks were intentionally
+**not** touched in this pass.
 
 ## Completed This Session
-- `stream-chat` installed (skipped `stream-chat-react` — prebuilt UI).
-- Service: doctor `createVideoCall`/`endVideoCall`; patient `getVideoCallToken`.
-- Hooks: `useVideoCall` (doctor), `usePatientVideoCall` (patient), `useInCallChat`.
-- Components (`components/doctor/video/`): ParticipantVideo (headless `bindVideoElement`),
-  RemoteVideoTile, LocalVideoTile (PiP), CallControls, InCallChat, CallStatusOverlay, VideoCallLayout.
-- Pages: doctor video page (placeholder → live), patient video page (new).
-- Patient entry: `AppointmentRow` "Join call" enabled within 5-min window; online-appointment
-  placeholder now links to the video page.
-- `npx tsc --noEmit` (frontend) → 0 errors. New files lint-clean except repo-wide `no-explicit-any`
-  baseline (Stream types / catch blocks).
+- Installed `@tanstack/react-query@^5` + `@tanstack/react-query-devtools`.
+- Plumbing: `src/lib/queryClient.ts`, `src/lib/queryKeys.ts`, `src/providers/QueryProvider.tsx`;
+  wrapped `app/layout.tsx` outermost.
+- Admin hooks (`src/hooks/admin/*`): `useAdminUsers` (createUser/updateRole/toggleActive/
+  deleteUser/updateProfile), `useAdminStaffRequests` (socket `staff_request:new` → invalidate),
+  `useAdminAppointments`, `useAdminInvoices` (sockets `invoice:new` + `payment:received`),
+  `useAdminReports` (revenue/ratings/occupancy/pharmacy/doctors, occupancy + pharmacy
+  conditionally enabled), `useAdminDashboardStats` (stats + low-stock, socket `payment:received`
+  → toast + invalidate), `useAdminAuditLog`.
+- Cashier hooks (`src/hooks/cashier/*`): `useCashierInvoices`, `useCashierInvoice(id)`,
+  `useCashierPending` (sockets `pharmacy:order:*`, `payment:pending` → invalidate),
+  `useCashierReport(date)`, `useCashierDashboard`.
+- Migrated 8 admin pages (overview, users, staff-requests, appointments, invoices, reports,
+  audit, audit-log) and 5 cashier pages (dashboard, invoices list, invoice detail, pending,
+  reports). Modal/filter/tab state lives in each page.
+- Refactored self-fetching components: `OccupancySection` → `useAdminOccupancyReport`,
+  `RevenueChart` → `useAdminRevenueReport({from: 7daysAgo})` (socket invalidation moved into hook).
+- `UsersTable.tsx` re-pointed `UserRoleFilter` import to `@/hooks/admin`.
+- Deleted: `useAdmin.ts`, `useCashierInvoices.ts`, `useCashierInvoice.ts`, `useCashierPending.ts`,
+  `useCashierReport.ts`, `useCashierDashboard.ts`.
+- `npx tsc --noEmit` → 0 errors. `npm run lint` → 296 problems (was 297; no new errors).
 
 ## Key implementation notes
-- Doctor opens via POST `createVideoCall` (creates Stream call) then joins `{create:false}`;
-  patient uses GET token then joins. `<StreamVideo>`/`<StreamCall>` = headless providers; video via
-  `call.bindVideoElement`. `apiKey` from token response (env fallback). Tokens: stage
-  `var(--forest-950)`, End Call `var(--critical)`.
+- `mutation.mutate(args)` / `mutation.mutateAsync(args)`; pages read `mutation.isPending`.
+- Socket callbacks use the **singleton** `queryClient` from `@/lib/queryClient` (not `useQueryClient()`,
+  which can't run inside a callback); React-render code uses `useQueryClient()`.
+- Default query options: `staleTime: 30s`, `gcTime: 5min`, no retry on 401/403/404,
+  no refetch-on-focus, mutation retry off.
+- Adapted to real service method names (`updateUserRole`, `updateUserActive(id, boolean)`,
+  `approveStaff`, `rejectStaff`, `getAdminInvoices`, `getDoctorReport`) rather than the spec's names.
 
 ## Next Steps
-- **Test full doctor flow locally with real Stream credentials** (see `todos.md`): backend
-  `STREAM_API_KEY`/`STREAM_API_SECRET`, frontend `NEXT_PUBLIC_STREAM_API_KEY`. In-call chat needs
-  the **Chat product enabled** on the Stream app.
+- **Browser smoke test** the migrated pages (see `todos.md`): admin overview/users/staff-requests/
+  appointments/invoices/reports + audit, cashier dashboard/invoices/detail/pending/reports.
+  Confirm socket-driven refreshes (`payment:received`, `staff_request:new`, `invoice:new`,
+  `pharmacy:order:created`, `pharmacy:order:status`, `payment:pending`).
+- Consider extending the same pattern to the remaining modules (doctor/patient/nurse/pharmacist/
+  lab/radiology/reception) once Admin + Cashier are validated in the browser.
 
 ---
 
 ## Previous Task
-Doctor System — Part 2 (Frontend): integrate Part-1 endpoints + new pages (2026-06-02) — COMPLETE.
+Doctor System — Part 3 (Frontend): Video Call + In-Call Chat (2026-06-02) — COMPLETE.

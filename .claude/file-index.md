@@ -3,6 +3,26 @@
 > NOTE: Paths below use the legacy `newSiryan_backEnd/` prefix from the original plan.
 > The real location is `apps/backend/` (monorepo). New entries use the correct path.
 
+## Frontend — Data layer: TanStack Query v5 (Admin + Cashier, 2026-06-02)
+apps/frontend/src/lib/queryClient.ts                — singleton QueryClient (30s stale, 5min gc, retry policy)
+apps/frontend/src/lib/queryKeys.ts                  — central key registry for admin + cashier queries
+apps/frontend/src/providers/QueryProvider.tsx       — `'use client'` QueryClientProvider + devtools wrapper
+apps/frontend/src/hooks/admin/useAdminUsers.ts            — users list + create/updateRole/toggleActive/delete/updateProfile
+apps/frontend/src/hooks/admin/useAdminStaffRequests.ts    — staff requests + approve/reject (socket: staff_request:new)
+apps/frontend/src/hooks/admin/useAdminAppointments.ts     — appointments + cancel mutation
+apps/frontend/src/hooks/admin/useAdminInvoices.ts         — admin invoices + create (sockets: invoice:new, payment:received)
+apps/frontend/src/hooks/admin/useAdminReports.ts          — revenue/ratings/occupancy/pharmacy/doctor (revenue subscribes to payment:received)
+apps/frontend/src/hooks/admin/useAdminDashboardStats.ts   — stats + low-stock + payment:received toast
+apps/frontend/src/hooks/admin/useAdminAuditLog.ts         — audit log (used by audit + audit-log pages)
+apps/frontend/src/hooks/admin/index.ts                    — barrel export (re-exports UserRoleFilter)
+apps/frontend/src/hooks/cashier/useCashierInvoices.ts     — list + payment/cancel (sockets: pharmacy:order:*)
+apps/frontend/src/hooks/cashier/useCashierInvoice.ts      — single invoice + payment/cancel
+apps/frontend/src/hooks/cashier/useCashierPending.ts      — pending list + generate (sockets: payment:pending, pharmacy:order:*)
+apps/frontend/src/hooks/cashier/useCashierReport.ts       — daily report
+apps/frontend/src/hooks/cashier/useCashierDashboard.ts    — summary + transactions + createInvoice
+apps/frontend/src/hooks/cashier/index.ts                  — barrel export
+(layout.tsx wraps QueryProvider outermost; 13 admin/cashier pages + OccupancySection + RevenueChart migrated; old useAdmin/useCashier* hooks deleted)
+
 ## Frontend — Doctor: Video Call + In-Call Chat (Part 3, 2026-06-02)
 apps/frontend/src/hooks/useVideoCall.ts            — doctor call lifecycle (POST create → join → end)
 apps/frontend/src/hooks/usePatientVideoCall.ts     — patient call lifecycle (GET token → join → leave)

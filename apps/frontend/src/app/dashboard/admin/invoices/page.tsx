@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FileText, Search, Plus, Trash2, X } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
+import { useAdminInvoices } from '@/hooks/admin';
 import { useToast } from '@/hooks/useToast';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
@@ -18,9 +19,10 @@ interface LineItem { description: string; category: string; amount: string; }
 interface CreateInvoiceModalProps {
   onClose: () => void;
   onCreated: (inv: AdminInvoice) => void;
+  onSubmit: (dto: CreateAdminInvoiceDto) => Promise<AdminInvoice>;
 }
 
-function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
+function CreateInvoiceModal({ onClose, onCreated, onSubmit }: CreateInvoiceModalProps) {
   const { showToast } = useToast();
   const [patients, setPatients] = useState<User[]>([]);
   const [patientId, setPatientId] = useState('');
@@ -59,11 +61,10 @@ function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
 
     setSubmitting(true);
     try {
-      const created = await adminService.createAdminInvoice(dto);
+      const created = await onSubmit(dto);
       onCreated(created);
-      showToast('Invoice created', 'success');
     } catch {
-      showToast('Failed to create invoice', 'error');
+      // hook surfaces error toast
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +82,6 @@ function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
           <button onClick={onClose} className="btn btn-ghost p-1"><X size={16} style={{ color: 'var(--fg-3)' }} /></button>
         </div>
 
-        {/* Patient */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[12px] font-medium text-[var(--fg-2)]">Patient</label>
           <select className="input text-[13px]" value={patientId} onChange={(e) => setPatientId(e.target.value)}>
@@ -92,7 +92,6 @@ function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
           </select>
         </div>
 
-        {/* Line items */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <label className="text-[12px] font-medium text-[var(--fg-2)]">Line items</label>
@@ -134,7 +133,6 @@ function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
           ))}
         </div>
 
-        {/* Insurance coverage */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[12px] font-medium text-[var(--fg-2)]">Insurance coverage (EGP) <span style={{ color: 'var(--fg-3)', fontWeight: 400 }}>(optional)</span></label>
           <input
@@ -147,7 +145,6 @@ function CreateInvoiceModal({ onClose, onCreated }: CreateInvoiceModalProps) {
           />
         </div>
 
-        {/* Notes */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[12px] font-medium text-[var(--fg-2)]">Notes <span style={{ color: 'var(--fg-3)', fontWeight: 400 }}>(optional)</span></label>
           <textarea
@@ -275,27 +272,12 @@ function InvoiceDetail({ invoice }: InvoiceDetailPanel) {
 }
 
 export default function AdminInvoicesPage() {
-  const { showToast } = useToast();
-  const [invoices, setInvoices] = useState<AdminInvoice[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { invoices, loading: isLoading, create } = useAdminInvoices();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFilter, setDateFilter] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AdminInvoice | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      setInvoices(await adminService.getAdminInvoices());
-    } catch {
-      showToast('Failed to load invoices', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(() => {
     let list = invoices;
@@ -339,7 +321,6 @@ export default function AdminInvoicesPage() {
         ]}
       />
 
-      {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex gap-1 bg-[var(--bg-sunken)] p-1 rounded-[var(--radius-lg)] border border-[var(--border-1)]">
           {STATUS_TABS.map((tab) => (
@@ -379,7 +360,6 @@ export default function AdminInvoicesPage() {
       </div>
 
       <div className="flex gap-5">
-        {/* Invoice list */}
         <div className="flex-1 min-w-0 card overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col divide-y divide-[var(--border-1)]">
@@ -434,7 +414,6 @@ export default function AdminInvoicesPage() {
           )}
         </div>
 
-        {/* Detail panel */}
         {selected && (
           <div className="w-[340px] shrink-0 card p-5 flex flex-col gap-4 self-start sticky top-5">
             <div className="flex items-center justify-between">
@@ -451,8 +430,8 @@ export default function AdminInvoicesPage() {
       {createOpen && (
         <CreateInvoiceModal
           onClose={() => setCreateOpen(false)}
+          onSubmit={(dto) => create.mutateAsync(dto)}
           onCreated={(inv) => {
-            setInvoices((prev) => [inv, ...prev]);
             setSelected(inv);
             setCreateOpen(false);
           }}

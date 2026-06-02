@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, FileText } from 'lucide-react';
-import { useCashierDashboard } from '@/hooks/useCashierDashboard';
+import { useCashierDashboard } from '@/hooks/cashier';
 import { useSocketEvent } from '@/hooks/useSocketEvent';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { TodaysTransactions } from '@/components/staff/cashier/TodaysTransactions';
@@ -18,8 +18,8 @@ function fmtLBP(n: number) {
 
 export default function CashierDashboardPage() {
   const router = useRouter();
-  const { loading, summary, transactions, createModalOpen, setCreateModalOpen, createInvoice } =
-    useCashierDashboard();
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const { loading, summary, transactions, createInvoice } = useCashierDashboard();
 
   // Real-time "new payment pending" alerts (pharmacy approved / physical visit completed).
   const [pendingAlerts, setPendingAlerts] = useState<(PaymentPendingPayload & { key: string })[]>([]);
@@ -91,7 +91,10 @@ export default function CashierDashboardPage() {
       <CreateInvoiceModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onSubmit={createInvoice}
+        onSubmit={async (data) => {
+          await createInvoice.mutateAsync(data);
+          setCreateModalOpen(false);
+        }}
       />
     </div>
   );

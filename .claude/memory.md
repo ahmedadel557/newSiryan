@@ -154,6 +154,14 @@ Admin real-time (full catalog):
 ## Frontend State
 - App Router. Pages are thin — pull from hooks, pass to components
 - Data flow: Page → hook → service → apiClient (axios with 401 interceptor)
+- **Admin + Cashier modules use TanStack Query v5** (added 2026-06-02). Singleton `queryClient`
+  in `src/lib/queryClient.ts`; key registry in `src/lib/queryKeys.ts`; `QueryProvider` in
+  `src/providers/QueryProvider.tsx` wraps the app outermost in `app/layout.tsx`. Per-concern
+  hooks live in `src/hooks/admin/*` and `src/hooks/cashier/*` (barrel `index.ts` in each).
+  Defaults: `staleTime: 30s`, `gcTime: 5min`, no retry on 401/403/404, no refetch-on-focus,
+  mutation retry off. Mutations use `mutate`/`mutateAsync`; pages read `mutation.isPending`.
+  Socket callbacks invalidate via the **singleton** `queryClient` (not `useQueryClient()`).
+  Other modules still use `useState`+`useEffect`+manual `reload()`.
 - Design: custom CSS tokens + kit.css. Tailwind v4 for layout only. NOT shadcn CSS classes.
 - Validation: `yup` (not zod)
 - All types: `src/types/index.ts`

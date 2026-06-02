@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Wallet } from 'lucide-react';
-import { useCashierPending } from '@/hooks/useCashierPending';
+import { useCashierPending } from '@/hooks/cashier';
 import { PendingPatientCard } from '@/components/staff/cashier/PendingPatientCard';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -13,8 +13,12 @@ export default function CashierPendingPage() {
   const { patients, loading, error, generatingId, generateInvoice } = useCashierPending();
 
   async function handleGenerate(patient: PendingPatient) {
-    const ok = await generateInvoice(patient);
-    if (ok) router.push('/dashboard/cashier/invoices');
+    try {
+      await generateInvoice.mutateAsync(patient);
+      router.push('/dashboard/cashier/invoices');
+    } catch {
+      // hook surfaces the error toast
+    }
   }
 
   const pendingTotal = patients.reduce((s, p) => s + p.total_due, 0);

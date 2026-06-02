@@ -1,13 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/hooks/useToast';
-import { adminService } from '@/services/admin.service';
-import apiClient from '@/services/api.client';
-import type { StaffRequest } from '@/types';
+import { useAdminStaffRequests } from '@/hooks/admin';
 import { UserCheck, UserX, Users } from 'lucide-react';
+import type { StaffRequest } from '@/types';
 
 type RequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -25,60 +23,30 @@ const roleLabel: Record<string, string> = {
 };
 
 export default function StaffRequestsPage() {
-  const { showToast } = useToast();
-  const [requests, setRequests] = useState<StaffRequest[]>([]);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<RequestStatus>('pending');
   const [rejectModal, setRejectModal] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
   const [rejectReason, setRejectReason] = useState('');
   const [viewModal, setViewModal] = useState<StaffRequest | null>(null);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const fetchRequests = useCallback(async (status: RequestStatus) => {
-    setIsLoading(true);
-    try {
-      const res = await apiClient.get(`/admin/staff-requests?status=${status}`);
-      const raw = res.data.data;
-      const list: any[] = Array.isArray(raw) ? raw : (raw?.requests ?? []);
-      const mapped = list.map((r: any) => ({ ...r, id: r._id ?? r.id }));
-      setRequests(mapped);
-      if (status === 'pending') setPendingCount(mapped.length);
-    } catch {
-      showToast('Failed to load staff requests', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const { requests, loading: isLoading, approve, reject } = useAdminStaffRequests(filter);
+  const { total: pendingCount } = useAdminStaffRequests('pending');
 
-  useEffect(() => { fetchRequests(filter); }, [filter, fetchRequests]);
+  const actionLoadingId = approve.isPending
+    ? approve.variables ?? null
+    : reject.isPending
+      ? reject.variables?.id ?? null
+      : null;
 
-  const handleApprove = async (id: string, name: string) => {
-    setActionLoading(id);
-    try {
-      await adminService.approveStaff(id);
-      showToast(`${name} has been approved`, 'success');
-      await fetchRequests(filter);
-    } catch {
-      showToast('Failed to approve request', 'error');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleReject = async () => {
-    setActionLoading(rejectModal.id);
-    try {
-      await adminService.rejectStaff(rejectModal.id, rejectReason || undefined);
-      showToast('Request rejected', 'success');
-      setRejectModal({ open: false, id: '', name: '' });
-      setRejectReason('');
-      await fetchRequests(filter);
-    } catch {
-      showToast('Failed to reject request', 'error');
-    } finally {
-      setActionLoading(null);
-    }
+  const handleReject = () => {
+    reject.mutate(
+      { id: rejectModal.id, reason: rejectReason || undefined },
+      {
+        onSuccess: () => {
+          setRejectModal({ open: false, id: '', name: '' });
+          setRejectReason('');
+        },
+      },
+    );
   };
 
   const filterTabs: { id: RequestStatus; label: string }[] = [
@@ -91,7 +59,6 @@ export default function StaffRequestsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', color: 'var(--fg-1)', margin: 0 }}>
@@ -103,7 +70,6 @@ export default function StaffRequestsPage() {
         </div>
       </div>
 
-      {/* Filter tabs */}
       <div style={{ display: 'flex', gap: 2, background: 'var(--sand-100)', padding: 3, borderRadius: 8, width: 'fit-content' }}>
         {filterTabs.map((tab) => (
           <button
@@ -127,7 +93,6 @@ export default function StaffRequestsPage() {
         ))}
       </div>
 
-      {/* Table */}
       <div className="card" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -197,27 +162,27 @@ export default function StaffRequestsPage() {
                       {r.approval_status === 'pending' && (
                         <>
                           <button
-                            onClick={() => handleApprove(r.id, r.profile?.first_name || r.username)}
-                            disabled={actionLoading === r.id}
+                            onClick={() => approve.mutate(r.id)}
+                            disabled={actionLoadingId === r.id}
                             style={{
                               padding: '4px 10px', fontSize: 12, borderRadius: 'var(--radius-md)',
                               border: 'none', background: 'var(--positive-soft-bg)',
                               color: 'var(--positive-soft-fg)', cursor: 'pointer',
                               display: 'flex', alignItems: 'center', gap: 4,
-                              opacity: actionLoading === r.id ? 0.6 : 1,
+                              opacity: actionLoadingId === r.id ? 0.6 : 1,
                             }}
                           >
                             <UserCheck size={12} /> Approve
                           </button>
                           <button
                             onClick={() => setRejectModal({ open: true, id: r.id, name: r.profile?.first_name || r.username })}
-                            disabled={actionLoading === r.id}
+                            disabled={actionLoadingId === r.id}
                             style={{
                               padding: '4px 10px', fontSize: 12, borderRadius: 'var(--radius-md)',
                               border: 'none', background: 'var(--critical-soft-bg)',
                               color: 'var(--critical-soft-fg)', cursor: 'pointer',
                               display: 'flex', alignItems: 'center', gap: 4,
-                              opacity: actionLoading === r.id ? 0.6 : 1,
+                              opacity: actionLoadingId === r.id ? 0.6 : 1,
                             }}
                           >
                             <UserX size={12} /> Reject
@@ -233,7 +198,6 @@ export default function StaffRequestsPage() {
         </table>
       </div>
 
-      {/* Reject Modal */}
       {rejectModal.open && (
         <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
@@ -268,17 +232,16 @@ export default function StaffRequestsPage() {
               </button>
               <button
                 onClick={handleReject}
-                disabled={!!actionLoading}
-                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--critical-soft-fg)', color: 'white', cursor: 'pointer', fontSize: 14, fontWeight: 500, opacity: actionLoading ? 0.6 : 1 }}
+                disabled={reject.isPending}
+                style={{ flex: 1, padding: '10px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--critical-soft-fg)', color: 'white', cursor: 'pointer', fontSize: 14, fontWeight: 500, opacity: reject.isPending ? 0.6 : 1 }}
               >
-                {actionLoading ? 'Rejecting...' : 'Reject'}
+                {reject.isPending ? 'Rejecting...' : 'Reject'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* View Modal */}
       {viewModal && (
         <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}

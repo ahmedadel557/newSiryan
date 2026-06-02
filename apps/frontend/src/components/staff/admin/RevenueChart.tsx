@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { adminService } from '@/services/admin.service';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useMemo } from 'react';
+import { useAdminRevenueReport } from '@/hooks/admin';
 
 type DayEntry = { _id: { year: number; month: number; day: number }; total: number; count: number };
 
@@ -53,31 +52,14 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps = {}) {
-  const [points, setPoints] = useState(() =>
-    Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - (6 - i));
-      return { label: d.toLocaleDateString('en-US', { weekday: 'short' }), total: 0 };
-    }),
+  const isControlled = data !== undefined;
+  const query = useAdminRevenueReport(isControlled ? {} : { from: fromDateParam() });
+  const loading = isControlled ? false : query.isLoading;
+
+  const points = useMemo(
+    () => last7From(isControlled ? (data ?? []) : (query.data?.by_day ?? [])),
+    [isControlled, data, query.data],
   );
-  const [loading, setLoading] = useState(data === undefined);
-
-  const refresh = useCallback(() => {
-    if (data !== undefined) {
-      setPoints(last7From(data));
-      setLoading(false);
-      return;
-    }
-    adminService
-      .getRevenueReport({ from: fromDateParam() })
-      .then((r) => setPoints(last7From(r.by_day)))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [data]);
-
-  useEffect(() => { refresh(); }, [refresh]);
-
-  useSocketEvent('payment:received', refresh);
 
   const values = points.map((p) => p.total);
   const max = Math.max(...values, 1);

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { User } from "@/types";
-import type { UserRoleFilter } from "@/hooks/useAdmin";
+import type { UserRoleFilter } from "@/hooks/admin";
 import { MoreVertical } from "lucide-react";
 
 const thClass =

@@ -1,49 +1,38 @@
 'use client';
 
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useAdmin } from '@/hooks/useAdmin';
+import { useAdminUsers, type UserRoleFilter } from '@/hooks/admin';
 import { useAuth } from '@/hooks/useAuth';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { UsersTable } from '@/components/staff/admin/UsersTable';
 import { CreateStaffModal } from '@/components/staff/admin/CreateStaffModal';
 import { EditRoleModal } from '@/components/staff/admin/EditRoleModal';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import type { User } from '@/types';
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
+  const [userFilter, setUserFilter] = useState<UserRoleFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editRoleUser, setEditRoleUser] = useState<User | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
   const {
     users,
     allUsers,
-    isLoading,
-    createModalOpen,
-    setCreateModalOpen,
-    editRoleUser,
-    setEditRoleUser,
-    deleteConfirmId,
-    setDeleteConfirmId,
-    userFilter,
-    setUserFilter,
-    searchQuery,
-    setSearchQuery,
+    loading,
     createUser,
-    toggleUserActive,
-    updateUserRole,
+    updateRole,
+    toggleActive,
     deleteUser,
-  } = useAdmin();
+  } = useAdminUsers({ filter: userFilter, search: searchQuery });
 
   const kpiCards = [
-    {
-      label: 'Total Staff',
-      value: allUsers.filter((user) => user.role !== 'patient').length,
-    },
-    {
-      label: 'Total Patients',
-      value: allUsers.filter((u) => u.role === 'patient').length,
-    },
-    {
-      label: 'Active accounts',
-      value: allUsers.filter((u) => u.is_active).length,
-    },
+    { label: 'Total Staff', value: allUsers.filter((user) => user.role !== 'patient').length },
+    { label: 'Total Patients', value: allUsers.filter((u) => u.role === 'patient').length },
+    { label: 'Active accounts', value: allUsers.filter((u) => u.is_active).length },
     { label: 'Inactive', value: allUsers.filter((u) => !u.is_active).length },
   ];
 
@@ -63,20 +52,34 @@ export default function AdminUsersPage() {
 
       <UsersTable
         users={users}
-        isLoading={isLoading}
+        isLoading={loading}
         userFilter={userFilter}
         onFilterChange={setUserFilter}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onToggleActive={toggleUserActive}
+        onToggleActive={(id, isActive) => toggleActive.mutate({ id, isActive })}
         onEditRole={setEditRoleUser}
         onDelete={setDeleteConfirmId}
         currentUserId={currentUser?.id}
       />
 
-      <CreateStaffModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} onSubmit={createUser} />
+      <CreateStaffModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSubmit={async (data) => {
+          await createUser.mutateAsync(data);
+          setCreateModalOpen(false);
+        }}
+      />
 
-      <EditRoleModal user={editRoleUser} onClose={() => setEditRoleUser(null)} onSubmit={updateUserRole} />
+      <EditRoleModal
+        user={editRoleUser}
+        onClose={() => setEditRoleUser(null)}
+        onSubmit={async (id, role) => {
+          await updateRole.mutateAsync({ id, role });
+          setEditRoleUser(null);
+        }}
+      />
 
       <ConfirmDialog
         open={!!deleteConfirmId}
@@ -85,7 +88,10 @@ export default function AdminUsersPage() {
         confirmLabel="Delete"
         danger
         onConfirm={() => {
-          if (deleteConfirmId) deleteUser(deleteConfirmId);
+          if (deleteConfirmId) {
+            deleteUser.mutate(deleteConfirmId);
+            setDeleteConfirmId(null);
+          }
         }}
         onClose={() => setDeleteConfirmId(null)}
       />

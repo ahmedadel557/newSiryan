@@ -2,6 +2,8 @@
 
 ## High Priority
 - [ ] Test full doctor flow locally with real Stream credentials (set backend `STREAM_API_KEY`/`STREAM_API_SECRET` + frontend `NEXT_PUBLIC_STREAM_API_KEY`; verify video call + in-call chat doctor↔patient). In-call chat also needs the **Chat product enabled** on the Stream app.
+- [ ] Browser smoke-test the TanStack Query migration (Admin + Cashier). Pages to verify: admin overview/users/staff-requests/appointments/invoices/reports/audit/audit-log; cashier dashboard/invoices list/invoice detail/pending/reports. Confirm socket-driven cache invalidations fire (`payment:received`, `staff_request:new`, `invoice:new`, `pharmacy:order:created`, `pharmacy:order:status`, `payment:pending`) and that mutations update the list/detail without a manual refresh.
+- [ ] Decide whether to extend TanStack Query to the remaining modules (doctor / patient / nurse / pharmacist / lab / radiology / receptionist) once Admin + Cashier are validated in the browser.
 
 ~~Verify lucide-react... uninstall (project uses react-icons)~~ — CORRECTION: the project standard **is** `lucide-react` (used in navItems + all components). `react-icons` is NOT used. Ignore the old rule.
 

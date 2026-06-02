@@ -15,6 +15,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { MaintenanceOverlay } from '@/components/shared/MaintenanceOverlay';
 import { Avatar } from '@/components/ui/Avatar';
 import { adminService } from '@/services/admin.service';
+import { useAdminStaffRequests } from '@/hooks/admin';
 import type { NavItem } from '@/config/navItems';
 import type { Role } from '@/types';
 import Image from 'next/image';
@@ -45,7 +46,12 @@ interface StaffShellProps {
 export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
   const { user, profile, logout } = useAuth();
   const { showToast } = useToast();
-  const [pendingStaffCount, setPendingStaffCount] = useState(0);
+  // Pending-staff badge — shared TanStack Query cache. Approve/reject mutations on the
+  // staff-requests page and the `staff_request:new` socket listener inside the hook both
+  // invalidate this key, so the badge stays in sync without a separate fetch.
+  const { total: pendingStaffCount } = useAdminStaffRequests('pending', {
+    enabled: user?.role === 'admin',
+  });
   const [maintenanceState, setMaintenanceState] = useState<MaintenancePayload | null>(null);
   const [urgentAnnouncements, setUrgentAnnouncements] = useState<AnnouncementPayload[]>([]);
 
@@ -112,12 +118,6 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
   useEffect(() => {
     setDrawerOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      adminService.getStaffRequests('pending').then((d) => setPendingStaffCount(d.total)).catch(() => {});
-    }
-  }, [user?.role]);
 
   const isActive = (href: string) => {
     const isRootRoute = href.split('/').length <= 3;

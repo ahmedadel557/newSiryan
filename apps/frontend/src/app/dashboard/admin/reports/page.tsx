@@ -1,16 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Star } from 'lucide-react';
-import { useAdmin } from '@/hooks/useAdmin';
-import { adminService } from '@/services/admin.service';
+import {
+  useAdminDashboardStats,
+  useAdminDoctorReport,
+  useAdminRevenueReport,
+  useAdminOccupancyReport,
+  useAdminPharmacyReport,
+} from '@/hooks/admin';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { RevenueChart } from '@/components/staff/admin/RevenueChart';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatEGP } from '@/lib/pricing';
-import type { OccupancyReport, PharmacyReport, DoctorReportItem } from '@/types';
+import type { DoctorReportItem } from '@/types';
 
 type Tab = 'revenue' | 'occupancy' | 'doctors' | 'pharmacy';
 
@@ -30,8 +35,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'pharmacy', label: 'Pharmacy' },
 ];
 
-type DayEntry = { _id: { year: number; month: number; day: number }; total: number; count: number };
-
 function occupancyStatusVariant(status: string) {
   if (status === 'occupied') return 'critical' as const;
   if (status === 'maintenance') return 'caution' as const;
@@ -39,65 +42,30 @@ function occupancyStatusVariant(status: string) {
 }
 
 export default function AdminReportsPage() {
-  const { stats, isLoading: statsLoading, doctorReport } = useAdmin();
   const [activeTab, setActiveTab] = useState<Tab>('revenue');
-
-  // Revenue tab state
   const [dateFrom, setDateFrom] = useState('');
+  const [appliedRange, setAppliedRange] = useState<{ from?: string; to?: string }>({});
   const [dateTo, setDateTo] = useState('');
-  const [byCategory, setByCategory] = useState<Array<{ _id: string; total: number; count: number }>>([]);
-  const [byMethod, setByMethod] = useState<Array<{ _id: string; total: number; count: number }>>([]);
-  const [byDay, setByDay] = useState<DayEntry[]>([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [revenueLoading, setRevenueLoading] = useState(true);
 
-  // Occupancy tab state
-  const [occupancy, setOccupancy] = useState<OccupancyReport | null>(null);
-  const [occupancyLoaded, setOccupancyLoaded] = useState(false);
-  const [occupancyLoading, setOccupancyLoading] = useState(false);
+  const { stats } = useAdminDashboardStats();
+  const { data: doctorReport = [], isLoading: doctorLoading } = useAdminDoctorReport();
+  const { data: revenue, isLoading: revenueLoading } = useAdminRevenueReport(appliedRange);
+  const { data: occupancy, isLoading: occupancyLoading } = useAdminOccupancyReport({ enabled: activeTab === 'occupancy' });
+  const { data: pharmacy, isLoading: pharmacyLoading } = useAdminPharmacyReport({ enabled: activeTab === 'pharmacy' });
 
-  // Pharmacy tab state
-  const [pharmacy, setPharmacy] = useState<PharmacyReport | null>(null);
-  const [pharmacyLoaded, setPharmacyLoaded] = useState(false);
-  const [pharmacyLoading, setPharmacyLoading] = useState(false);
+  const byCategory = revenue?.by_category ?? [];
+  const byMethod = revenue?.by_payment_method ?? [];
+  const byDay = revenue?.by_day ?? [];
+  const totalRevenue = useMemo(() => byCategory.reduce((s, c) => s + c.total, 0), [byCategory]);
 
-  // Doctors tab uses doctorReport from useAdmin
-
-  const fetchRevenue = async (from?: string, to?: string) => {
-    setRevenueLoading(true);
-    try {
-      const r = await adminService.getRevenueReport(from || to ? { from: from || undefined, to: to || undefined } : undefined);
-      const cats = r.by_category ?? [];
-      const methods = r.by_payment_method ?? [];
-      setByCategory(cats);
-      setByMethod(methods);
-      setByDay(r.by_day ?? []);
-      setTotalRevenue(cats.reduce((s, c) => s + c.total, 0));
-    } catch {
-      /* ignore */
-    } finally {
-      setRevenueLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchRevenue(); }, []);
-
-  useEffect(() => {
-    if (activeTab === 'occupancy' && !occupancyLoaded) {
-      setOccupancyLoading(true);
-      adminService.getOccupancyReport()
-        .then((r) => { setOccupancy(r); setOccupancyLoaded(true); })
-        .catch(() => {})
-        .finally(() => setOccupancyLoading(false));
-    }
-    if (activeTab === 'pharmacy' && !pharmacyLoaded) {
-      setPharmacyLoading(true);
-      adminService.getPharmacyReport()
-        .then((r) => { setPharmacy(r); setPharmacyLoaded(true); })
-        .catch(() => {})
-        .finally(() => setPharmacyLoading(false));
-    }
-  }, [activeTab, occupancyLoaded, pharmacyLoaded]);
+  function applyRevenueRange() {
+    setAppliedRange({ from: dateFrom || undefined, to: dateTo || undefined });
+  }
+  function clearRevenueRange() {
+    setDateFrom('');
+    setDateTo('');
+    setAppliedRange({});
+  }
 
   const categoryOrder = ['appointment', 'pharmacy', 'room', 'lab', 'radiology', 'other'];
 
@@ -110,7 +78,6 @@ export default function AdminReportsPage() {
         </div>
       </div>
 
-      {/* Tab bar */}
       <div className="flex gap-1 bg-[var(--bg-sunken)] p-1 rounded-[var(--radius-lg)] w-fit border border-[var(--border-1)]">
         {TABS.map((tab) => (
           <button
@@ -128,10 +95,8 @@ export default function AdminReportsPage() {
         ))}
       </div>
 
-      {/* ── Revenue Tab ── */}
       {activeTab === 'revenue' && (
         <div className="flex flex-col gap-5">
-          {/* Date range */}
           <div className="card p-4 flex flex-wrap items-end gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-[12px] font-medium text-[var(--fg-2)]">From</label>
@@ -153,14 +118,14 @@ export default function AdminReportsPage() {
             </div>
             <button
               className="btn btn-primary text-[13px] h-9"
-              onClick={() => fetchRevenue(dateFrom, dateTo)}
+              onClick={applyRevenueRange}
             >
               Apply
             </button>
             {(dateFrom || dateTo) && (
               <button
                 className="btn btn-ghost text-[13px] h-9"
-                onClick={() => { setDateFrom(''); setDateTo(''); fetchRevenue(); }}
+                onClick={clearRevenueRange}
               >
                 Clear
               </button>
@@ -176,7 +141,6 @@ export default function AdminReportsPage() {
             ]}
           />
 
-          {/* Revenue by category */}
           <div className="card p-5 flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-2">
               <h2 className="text-[14px] font-semibold text-[var(--fg-1)]">Revenue by service</h2>
@@ -206,7 +170,6 @@ export default function AdminReportsPage() {
             )}
           </div>
 
-          {/* Revenue by payment method */}
           {byMethod.length > 0 && (
             <div className="card p-5 flex flex-col gap-3">
               <h2 className="text-[14px] font-semibold text-[var(--fg-1)]">Revenue by payment method</h2>
@@ -222,7 +185,6 @@ export default function AdminReportsPage() {
             </div>
           )}
 
-          {/* 7-day trend */}
           <div className="card p-5 flex flex-col gap-4">
             <p className="text-[14px] font-semibold text-[var(--fg-1)]">Revenue trend (last 7 days)</p>
             {revenueLoading ? <div className="h-[140px] rounded bg-[var(--sand-100)] animate-pulse" /> : <RevenueChart data={byDay} />}
@@ -230,7 +192,6 @@ export default function AdminReportsPage() {
         </div>
       )}
 
-      {/* ── Occupancy Tab ── */}
       {activeTab === 'occupancy' && (
         <div className="flex flex-col gap-5">
           {occupancyLoading ? (
@@ -250,7 +211,6 @@ export default function AdminReportsPage() {
                 ]}
               />
 
-              {/* By type */}
               {Object.keys(occupancy.by_type).length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {Object.entries(occupancy.by_type).map(([type, data]) => {
@@ -271,7 +231,6 @@ export default function AdminReportsPage() {
                 </div>
               )}
 
-              {/* Rooms table */}
               {occupancy.rooms.length > 0 && (
                 <div className="card overflow-hidden">
                   <table className="w-full text-[13px]">
@@ -305,10 +264,9 @@ export default function AdminReportsPage() {
         </div>
       )}
 
-      {/* ── Doctor Performance Tab ── */}
       {activeTab === 'doctors' && (
         <div className="flex flex-col gap-5">
-          {statsLoading ? (
+          {doctorLoading ? (
             <div className="flex flex-col gap-3">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} height="48px" className="rounded" />)}
             </div>
@@ -359,7 +317,6 @@ export default function AdminReportsPage() {
         </div>
       )}
 
-      {/* ── Pharmacy Tab ── */}
       {activeTab === 'pharmacy' && (
         <div className="flex flex-col gap-5">
           {pharmacyLoading ? (

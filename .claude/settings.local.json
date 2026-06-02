@@ -26,7 +26,10 @@
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
       "Bash(npx eslint *)",
       "Bash(node -e ' *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(grep -E \"\\(hooks\\\\\\\\\\\\\\\\admin|hooks\\\\\\\\\\\\\\\\cashier|lib\\\\\\\\\\\\\\\\queryClient|lib\\\\\\\\\\\\\\\\queryKeys|providers\\\\\\\\\\\\\\\\QueryProvider|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\admin|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\cashier|OccupancySection|RevenueChart|UsersTable|app\\\\\\\\\\\\\\\\layout\\)\")",
+      "Bash(grep -E -A 30 \"\\(hooks\\\\\\\\\\\\\\\\admin|hooks\\\\\\\\\\\\\\\\cashier|RevenueChart|OccupancySection|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\admin|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\cashier|UsersTable|lib\\\\\\\\\\\\\\\\queryClient|lib\\\\\\\\\\\\\\\\queryKeys|providers\\\\\\\\\\\\\\\\QueryProvider\\)\")",
+      "Bash(grep -E -B 1 -A 4 \"\\(hooks\\\\\\\\\\\\\\\\admin|hooks\\\\\\\\\\\\\\\\cashier|RevenueChart|OccupancySection|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\admin|app\\\\\\\\\\\\\\\\dashboard\\\\\\\\\\\\\\\\cashier|UsersTable|lib\\\\\\\\\\\\\\\\queryClient|lib\\\\\\\\\\\\\\\\queryKeys|providers\\\\\\\\\\\\\\\\QueryProvider\\)\")"
     ]
   }
 }

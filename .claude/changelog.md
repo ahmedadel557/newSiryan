@@ -1,5 +1,73 @@
 # Changelog
 
+## [2026-06-02] Data layer — TanStack Query v5 integration (Admin + Cashier)
+
+### Goal
+Replace hand-rolled `useState` + `useEffect` + manual `reload()` patterns in the Admin and Cashier
+modules with TanStack Query v5. Goals: shared cache across pages, automatic re-fetch on mutation,
+socket events become cache invalidations, and modal/filter/tab UI state moves out of hooks into
+the consuming pages. Other modules (doctor/patient/nurse/pharmacist/lab/radiology/reception)
+remain on the old pattern for now.
+
+### Dependencies
+- Added `@tanstack/react-query@^5` and `@tanstack/react-query-devtools` (frontend only).
+
+### New Files (Frontend, under `apps/frontend/`)
+- `src/lib/queryClient.ts` — singleton QueryClient (30s stale, 5min gc, no retry on 401/403/404,
+  no refetch-on-focus, mutation retry off)
+- `src/lib/queryKeys.ts` — central key registry for all admin + cashier queries
+- `src/providers/QueryProvider.tsx` — `'use client'` wrapper around `QueryClientProvider` + devtools
+- `src/hooks/admin/` — `useAdminUsers`, `useAdminStaffRequests`, `useAdminAppointments`,
+  `useAdminInvoices`, `useAdminReports` (revenue/ratings/occupancy/pharmacy/doctors),
+  `useAdminDashboardStats`, `useAdminAuditLog`, `index.ts`
+- `src/hooks/cashier/` — `useCashierInvoices`, `useCashierInvoice`, `useCashierPending`,
+  `useCashierReport`, `useCashierDashboard`, `index.ts`
+
+### Changed Files
+- `src/app/layout.tsx` — wrapped existing `ThemeProvider → AuthProvider → ToastProvider` in
+  `<QueryProvider>` (outermost)
+- Admin pages: `dashboard/admin/{page,users,staff-requests,appointments,invoices,reports,audit,audit-log}.tsx`
+  — switched to per-concern hooks; modal/filter/tab state lives in each page
+- Cashier pages: `dashboard/cashier/{page,invoices/page,invoices/[id]/page,pending/page,reports/page}.tsx`
+  — same migration
+- `src/components/staff/admin/OccupancySection.tsx` — replaced self-fetch with `useAdminOccupancyReport()`
+- `src/components/staff/admin/RevenueChart.tsx` — replaced self-fetch + in-component
+  `useSocketEvent('payment:received')` with `useAdminRevenueReport({from: 7daysAgo})`
+  (socket invalidation now lives in the hook)
+- `src/components/staff/admin/UsersTable.tsx` — `UserRoleFilter` import path moved to `@/hooks/admin`
+
+### Deleted Files
+- `src/hooks/useAdmin.ts`
+- `src/hooks/useCashierInvoices.ts`, `useCashierInvoice.ts`, `useCashierPending.ts`,
+  `useCashierReport.ts`, `useCashierDashboard.ts`
+
+### Conventions
+- Hook layer call sites: `mutation.mutate(args)` / `mutation.mutateAsync(args)`,
+  `mutation.isPending` for loading flag. Pages no longer track local submitting booleans
+  for hook-backed actions.
+- Socket → cache: socket callbacks use the **singleton** `queryClient` imported from
+  `@/lib/queryClient` (`useQueryClient()` would violate hook rules inside a callback);
+  React-render code uses `useQueryClient()` as usual.
+- Service-layer untouched: hooks call services, services call `apiClient`.
+- Toast convention preserved: `showToast(message, 'success' | 'error' | 'info')`.
+- Modal/filter UI state was deliberately moved out of hooks into pages (`useState` locally)
+  so hooks are pure data layer.
+
+### Adaptations to the original spec (vs. real code)
+- Used real service method names: `updateUserRole`, `updateUserActive(id, isActive: boolean)`,
+  `approveStaff(id)`, `rejectStaff(id, reason?)`, `getAdminInvoices()`, `getDoctorReport()`.
+- Added `useAdminDashboardStats` and `useAdminAuditLog` (the spec didn't cover stats/logs/low-stock
+  + audit-log usage in the overview/audit pages, but real `useAdmin` did).
+- Rebuilt `useCashierDashboard` in the new structure (spec deleted it without a replacement,
+  but the cashier overview page uses `summary`/`transactions`/`createInvoice`).
+
+### Verification
+- `npx tsc --noEmit` → 0 errors.
+- `npm run lint` → 296 problems vs. 297 baseline (no new errors; one prior warning eliminated).
+- Browser smoke test (admin overview/users/staff-requests/appointments/invoices/reports,
+  cashier dashboard/invoices/detail/pending/reports + socket-driven refreshes) is the next step
+  and has not been run yet.
+
 ## [2026-06-02] Doctor System Part 3 (Frontend) — Video Call + In-Call Chat (custom UI)
 
 ### Goal

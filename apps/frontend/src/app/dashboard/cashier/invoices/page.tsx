@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Search, FileText } from 'lucide-react';
-import { useCashierInvoices, type InvoiceTab } from '@/hooks/useCashierInvoices';
+import { useCashierInvoices } from '@/hooks/cashier';
 import { InvoiceCard } from '@/components/staff/cashier/InvoiceCard';
 import { PaymentModal } from '@/components/staff/cashier/PaymentModal';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { CashierInvoice } from '@/types';
+
+type InvoiceTab = 'all' | 'unpaid' | 'paid' | 'partial';
 
 const TABS: { value: InvoiceTab; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -16,22 +18,41 @@ const TABS: { value: InvoiceTab; label: string }[] = [
   { value: 'partial', label: 'Partial' },
 ];
 
-export default function CashierInvoicesPage() {
-  const {
-    invoices,
-    loading,
-    error,
-    tab,
-    setTab,
-    search,
-    setSearch,
-    counts,
-    paymentInvoice,
-    setPaymentInvoiceId,
-    processPayment,
-  } = useCashierInvoices();
+const TAB_STATUS: Record<Exclude<InvoiceTab, 'all'>, CashierInvoice['status']> = {
+  unpaid: 'unpaid',
+  paid: 'paid',
+  partial: 'partially_paid',
+};
 
+export default function CashierInvoicesPage() {
+  const { allInvoices, loading, error, processPayment } = useCashierInvoices();
+
+  const [tab, setTab] = useState<InvoiceTab>('all');
+  const [search, setSearch] = useState('');
+  const [paymentInvoiceId, setPaymentInvoiceId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const counts = useMemo(
+    () => ({
+      all: allInvoices.length,
+      unpaid: allInvoices.filter((i) => i.status === 'unpaid').length,
+      paid: allInvoices.filter((i) => i.status === 'paid').length,
+      partial: allInvoices.filter((i) => i.status === 'partially_paid').length,
+    }),
+    [allInvoices],
+  );
+
+  const invoices = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return allInvoices
+      .filter((inv) => (tab === 'all' ? true : inv.status === TAB_STATUS[tab]))
+      .filter((inv) => (q ? inv.patient_name.toLowerCase().includes(q) : true));
+  }, [allInvoices, tab, search]);
+
+  const paymentInvoice = useMemo(
+    () => allInvoices.find((inv) => inv.id === paymentInvoiceId) ?? null,
+    [allInvoices, paymentInvoiceId],
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,7 +65,6 @@ export default function CashierInvoicesPage() {
         </div>
       </div>
 
-      {/* Tabs + search */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex gap-1">
           {TABS.map((t) => (
@@ -104,7 +124,10 @@ export default function CashierInvoicesPage() {
         key={paymentInvoice?.id ?? 'none'}
         invoice={paymentInvoice}
         onClose={() => setPaymentInvoiceId(null)}
-        onSubmit={processPayment}
+        onSubmit={async (id, input) => {
+          await processPayment.mutateAsync({ id, input });
+          setPaymentInvoiceId(null);
+        }}
       />
     </div>
   );
