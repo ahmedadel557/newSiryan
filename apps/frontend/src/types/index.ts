@@ -1155,7 +1155,7 @@ export interface DoctorSchedule {
 }
 
 // ---- Shifts ----
-export type ShiftType = 'morning' | 'afternoon' | 'night' | 'on_call';
+export type ShiftType = 'morning' | 'evening' | 'night';
 export interface Shift {
   id: string;
   _id?: string;
@@ -1167,7 +1167,7 @@ export interface Shift {
   created_at: string;
 }
 export interface AssignShiftDto {
-  staff_id: string;
+  user_id: string;
   shift_type: ShiftType;
   start_date: string;
   end_date: string;

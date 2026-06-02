@@ -6,13 +6,12 @@ import type { Shift, ShiftType, User, Role, AssignShiftDto } from '@/types';
 import { useToast } from '@/hooks/shared';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 
-const SHIFT_TYPES: ShiftType[] = ['morning', 'afternoon', 'night', 'on_call'];
+const SHIFT_TYPES: ShiftType[] = ['morning', 'evening', 'night'];
 
 const shiftColor: Record<ShiftType, string> = {
   morning: 'var(--brand)',
-  afternoon: 'var(--caution)',
+  evening: 'var(--caution)',
   night: 'var(--info)',
-  on_call: 'var(--critical)',
 };
 
 const ROLES: Role[] = ['doctor', 'nurse', 'pharmacist', 'lab_technician', 'radiology_technician', 'receptionist', 'cashier', 'inventory_manager'];
@@ -54,7 +53,7 @@ export default function ShiftsPage() {
   const [modal, setModal] = useState<AssignModal | null>(null);
   const [staffSearch, setStaffSearch] = useState('');
   const [formData, setFormData] = useState<AssignShiftDto>({
-    staff_id: '', shift_type: 'morning', start_date: '', end_date: '',
+    user_id: '', shift_type: 'morning', start_date: '', end_date: '',
   });
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -81,14 +80,14 @@ export default function ShiftsPage() {
   useEffect(() => { load(); }, [load]);
 
   const openCreate = () => {
-    setFormData({ staff_id: '', shift_type: 'morning', start_date: '', end_date: '' });
+    setFormData({ user_id: '', shift_type: 'morning', start_date: '', end_date: '' });
     setStaffSearch('');
     setModal({ mode: 'create' });
   };
 
   const openEdit = (shift: Shift) => {
     setFormData({
-      staff_id: shift.staff.id,
+      user_id: shift.staff.id,
       shift_type: shift.shift_type,
       start_date: shift.start_date.slice(0, 10),
       end_date: shift.end_date.slice(0, 10),
@@ -252,9 +251,9 @@ export default function ShiftsPage() {
                   className="input w-full"
                   placeholder="Search by email or role..."
                   value={staffSearch}
-                  onChange={(e) => { setStaffSearch(e.target.value); setFormData((f) => ({ ...f, staff_id: '' })); }}
+                  onChange={(e) => { setStaffSearch(e.target.value); setFormData((f) => ({ ...f, user_id: '' })); }}
                 />
-                {staffSearch && !formData.staff_id && filteredStaff.length > 0 && (
+                {staffSearch && !formData.user_id && filteredStaff.length > 0 && (
                   <div className="card mt-1" style={{ maxHeight: 160, overflowY: 'auto' }}>
                     {filteredStaff.slice(0, 8).map((u) => (
                       <button
@@ -263,7 +262,7 @@ export default function ShiftsPage() {
                         className="w-full text-left px-3 py-2 hover:bg-[var(--bg-hover)]"
                         style={{ display: 'block', fontSize: 13, border: 'none', background: 'none', cursor: 'pointer' }}
                         onClick={() => {
-                          setFormData((f) => ({ ...f, staff_id: u.id }));
+                          setFormData((f) => ({ ...f, user_id: u.id }));
                           setStaffSearch(u.email);
                         }}
                       >
@@ -300,7 +299,7 @@ export default function ShiftsPage() {
 
               <div className="flex gap-2 justify-end pt-2">
                 <button type="button" className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving || !formData.staff_id}>
+                <button type="submit" className="btn btn-primary" disabled={saving || !formData.user_id}>
                   {saving ? 'Saving...' : modal.mode === 'create' ? 'Assign' : 'Update'}
                 </button>
               </div>
