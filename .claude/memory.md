@@ -19,6 +19,21 @@ JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Paylo
 1. Self-registration `POST /auth/register`: status=pending, password_changed=true, emits `staff_request:new` to admin
 2. Admin-creation `POST /admin/users`: status=active, password_changed=false, temp password emailed, no approval needed
 
+## Stream Video + Chat (Doctor system, 2026-06-02) — ALL 3 PARTS COMPLETE
+- Backend (P1): `src/config/stream.ts` (`@stream-io/node-sdk`, `getStreamClient()` 503 if unconfigured),
+  models `VideoCall`/`DoctorNote`, `services/doctor.service.ts` (video get-or-create/end/token, notes, queue).
+  Routes: `POST /api/doctor/video/call/:appointmentId` (doctor opens — getOrCreate Stream call),
+  `POST /api/doctor/video/call/:callId/end`, `GET /api/doctor/video/token/:appointmentId` (doctor+patient).
+  Env: `STREAM_API_KEY`/`STREAM_API_SECRET`. Server `generateUserToken` valid for both Video AND Chat.
+- Frontend (P3): `@stream-io/video-react-sdk` 1.37.4 + `stream-chat` (NO `stream-chat-react`).
+  Custom UI only — `<StreamVideo>`/`<StreamCall>` headless providers + `useCallStateHooks`;
+  video rendered via `call.bindVideoElement`/`bindAudioElement` (NO ParticipantView/SpeakerLayout/StreamTheme).
+  Hooks: `useVideoCall` (doctor), `usePatientVideoCall` (patient), `useInCallChat`. Components in
+  `components/doctor/video/`. Pages: `/dashboard/{doctor,patient}/video/[appointmentId]`.
+  `apiKey` comes from the token response (env `NEXT_PUBLIC_STREAM_API_KEY` is fallback only).
+- IMPORTANT: project icons are **lucide-react** (not react-icons); data fields are snake_case.
+- E2E needs real Stream creds; in-call chat needs the Chat product enabled on the Stream app.
+
 ## Backend State
 - Entry: `src/server.ts` → Mongo → seed → Redis → cron → initSocket → attachRedisAdapter → listen
 - 14 route files, 14 controller folders, 8 service files, 25 Mongoose models

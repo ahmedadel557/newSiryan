@@ -37,6 +37,8 @@ import {
   Activity,
   ShoppingBag,
   RefreshCcw,
+  Star,
+  Bell,
 } from 'lucide-react';
 import type { Role } from '@/types';
 
@@ -62,9 +64,12 @@ export const patientNav: NavItem[] = [
 
 export const doctorNav: NavItem[] = [
   { label: 'My Patients', href: '/dashboard/doctor', icon: <Users {...I} /> },
+  { label: 'Queue', href: '/dashboard/doctor/queue', icon: <ClipboardList {...I} /> },
   { label: 'Schedule', href: '/dashboard/doctor/schedule', icon: <CalendarDays {...I} /> },
   { label: 'Shared Records', href: '/dashboard/doctor/shared-records', icon: <Inbox {...I} /> },
   { label: 'Patient Record', href: '/dashboard/doctor/record', icon: <FileText {...I} /> },
+  { label: 'Ratings', href: '/dashboard/doctor/ratings', icon: <Star {...I} /> },
+  { label: 'Notifications', href: '/dashboard/doctor/notifications', icon: <Bell {...I} /> },
   { label: 'Settings', href: '/dashboard/settings', icon: <Settings {...I} /> },
 ];
 

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
+    "@stream-io/node-sdk": "^0.7.59",
     "@types/cookie-parser": "^1.4.10",
     "@types/pdfkit": "^0.17.6",
     "bcryptjs": "^2.4.3",

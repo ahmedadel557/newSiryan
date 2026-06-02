@@ -1,5 +1,126 @@
 # Changelog
 
+## [2026-06-02] Doctor System Part 3 (Frontend) — Video Call + In-Call Chat (custom UI)
+
+### Goal
+Build the 1-on-1 video consultation (doctor + patient) with a fully custom UI (no prebuilt Stream
+visual components) and an in-call-only text chat, replacing the Part-2 video placeholder.
+
+### Dependency
+- `stream-chat` (headless client). Skipped `stream-chat-react` (prebuilt UI — violates custom-UI rule);
+  `@stream-io/video-react-sdk` was already installed in Part 2.
+
+### New Files (Frontend, under `apps/frontend/`)
+- `src/hooks/useVideoCall.ts` — doctor call lifecycle (POST create → join → end-for-both)
+- `src/hooks/usePatientVideoCall.ts` — patient call lifecycle (GET token → join → leave)
+- `src/hooks/useInCallChat.ts` — Stream Chat channel keyed by callId (best-effort, guarded)
+- `src/components/doctor/video/ParticipantVideo.tsx` — headless track binding (`bindVideoElement`/`bindAudioElement`)
+- `src/components/doctor/video/RemoteVideoTile.tsx`, `LocalVideoTile.tsx` (PiP)
+- `src/components/doctor/video/CallControls.tsx` — mic/camera/chat/end (Stream media-state hooks)
+- `src/components/doctor/video/InCallChat.tsx` — custom slide-in chat panel
+- `src/components/doctor/video/CallStatusOverlay.tsx` — connecting state
+- `src/components/doctor/video/VideoCallLayout.tsx` — composes the above (shared by both pages)
+- `src/app/dashboard/patient/video/[appointmentId]/page.tsx` — patient call page
+
+### Changed Files
+- `src/app/dashboard/doctor/video/[appointmentId]/page.tsx` — placeholder → live call page
+- `src/services/doctor.service.ts` — added `createVideoCall`, `endVideoCall`
+- `src/services/patient.service.ts` — added `getVideoCallToken` (+ `VideoCallToken` import)
+- `src/components/patient/AppointmentRow.tsx` — enabled "Join call" within the 5-min window → patient video page
+- `src/app/dashboard/patient/appointments/online/[id]/page.tsx` — placeholder → "Join video call" CTA
+
+### Conventions / deviations from spec
+- Doctor opens via **POST** `createVideoCall` (backend creates the Stream call) then joins
+  `{ create: false }`; patient uses **GET** token then joins. (Spec's doctor-uses-GET would fail.)
+- `<StreamVideo>`/`<StreamCall>` used as **headless providers** for the SDK hooks; video rendered
+  via `call.bindVideoElement` — no prebuilt visual UI (no ParticipantView/SpeakerLayout/StreamTheme).
+- Used real design tokens (spec's `--surface-sunken`/`--error`/`--red-500` don't exist): stage
+  `var(--forest-950)`, End Call `var(--critical)`, chat `var(--bg-surface)`/`--bg-sunken`/`--brand`.
+- `apiKey` taken from the token response (env `NEXT_PUBLIC_STREAM_API_KEY` is only a fallback).
+
+### Verification
+- `npx tsc --noEmit` (frontend) → 0 errors. New video files lint-clean except repo-wide
+  `no-explicit-any` baseline (Stream chat types / catch blocks — same pattern as existing hooks/services).
+- E2E needs real `STREAM_API_KEY`/`SECRET` (backend) + `NEXT_PUBLIC_STREAM_API_KEY` (frontend);
+  in-call chat additionally needs the Chat product enabled on the Stream app.
+
+## [2026-06-02] Doctor System Part 2 (Frontend) — Integrate Part-1 endpoints + new pages
+
+### Goal
+The doctor frontend already existed and was mature, so Part 2 integrated Part-1's three new
+backend endpoints (`/queue/today`, `/notes` CRUD, `/video/token`) and added the net-new,
+backend-supported pages — rather than rebuilding the spec's greenfield dashboard (which would
+have duplicated working UI and called endpoints that don't exist).
+
+### New Files (Frontend, under `apps/frontend/`)
+- `src/hooks/useDoctorQueue.ts` — today's queue, 60s auto-refresh, `appointment:status` socket sync
+- `src/hooks/useDoctorNotes.ts` — per-patient private notes CRUD (optimistic, toasts)
+- `src/hooks/useDoctorRatings.ts` — wraps existing `getMyRatings()`
+- `src/components/doctor/RatingStars.tsx` — read-only star display
+- `src/components/doctor/QueueItem.tsx` — queue row; conditional "Start video call" (online + within 5 min)
+- `src/components/doctor/NoteEditor.tsx` — private-notes panel (add/edit/delete) used in Notes tab
+- `src/app/dashboard/doctor/queue/page.tsx` — today's queue
+- `src/app/dashboard/doctor/ratings/page.tsx` — my ratings
+- `src/app/dashboard/doctor/notifications/page.tsx` — notifications (reuses `useNotifications`)
+- `src/app/dashboard/doctor/video/[appointmentId]/page.tsx` — placeholder (Part 3 fills it)
+
+### Changed Files
+- `src/services/doctor.service.ts` — added getTodayQueue, getNotes/createNote/updateNote/deleteNote,
+  getVideoCallToken (+ `normalizeNote`)
+- `src/types/index.ts` — added `DoctorQueueItem`, `DoctorNote`, `VideoCallToken`
+- `src/components/doctor/NotesTab.tsx` + `app/dashboard/doctor/patients/[id]/page.tsx` —
+  render `<NoteEditor>` (real persistent DoctorNote) alongside existing clinical notes
+- `src/config/navItems.tsx` — added Queue / Ratings / Notifications to `doctorNav` (lucide-react)
+
+### Dependency
+- `@stream-io/video-react-sdk` (installed for Part 3).
+
+### Conventions / deviations from spec
+- Kept **lucide-react** (repo standard; the spec's "react-icons only" is backwards).
+- **snake_case** types (matches existing). Skipped spec items with no backend support
+  (working-hours editor, global prescriptions/orders pages, visit-summary) and spec components
+  that already exist.
+
+### Verification
+- `npx tsc --noEmit` (frontend) → 0 errors. New files lint clean except the repo-wide accepted
+  baseline pattern (`react-hooks/set-state-in-effect`, also present in `useNotifications.ts`);
+  project lint has 248 pre-existing errors unrelated to this change.
+
+## [2026-06-02] Doctor System Part 1 (Backend) — Stream Video + Notes + Queue
+
+### Goal
+Deliver the genuinely-missing doctor backend pieces. Most of the original Part-1 spec
+(records, prescriptions, lab/radiology orders, schedule, ratings, cancel/reschedule) already
+existed in `apps/backend`, so this part added only: **Stream Video calling** (fills the
+patient "Video calls coming soon" placeholder), **doctor private notes**, and a dedicated
+**today's queue** endpoint. Built with the repo's first real service layer (`doctor.service.ts`).
+
+### New Files (Backend, all under `apps/backend/`)
+- `src/config/stream.ts` — guarded `StreamClient` singleton (`@stream-io/node-sdk`); 503 when unconfigured
+- `src/models/VideoCall.ts` — appointment↔Stream-call mapping (waiting/active/ended)
+- `src/models/DoctorNote.ts` — doctor-private patient notes
+- `src/services/doctor.service.ts` — video (get-or-create / end / token), notes CRUD, today-queue
+- `src/controllers/doctor/video.controller.ts` — createVideoCall, endVideoCall, getVideoToken
+- `src/controllers/doctor/notes.controller.ts` — createNote, getNotes, updateNote, deleteNote
+- `src/controllers/doctor/queue.controller.ts` — getTodayQueue
+
+### Changed Files
+- `src/validations/doctor.validation.ts` — added `createNoteSchema`, `updateNoteSchema`
+- `src/types/index.ts` — added `VideoCallToken`, `DoctorQueueItem`
+- `src/routes/doctor.routes.ts` — added `/video/token/:appointmentId` (doctor+patient),
+  `/video/call/:appointmentId`, `/video/call/:callId/end`, `/queue/today`, `/notes` CRUD
+- `.env.example` — added `STREAM_API_KEY`, `STREAM_API_SECRET`
+
+### Dependency
+- `@stream-io/node-sdk` (video SDK). The spec's `getstream-node` (legacy chat) was skipped.
+
+### Verification
+- `npx tsc --noEmit` → 0 errors. (ESLint is not configured in the backend — no dep/config.)
+
+### Out of scope (reused existing, not rebuilt)
+DoctorSchedule model, parallel route paths, and the already-implemented
+records/prescriptions/orders/schedule/ratings/cancel-reschedule endpoints.
+
 ## [2026-06-01] Auth Pages Component Architecture Refactor
 
 ### Goal

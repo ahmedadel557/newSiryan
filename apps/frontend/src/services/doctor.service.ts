@@ -4,6 +4,8 @@ import type {
   Appointment,
   BlockedSlot,
   DiagnosisDto,
+  DoctorNote,
+  DoctorQueueItem,
   DoctorScheduleRoomBooking,
   LabOrder,
   LabOrderDto,
@@ -14,6 +16,7 @@ import type {
   PrescriptionDto,
   RadiologyOrder,
   RadiologyOrderDto,
+  VideoCallToken,
   Vitals,
 } from '@/types';
 
@@ -60,6 +63,17 @@ function normalizeProfile(p: any): Profile {
     // Use user's id as the profile id so the queue join works:
     // appointments have patient_id = user's id; profiles must match on that key
     id: p.user?.id ?? p.user?._id?.toString() ?? p._id?.toString() ?? p.id,
+  };
+}
+
+function normalizeNote(n: any): DoctorNote {
+  return {
+    id: n._id ?? n.id,
+    patient_id: n.patient?._id?.toString() ?? n.patient?.toString() ?? n.patient_id ?? '',
+    content: n.content ?? '',
+    appointment_id: n.appointment?._id?.toString() ?? n.appointment?.toString() ?? n.appointment_id,
+    created_at: n.createdAt ?? n.created_at ?? '',
+    updated_at: n.updatedAt ?? n.updated_at ?? '',
   };
 }
 
@@ -294,5 +308,51 @@ export const doctorService = {
   }> {
     const res = await apiClient.get<ApiResponse<any>>(`/doctor/${doctorId}/ratings`);
     return res.data.data;
+  },
+
+  // --- Today's queue (Part 1 backend: GET /doctor/queue/today) ---
+  async getTodayQueue(): Promise<DoctorQueueItem[]> {
+    const res = await apiClient.get<ApiResponse<DoctorQueueItem[]>>('/doctor/queue/today');
+    return res.data.data ?? [];
+  },
+
+  // --- Private doctor notes (Part 1 backend: /doctor/notes) ---
+  async getNotes(patientId: string): Promise<DoctorNote[]> {
+    const res = await apiClient.get<ApiResponse<any[]>>(`/doctor/notes/${patientId}`);
+    return (res.data.data ?? []).map(normalizeNote);
+  },
+
+  async createNote(data: { patient_id: string; content: string; appointment_id?: string }): Promise<DoctorNote> {
+    const res = await apiClient.post<ApiResponse<any>>('/doctor/notes', data);
+    return normalizeNote(res.data.data);
+  },
+
+  async updateNote(noteId: string, data: { content: string }): Promise<DoctorNote> {
+    const res = await apiClient.put<ApiResponse<any>>(`/doctor/notes/${noteId}`, data);
+    return normalizeNote(res.data.data);
+  },
+
+  async deleteNote(noteId: string): Promise<void> {
+    await apiClient.delete(`/doctor/notes/${noteId}`);
+  },
+
+  // --- Video call token (Part 1 backend: GET /doctor/video/token/:appointmentId) ---
+  async getVideoCallToken(appointmentId: string): Promise<VideoCallToken> {
+    const res = await apiClient.get<ApiResponse<VideoCallToken>>(`/doctor/video/token/${appointmentId}`);
+    return res.data.data;
+  },
+
+  // --- Doctor opens the call (Part 1 backend: POST /doctor/video/call/:appointmentId) ---
+  // Creates the Stream call server-side and returns token + the appointment (carries patient id for chat).
+  async createVideoCall(
+    appointmentId: string,
+  ): Promise<{ callId: string; token: string; apiKey: string; status?: string; appointment: any }> {
+    const res = await apiClient.post<ApiResponse<any>>(`/doctor/video/call/${appointmentId}`);
+    return res.data.data;
+  },
+
+  // --- Doctor ends the call for both participants (POST /doctor/video/call/:callId/end) ---
+  async endVideoCall(callId: string): Promise<void> {
+    await apiClient.post(`/doctor/video/call/${callId}/end`);
   },
 };

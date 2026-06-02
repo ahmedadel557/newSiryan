@@ -154,7 +154,15 @@ export default function PatientRecordPage() {
           {activeTab === 'prescriptions' && <PrescriptionsTab prescriptions={prescriptions} onNew={() => setOpenModal('prescription')} />}
           {activeTab === 'labs' && <LabResultsTab labs={labs} onNew={() => setOpenModal('lab')} />}
           {activeTab === 'imaging' && <RadiologyTab imaging={imaging} onNew={() => setOpenModal('radiology')} />}
-          {activeTab === 'notes' && <NotesTab record={record} records={records} onSaveNote={saveNote} />}
+          {activeTab === 'notes' && (
+            <NotesTab
+              record={record}
+              records={records}
+              onSaveNote={saveNote}
+              patientId={patientId}
+              appointmentId={latestAppointment?.id}
+            />
+          )}
         </div>
 
         {/* Sidebar */}

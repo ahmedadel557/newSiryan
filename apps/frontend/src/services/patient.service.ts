@@ -16,6 +16,7 @@ import type {
   PatientPharmacyOrderDto,
   RoomBookingDto,
   InsuranceCompany,
+  VideoCallToken,
 } from '@/types';
 import type { MockPaymentMethod } from '@/lib/pricing';
 
@@ -234,5 +235,11 @@ export const patientService = {
   async getInsuranceCompanies(): Promise<InsuranceCompany[]> {
     const res = await apiClient.get<ApiResponse<InsuranceCompany[]>>('/patient/insurance-companies');
     return res.data.data.map((c) => ({ ...c, id: (c as any)._id ?? c.id })) as InsuranceCompany[];
+  },
+
+  // Video token for an online appointment — backend GET /doctor/video/token/:id authorizes patients too.
+  async getVideoCallToken(appointmentId: string): Promise<VideoCallToken> {
+    const res = await apiClient.get<ApiResponse<VideoCallToken>>(`/doctor/video/token/${appointmentId}`);
+    return res.data.data;
   },
 };

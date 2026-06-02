@@ -9,3 +9,19 @@ export type Role =
   | 'radiology_technician'
   | 'cashier'
   | 'admin';
+
+export interface VideoCallToken {
+  callId: string;
+  token: string;
+  apiKey: string;
+  status?: 'waiting' | 'active' | 'ended';
+}
+
+export interface DoctorQueueItem {
+  appointment_id: string;
+  patient_id: string;
+  patient_name: string;
+  type: 'physical' | 'online';
+  status: string;
+  scheduled_at: Date;
+}

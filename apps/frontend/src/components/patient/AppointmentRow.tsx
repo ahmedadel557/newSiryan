@@ -63,12 +63,19 @@ function smartDateLabel(date: Date): { text: string; amber: boolean } {
 
 const cancellable: AppointmentStatus[] = ['pending', 'scheduled', 'confirmed'];
 
+// Module-level (impure date read kept out of the render body, like smartDateLabel).
+function isCallOpen(isOnline: boolean, scheduledAt: string, status: AppointmentStatus): boolean {
+  if (!isOnline || status === 'completed' || status === 'cancelled') return false;
+  return Date.now() >= new Date(scheduledAt).getTime() - 5 * 60 * 1000;
+}
+
 export function AppointmentRow({ appointment, onCancel }: AppointmentRowProps) {
   const { day, date, month, time, full } = parseAppt(appointment.scheduled_at);
   const canCancel = cancellable.includes(appointment.status);
   const isOnline = appointment.visit_type === 'online';
   const { text: smartLabel, amber } = smartDateLabel(full);
   const borderColor = isOnline ? '#7c3aed' : 'var(--info)';
+  const callOpen = isCallOpen(isOnline, appointment.scheduled_at, appointment.status);
 
   return (
     <div
@@ -116,10 +123,18 @@ export function AppointmentRow({ appointment, onCancel }: AppointmentRowProps) {
 
       {/* Actions */}
       <div className="flex flex-col gap-[6px] shrink-0">
-        {isOnline && appointment.status === 'confirmed' ? (
+        {isOnline && callOpen ? (
+          <Link
+            href={`/dashboard/patient/video/${appointment.id}`}
+            className="inline-flex items-center justify-center h-[30px] px-3 rounded-[8px] text-[13px] font-medium"
+            style={{ background: 'var(--brand)', color: 'var(--fg-on-brand)' }}
+          >
+            Join call
+          </Link>
+        ) : isOnline && appointment.status === 'confirmed' ? (
           <button
             disabled
-            title="Video calls coming soon"
+            title="Available 5 minutes before your appointment"
             className="inline-flex items-center justify-center h-[30px] px-3 rounded-[8px] text-[13px] font-medium border opacity-50 cursor-not-allowed"
             style={{ borderColor: '#7c3aed', color: '#7c3aed' }}
           >

@@ -1,67 +1,40 @@
 # Current Task
 
 ## Task
-Auth Pages Component Architecture Refactor (2026-06-01)
+Doctor System — Part 3 (Frontend): Video Call + In-Call Chat (2026-06-02)
 
 ## Status
-COMPLETE.
+COMPLETE. **The full 3-part Doctor system is now done.**
+
+## Context / Decision
+Part 3 was genuinely greenfield (the Part-2 video page was a placeholder). Built a fully custom
+video UI (no prebuilt Stream visual components) + in-call-only chat for both doctor and patient,
+on `@stream-io/video-react-sdk` (1.37.4) + `stream-chat`.
 
 ## Completed This Session
+- `stream-chat` installed (skipped `stream-chat-react` — prebuilt UI).
+- Service: doctor `createVideoCall`/`endVideoCall`; patient `getVideoCallToken`.
+- Hooks: `useVideoCall` (doctor), `usePatientVideoCall` (patient), `useInCallChat`.
+- Components (`components/doctor/video/`): ParticipantVideo (headless `bindVideoElement`),
+  RemoteVideoTile, LocalVideoTile (PiP), CallControls, InCallChat, CallStatusOverlay, VideoCallLayout.
+- Pages: doctor video page (placeholder → live), patient video page (new).
+- Patient entry: `AppointmentRow` "Join call" enabled within 5-min window; online-appointment
+  placeholder now links to the video page.
+- `npx tsc --noEmit` (frontend) → 0 errors. New files lint-clean except repo-wide `no-explicit-any`
+  baseline (Stream types / catch blocks).
 
-### Auth Pages Refactor — Micro-component Architecture
-
-**Shared components created (`src/components/auth/shared/`):**
-- [x] `AuthInput.tsx` — Reusable input field with icon, error display, hint, and status slot
-- [x] `AuthButton.tsx` — Reusable submit button with loading state
-- [x] `AuthDivider.tsx` — "or continue with" divider
-- [x] `GoogleIcon.tsx` — Shared Google SVG icon (was duplicated in login + register)
-- [x] `UsernameField.tsx` — Username input with availability status display
-- [x] `PasswordStrength.tsx` — Password strength indicator (was duplicated 3x)
-- [x] `StepIndicator.tsx` — Multi-step form indicator (was duplicated 2x)
-
-**Login components (`src/components/auth/login/`):**
-- [x] `LoginHeader.tsx` — Logo + brand header
-- [x] `LoginForm.tsx` — Email/password form with error handling + social login
-- [x] `SocialLogin.tsx` — Google + Phone OTP buttons
-- [x] `PhoneLogin.tsx` — Self-contained phone OTP flow (enter-phone + enter-otp states)
-
-**Register components (`src/components/auth/register/`):**
-- [x] `registerTypes.ts` — All schemas, types, and constants (patientSchema, staffSchema, DEPARTMENT_SPECIALIZATIONS, etc.)
-- [x] `RegisterHeader.tsx` — Logo + Patient/Staff tab switcher
-- [x] `PatientForm.tsx` — Patient registration orchestrator (3-step state machine)
-- [x] `StaffForm.tsx` — Staff registration orchestrator (2-step state machine)
-- [x] `StaffSuccessScreen.tsx` — Post-submission success screen
-- [x] `steps/PersonalInfoStep.tsx` — Patient step 1: name, email, phone, username
-- [x] `steps/MedicalInfoStep.tsx` — Patient step 2: DOB, gender, blood type, insurance, national ID
-- [x] `steps/SecurityStep.tsx` — Patient step 3: password, confirm, terms
-- [x] `steps/StaffProfessionalStep.tsx` — Staff step 1: name, email, phone, role, department, specialization, national ID
-- [x] `steps/StaffSecurityStep.tsx` — Staff step 2: username, password, terms, professional confirm
-
-**Complete-profile components (`src/components/auth/complete-profile/`):**
-- [x] `ProfileHeader.tsx` — Logo + Google avatar + title
-- [x] `CompleteProfileForm.tsx` — Account + personal info form
-
-**Hook created (`src/hooks/`):**
-- [x] `useUsernameCheck.ts` — Debounced username availability check (was duplicated 3x)
-
-**Pages rewritten as thin orchestrators:**
-- [x] `login/page.tsx` — 40 lines (was 436)
-- [x] `register/page.tsx` — 48 lines (was 1540)
-- [x] `complete-profile/page.tsx` — 23 lines (was 305)
-
-**Verification:**
-- [x] `npx tsc --noEmit` → 0 errors
-- [x] `npx eslint` → 0 errors, 3 warnings (pre-existing react-hook-form incompatible-library)
+## Key implementation notes
+- Doctor opens via POST `createVideoCall` (creates Stream call) then joins `{create:false}`;
+  patient uses GET token then joins. `<StreamVideo>`/`<StreamCall>` = headless providers; video via
+  `call.bindVideoElement`. `apiKey` from token response (env fallback). Tokens: stage
+  `var(--forest-950)`, End Call `var(--critical)`.
 
 ## Next Steps
-- [x] Fixed `CompleteProfileForm` TS assignment mismatch (`UseFormRegister<FormValues>` vs `UseFormRegister<PersonalFieldsValues>`) by exporting `FormValues` and importing/using it directly in the sub-component `ProfilePersonalFields`.
-- [x] Checked `PersonalInfoStep.tsx` and verified it compiles cleanly and that the IDE message was a stale caching artifact.
-- [x] Run full TypeScript type-checks and ESLint checks showing 0 errors.
+- **Test full doctor flow locally with real Stream credentials** (see `todos.md`): backend
+  `STREAM_API_KEY`/`STREAM_API_SECRET`, frontend `NEXT_PUBLIC_STREAM_API_KEY`. In-call chat needs
+  the **Chat product enabled** on the Stream app.
 
 ---
 
 ## Previous Task
-Pharmacy Module Part 3 — Real-time & Edge Cases (2026-05-30)
-
-## Status
-ALL PARTS COMPLETE.
+Doctor System — Part 2 (Frontend): integrate Part-1 endpoints + new pages (2026-06-02) — COMPLETE.

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Sparkles, VideoOff } from 'lucide-react';
+import { ChevronLeft, Video } from 'lucide-react';
 import { patientService } from '@/services/patient.service';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { Appointment } from '@/types';
@@ -59,23 +59,20 @@ export default function OnlineAppointmentPage() {
         >
           <div
             className="w-14 h-14 rounded-[var(--radius-lg)] flex items-center justify-center"
-            style={{ background: 'var(--info-soft-bg)', color: 'var(--info-soft-fg)' }}
+            style={{ background: 'var(--brand-soft-bg)', color: 'var(--brand)' }}
           >
-            <VideoOff size={24} strokeWidth={1.75} />
+            <Video size={24} strokeWidth={1.75} />
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className="text-[18px] font-semibold text-[var(--fg-1)]">Video calls coming soon</h2>
+            <h2 className="text-[18px] font-semibold text-[var(--fg-1)]">Ready for your video visit</h2>
             <p className="text-[13px] text-[var(--fg-3)] leading-relaxed">
-              Online appointments will be available here once video integration is complete.
+              Join the secure video room for your online appointment. You can join from 5 minutes before the
+              scheduled time.
             </p>
           </div>
-          <div
-            className="inline-flex items-center gap-[6px] px-3 py-[6px] rounded-full text-[12px] font-medium"
-            style={{ background: 'var(--brand-soft-bg)', color: 'var(--brand-soft-fg)' }}
-          >
-            <Sparkles size={12} />
-            Powered by Siryan
-          </div>
+          <Link href={`/dashboard/patient/video/${id}`} className="btn btn-primary inline-flex items-center gap-2 text-[13px]">
+            <Video size={14} /> Join video call
+          </Link>
         </div>
       </div>
     </div>

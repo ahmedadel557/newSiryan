@@ -23,12 +23,15 @@ Defines which files to read for each task type. Load ONLY these — avoid readin
 - newSiryan_backEnd/src/services/patient.service.ts (if exists)
 
 ## Doctor Feature Tasks
-- newSiryan_frontEnd/src/app/dashboard/doctor/[feature]/
-- newSiryan_frontEnd/src/components/doctor/
-- newSiryan_frontEnd/src/hooks/useDoctor*.ts
-- newSiryan_frontEnd/src/services/doctor.service.ts
-- newSiryan_backEnd/src/routes/doctor.ts
-- newSiryan_backEnd/src/controllers/doctor/
+- apps/frontend/src/app/dashboard/doctor/[feature]/
+- apps/frontend/src/components/doctor/
+- apps/frontend/src/hooks/useDoctor*.ts
+- apps/frontend/src/services/doctor.service.ts
+- apps/backend/src/routes/doctor.routes.ts
+- apps/backend/src/controllers/doctor/        (index.ts = existing features; video/notes/queue.controller.ts = Part 1)
+- apps/backend/src/services/doctor.service.ts  (video, notes, today-queue)
+- apps/backend/src/validations/doctor.validation.ts
+- apps/backend/src/config/stream.ts            (Stream Video client)
 
 ## Admin Tasks
 - newSiryan_frontEnd/src/app/dashboard/admin/
@@ -38,13 +41,13 @@ Defines which files to read for each task type. Load ONLY these — avoid readin
 - newSiryan_backEnd/src/models/User.ts + AuditLog.ts
 
 ## Backend API Tasks (new route/endpoint)
-- newSiryan_backEnd/src/app.ts (route mounting)
-- newSiryan_backEnd/src/routes/[domain].ts
-- newSiryan_backEnd/src/controllers/[domain]/
-- newSiryan_backEnd/src/services/[domain].service.ts
-- newSiryan_backEnd/src/validations/[domain].ts
-- newSiryan_backEnd/src/models/[Model].ts (relevant models)
-- newSiryan_backEnd/src/utils/response.ts
+- apps/backend/src/app.ts (route mounting)
+- apps/backend/src/routes/[domain].routes.ts
+- apps/backend/src/controllers/[domain]/
+- apps/backend/src/services/[domain].service.ts (note: most existing controllers hold their own logic; appointment.service.ts is a stub)
+- apps/backend/src/validations/[domain].validation.ts
+- apps/backend/src/models/[Model].ts (relevant models)
+- apps/backend/src/utils/response.ts (sendSuccess / sendError)
 
 ## Styling / UI Tasks
 - newSiryan_frontEnd/src/styles/tokens.css

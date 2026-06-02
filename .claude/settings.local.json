@@ -25,7 +25,8 @@
       "Bash(Head -30)",
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
       "Bash(npx eslint *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npm install *)"
     ]
   }
 }

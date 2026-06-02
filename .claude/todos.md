@@ -1,7 +1,9 @@
 # TODOs
 
 ## High Priority
-- [ ] Verify `lucide-react` is not depended on by any component — if clean, uninstall it (project uses `react-icons` per rules)
+- [ ] Test full doctor flow locally with real Stream credentials (set backend `STREAM_API_KEY`/`STREAM_API_SECRET` + frontend `NEXT_PUBLIC_STREAM_API_KEY`; verify video call + in-call chat doctor↔patient). In-call chat also needs the **Chat product enabled** on the Stream app.
+
+~~Verify lucide-react... uninstall (project uses react-icons)~~ — CORRECTION: the project standard **is** `lucide-react` (used in navItems + all components). `react-icons` is NOT used. Ignore the old rule.
 
 ## Technical Debt
 - [ ] No test suite exists on either BE or FE — consider adding at minimum integration tests for auth and critical API routes

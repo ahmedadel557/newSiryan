@@ -413,10 +413,19 @@ export const getRatingsReport = async (_req: AuthRequest, res: Response, next: N
   }
 };
 
+// Roles that go through the admin approval flow. Patients are auto-approved on signup and
+// admins are seeded — neither should appear on the Staff Registration Requests screen.
+const STAFF_APPROVAL_ROLES = [
+  'doctor', 'nurse', 'receptionist', 'pharmacist',
+  'inventory_manager', 'lab_technician', 'radiology_technician', 'cashier',
+];
+
 export const getStaffRequests = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { status = 'pending' } = req.query as { status?: string };
-    const users = await User.find({ approval_status: status }).sort({ createdAt: -1 }).lean();
+    const users = await User.find({ approval_status: status, role: { $in: STAFF_APPROVAL_ROLES } })
+      .sort({ createdAt: -1 })
+      .lean();
     const profiles = await Profile.find({ user: { $in: users.map(u => u._id) } }).lean();
     const profileMap = Object.fromEntries(profiles.map(p => [p.user.toString(), p]));
     const result = users.map(u => ({ ...u, id: (u._id as any).toString(), profile: profileMap[(u._id as any).toString()] ?? null }));

@@ -20,7 +20,16 @@
  ├── schedule (view/manage availability, blocked slots)
  ├── shared records (receive shared patient records)
  ├── record (create new medical record)
- └── real-time alerts (patient:checked_in, emergency:flag, lab/radiology results banners)
+ ├── queue (today's appointment queue)                              [backend ✓ P1 · frontend ✓ P2 /doctor/queue]
+ ├── notes (private per-patient notes)                              [backend ✓ P1 · frontend ✓ P2 NoteEditor in Notes tab]
+ ├── ratings (my ratings page)                                     [backend pre-existing · frontend ✓ P2 /doctor/ratings]
+ ├── notifications (doctor notifications page)                      [frontend ✓ P2 /doctor/notifications]
+ ├── video calls (Stream Video, custom UI, online appts)            [backend ✓ P1 · frontend ✓ P3]
+ │     doctor /dashboard/doctor/video/[id] + patient /dashboard/patient/video/[id];
+ │     mic/camera toggle, PiP local tile, end-for-both (doctor) / leave (patient)
+ ├── in-call chat (Stream Chat, custom UI, in-call only)            [frontend ✓ P3 — needs Chat enabled on Stream app]
+ └── real-time alerts (patient:checked_in, emergency:flag, lab/radiology results banners,
+       video:call:started / video:call:ended)
 
 ## Nurse
  ├── patients (view assigned patients, detail)

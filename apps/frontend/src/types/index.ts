@@ -661,6 +661,32 @@ export interface Notification {
   created_at: string;
 }
 
+export interface DoctorQueueItem {
+  appointment_id: string;
+  patient_id: string;
+  patient_name: string;
+  type: 'physical' | 'online';
+  status: AppointmentStatus | string;
+  scheduled_at: string;
+}
+
+export interface DoctorNote {
+  id: string;
+  patient_id: string;
+  content: string;
+  appointment_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Matches the backend GET /doctor/video/token response (camelCase, consumed by the Stream SDK in Part 3).
+export interface VideoCallToken {
+  callId: string;
+  token: string;
+  apiKey: string;
+  status?: 'waiting' | 'active' | 'ended';
+}
+
 /* ----------------------------------------------------------------
    DTOs — request payloads
 ---------------------------------------------------------------- */

@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { FileText, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { NoteEditor } from './NoteEditor';
 import type { MedicalRecord } from '@/types';
 
 interface NotesTabProps {
   record: MedicalRecord | null;
   records: MedicalRecord[];
   onSaveNote: (notes: string) => void;
+  patientId: string;
+  appointmentId?: string;
 }
 
-export function NotesTab({ record, records, onSaveNote }: NotesTabProps) {
+export function NotesTab({ record, records, onSaveNote, patientId, appointmentId }: NotesTabProps) {
   const [draft, setDraft] = useState(record?.notes ?? '');
 
   return (
@@ -66,6 +69,8 @@ export function NotesTab({ record, records, onSaveNote }: NotesTabProps) {
           </div>
         )}
       </div>
+
+      <NoteEditor patientId={patientId} appointmentId={appointmentId} />
     </div>
   );
 }

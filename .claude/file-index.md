@@ -1,5 +1,52 @@
 # File Index
 
+> NOTE: Paths below use the legacy `newSiryan_backEnd/` prefix from the original plan.
+> The real location is `apps/backend/` (monorepo). New entries use the correct path.
+
+## Frontend — Doctor: Video Call + In-Call Chat (Part 3, 2026-06-02)
+apps/frontend/src/hooks/useVideoCall.ts            — doctor call lifecycle (POST create → join → end)
+apps/frontend/src/hooks/usePatientVideoCall.ts     — patient call lifecycle (GET token → join → leave)
+apps/frontend/src/hooks/useInCallChat.ts           — Stream Chat channel keyed by callId (best-effort)
+apps/frontend/src/components/doctor/video/ParticipantVideo.tsx  — headless track binding
+apps/frontend/src/components/doctor/video/RemoteVideoTile.tsx   — remote participant + waiting state
+apps/frontend/src/components/doctor/video/LocalVideoTile.tsx    — PiP local tile
+apps/frontend/src/components/doctor/video/CallControls.tsx      — mic/camera/chat/end controls
+apps/frontend/src/components/doctor/video/InCallChat.tsx        — custom chat panel
+apps/frontend/src/components/doctor/video/CallStatusOverlay.tsx — connecting overlay
+apps/frontend/src/components/doctor/video/VideoCallLayout.tsx   — composes the call UI (shared)
+apps/frontend/src/app/dashboard/doctor/video/[appointmentId]/page.tsx   — doctor call page
+apps/frontend/src/app/dashboard/patient/video/[appointmentId]/page.tsx  — patient call page
+(service: doctor createVideoCall/endVideoCall, patient getVideoCallToken; AppointmentRow + online placeholder wired)
+
+## Frontend — Doctor: Queue / Notes / Ratings / Notifications (Part 2, 2026-06-02)
+apps/frontend/src/hooks/useDoctorQueue.ts        — today's queue (60s refresh + socket sync)
+apps/frontend/src/hooks/useDoctorNotes.ts        — per-patient private notes CRUD
+apps/frontend/src/hooks/useDoctorRatings.ts      — wraps doctorService.getMyRatings()
+apps/frontend/src/components/doctor/RatingStars.tsx   — read-only star display
+apps/frontend/src/components/doctor/QueueItem.tsx     — queue row + conditional Start-video button
+apps/frontend/src/components/doctor/NoteEditor.tsx    — private-notes panel (used in NotesTab)
+apps/frontend/src/app/dashboard/doctor/queue/page.tsx          — today's queue page
+apps/frontend/src/app/dashboard/doctor/ratings/page.tsx        — my ratings page
+apps/frontend/src/app/dashboard/doctor/notifications/page.tsx  — notifications page
+apps/frontend/src/app/dashboard/doctor/video/[appointmentId]/page.tsx — Part 3 placeholder
+(service methods getTodayQueue/notes CRUD/getVideoCallToken added to apps/frontend/src/services/doctor.service.ts)
+
+## Backend — Doctor: Video / Notes / Queue (Part 1, 2026-06-02)
+apps/backend/src/config/stream.ts
+- Guarded Stream `StreamClient` singleton (`@stream-io/node-sdk`); `getStreamClient()` throws 503 if unconfigured
+apps/backend/src/models/VideoCall.ts
+- Maps an appointment to a Stream call (status waiting/active/ended, started/ended timestamps)
+apps/backend/src/models/DoctorNote.ts
+- Doctor-private per-patient notes (optional appointment link)
+apps/backend/src/services/doctor.service.ts
+- First real service: video get-or-create/end/token, notes CRUD, today-queue (throws status-bearing errors)
+apps/backend/src/controllers/doctor/video.controller.ts
+- createVideoCall, endVideoCall, getVideoToken (thin → doctor.service)
+apps/backend/src/controllers/doctor/notes.controller.ts
+- createNote, getNotes, updateNote, deleteNote (thin → doctor.service)
+apps/backend/src/controllers/doctor/queue.controller.ts
+- getTodayQueue (thin → doctor.service)
+
 ## Backend — Entry & Config
 newSiryan_backEnd/src/server.ts
 - bootstraps Mongo → seed → Redis → cron jobs → Express listen
