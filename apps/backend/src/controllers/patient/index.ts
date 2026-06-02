@@ -645,6 +645,40 @@ export const getRoomBookings = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
+export const cancelRoomBooking = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const booking = await RoomBooking.findOne({ _id: req.params.id, patient: req.user!.id });
+    if (!booking) return sendError(res, 'Room booking not found', 404);
+    if (booking.status === 'cancelled') return sendError(res, 'Booking is already cancelled', 400);
+    if (booking.status === 'completed') return sendError(res, 'Cannot cancel a completed booking', 400);
+
+    const wasActive = booking.status === 'active';
+    booking.status = 'cancelled';
+    await booking.save();
+
+    if (wasActive) {
+      await Room.findByIdAndUpdate(booking.room, { status: 'available' });
+    }
+    cache.del(CACHE_KEYS.ROOM_AVAILABILITY);
+
+    sendSuccess(res, booking, 'Room booking cancelled');
+
+    try {
+      emitToUser(booking.doctor.toString(), 'room:booking:cancelled', { id: booking._id.toString() });
+      await Notification.create({
+        user: booking.doctor.toString(),
+        type: 'room',
+        title: 'Room booking cancelled',
+        message: 'A patient has cancelled their room booking.',
+        metadata: { room_booking_id: booking._id.toString() },
+      });
+    } catch { /* non-fatal */ }
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid booking ID', 400);
+    next(err);
+  }
+};
+
 export const getInvoices = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const invoices = await Invoice.find({ patient: req.user!.id }).sort({ createdAt: -1 });

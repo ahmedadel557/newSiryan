@@ -1,5 +1,66 @@
 # Changelog
 
+## [2026-06-02] B1–B8 Backend Gap Fixes — All 8 Missing Routes Implemented
+
+### Goal
+Re-apply the B1–B8 fixes from `.claude/api-contract-report.md`. After this session `npm run audit:routes` reports ❌ 0.
+
+### Backend Changes
+- `apps/backend/src/controllers/lab/index.ts` — added `getLabOrderById` (B1)
+- `apps/backend/src/routes/lab.routes.ts` — added `GET /orders/:id` (B1)
+- `apps/backend/src/controllers/radiology/index.ts` — added `getRadiologyOrderById` (B2)
+- `apps/backend/src/routes/radiology.routes.ts` — added `GET /orders/:id` (B2)
+- `apps/backend/src/controllers/pharmacist/index.ts` — added `verifyPrescription` + `rejectPrescription` (B3, B4)
+- `apps/backend/src/routes/pharmacist.routes.ts` — added `POST /prescriptions/:id/verify` + `POST /prescriptions/:id/reject` (B3, B4)
+- `apps/backend/src/controllers/nurse/index.ts` — added `getPatientVitals` (B5)
+- `apps/backend/src/routes/nurse.routes.ts` — added `GET /patients/:id/vitals` (B5)
+- `apps/backend/src/validations/receptionist.validation.ts` — added `createAppointmentSchema` + `registerPatientSchema` (B7, B8)
+- `apps/backend/src/controllers/receptionist/index.ts` — added `createAppointment` + `registerPatient` (B7, B8)
+- `apps/backend/src/routes/receptionist.routes.ts` — added `POST /appointments` + `POST /patients` (B7, B8)
+
+### Frontend Changes
+- `apps/frontend/src/services/admin.service.ts` — split `processDeletionRequest(id, action)` into `approveDeletionRequest(id)` + `rejectDeletionRequest(id)` so audit script can match literal route segments (B6)
+- `apps/frontend/src/app/dashboard/admin/compliance/page.tsx` — updated `handleProcess` to call the split functions (B6)
+
+### Result
+- `npm run audit:routes`: ❌ 8 → **0**
+- `npx tsc --noEmit` (backend): 0 errors
+- `npx tsc --noEmit` (frontend): 0 errors
+
+## [2026-06-02] Route-Diff Follow-Up — Cancel Room Booking + Script Fixes
+
+### Changed Files
+- `apps/backend/src/controllers/patient/index.ts` — added `cancelRoomBooking` export: finds booking by `{_id, patient}` (ownership check), rejects if already cancelled/completed, sets `status='cancelled'`, frees room if it was active, invalidates `CACHE_KEYS.ROOM_AVAILABILITY`, non-fatal doctor notification
+- `apps/backend/src/routes/patient.routes.ts` — imported `cancelRoomBooking`, added `router.delete('/rooms/bookings/:id', cancelRoomBooking)`
+- `apps/backend/scripts/auditRoutes.ts` — added `/:param/profile` to `shouldIgnore` with comment explaining the `staff.service.ts` roleToPath dispatch pattern
+- `apps/frontend/src/services/cashier.service.ts` — removed dead `getDailyStats` method (was calling non-existent `GET /cashier/stats/daily`; `getDailyReport` already covers this)
+
+### Result
+`npm run audit:routes`: ❌ 12 → 8. The remaining 8 are all known unimplemented-feature gaps (not wiring bugs), documented in `.claude/bugs.md` as RD-1 through RD-9.
+
+## [2026-06-02] API Contract Audit — Route-Diff Script + Shape Fixes
+
+### Goal
+Create a permanent route-diff audit tool and fix all confirmed shape mismatches between backend controllers and frontend service normalizers.
+
+### Created Files
+- `apps/backend/scripts/auditRoutes.ts` — regex-based diff: parses all `*.routes.ts` + all `*.service.ts`, compares method+path pairs, outputs ❌/⚠️/✅ report to console and `.claude/route-diff-report.txt`
+- `.claude/api-contract-report.md` — shape audit results table (all hotspots audited 2026-06-02)
+
+### Changed Files
+- `apps/backend/package.json` — added `"audit:routes": "ts-node --project tsconfig.json scripts/auditRoutes.ts"` script
+- `apps/frontend/src/services/admin.service.ts`:
+  - `getShifts()` — `Array.isArray` check replaced with `Object.values(raw.shifts).flat()` (BE returns grouped object, not array)
+  - `getTodayShifts()` — same fix as `getShifts`
+  - `getDepartmentStaff()` — `list.map()` on grouped object replaced with `Object.values(raw).flat()` (BE groups by role)
+  - `processDeletionRequest()` — URL fixed from `/deletion-requests/:id` to `/deletion-requests/:id/approve|reject`; return type changed to `void` (BE returns null)
+- `.claude/todos.md` — added Post-Launch section (shared contract, E2E tests, CI gate)
+- `.claude/memory.md` — added API Contract Health section
+- `.claude/current-task.md` — updated to current task
+
+### Root Cause (shape mismatches)
+All three fixes stem from the same pattern: backend groups results by a key (department, role) and returns `Record<string, T[]>` while the frontend expected a flat `T[]`. The `Array.isArray()` guard correctly detected the mismatch but silently defaulted to `[]` instead of surfacing an error.
+
 ## [2026-06-02] TanStack Query Migration — Part 3 (Hook Cleanup + Notifications)
 
 ### Goal

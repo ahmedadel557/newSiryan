@@ -1,10 +1,30 @@
 # Current Task
 
 ## Task
-TanStack Query Migration — Part 3 of 3 (2026-06-02): hook folder cleanup + useNotifications migration.
+B1–B8 Backend Gap Fixes — re-apply all 8 missing route/controller additions (2026-06-02).
 
 ## Status
 COMPLETE.
+
+## What was done
+- **B1** `GET /lab/orders/:id` — added `getLabOrderById` controller + route
+- **B2** `GET /radiology/orders/:id` — added `getRadiologyOrderById` controller + route
+- **B3** `POST /pharmacy/prescriptions/:id/verify` — added `verifyPrescription` controller + route
+- **B4** `POST /pharmacy/prescriptions/:id/reject` — added `rejectPrescription` controller + route
+- **B5** `GET /nurse/patients/:id/vitals` — added `getPatientVitals` controller + route
+- **B6** Split `processDeletionRequest` → `approveDeletionRequest` + `rejectDeletionRequest` in admin.service.ts; updated compliance page
+- **B7** `POST /receptionist/appointments` — added `createAppointmentSchema` validation + `createAppointment` controller + route
+- **B8** `POST /receptionist/patients` — added `registerPatientSchema` validation + `registerPatient` controller + route
+
+## Verification
+- `npm run audit:routes` → ❌ 0 (was 8)
+- `npx tsc --noEmit` backend → 0 errors
+- `npx tsc --noEmit` frontend → 0 errors
+
+---
+
+## Previous Task
+TanStack Query Migration — Part 3 of 3 (2026-06-02): hook folder cleanup + useNotifications migration.
 
 ## What was done
 - Migrated `useNotifications` from polling/useState to TanStack Query (`refetchInterval: 30_000`, socket → `setQueryData`, mutations for markRead/markAllRead/deleteOne/clearAll)

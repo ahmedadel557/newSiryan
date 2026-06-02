@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
 import { logAudit } from '../../utils/audit';
-import { cancelAppointmentSchema, rescheduleSchema, checkinSchema } from '../../validations/receptionist.validation';
+import { cancelAppointmentSchema, rescheduleSchema, checkinSchema, createAppointmentSchema, registerPatientSchema } from '../../validations/receptionist.validation';
 import { emitToUser } from '../../config/socket';
 import { sendEmail } from '../../utils/mailer';
 import User from '../../models/User';
@@ -498,6 +498,84 @@ export const getRequests = async (_req: AuthRequest, res: Response, next: NextFu
 
     sendSuccess(res, result);
   } catch (err) {
+    next(err);
+  }
+};
+
+/* ─── POST /appointments ─── */
+
+export const createAppointment = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const parsed = createAppointmentSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const { patient_id, doctor_id, scheduled_at, reason, type } = parsed.data.body;
+
+    if (scheduled_at <= new Date()) return sendError(res, 'Scheduled time must be in the future', 400);
+
+    const [patient, doctor] = await Promise.all([
+      User.findOne({ _id: patient_id, role: 'patient', is_active: true }),
+      User.findOne({ _id: doctor_id, role: 'doctor', is_active: true }),
+    ]);
+    if (!patient) return sendError(res, 'Patient not found', 404);
+    if (!doctor) return sendError(res, 'Doctor not found', 404);
+
+    const conflict = await Appointment.findOne({
+      doctor: doctor_id,
+      scheduled_at,
+      status: { $in: ['pending', 'confirmed'] },
+    });
+    if (conflict) return sendError(res, 'This time slot is already booked', 409);
+
+    const appointment = await Appointment.create({
+      patient: patient_id,
+      doctor: doctor_id,
+      type: type ?? 'physical',
+      scheduled_at,
+      reason: reason ?? '',
+      status: 'confirmed',
+    });
+
+    sendSuccess(res, appointment, 'Appointment created', 201);
+    logAudit({ performedBy: req.user!.id, action: 'create_appointment', resource: 'appointment', resourceId: appointment._id.toString(), req });
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid ID provided', 400);
+    next(err);
+  }
+};
+
+/* ─── POST /patients ─── */
+
+export const registerPatient = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const parsed = registerPatientSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const { username, email, password, first_name, last_name, date_of_birth, gender, national_id, phone, blood_type } = parsed.data.body;
+
+    const user = await User.create({ username, email, password, role: 'patient' });
+    let profile;
+    try {
+      profile = await Profile.create({
+        user: user._id,
+        first_name,
+        last_name,
+        date_of_birth: date_of_birth ? new Date(date_of_birth) : undefined,
+        gender,
+        national_id,
+        phone,
+        blood_type,
+      });
+    } catch (profileErr) {
+      await User.deleteOne({ _id: user._id });
+      throw profileErr;
+    }
+
+    sendSuccess(res, { user, profile }, 'Patient registered', 201);
+    logAudit({ performedBy: req.user!.id, action: 'register_patient', resource: 'user', resourceId: user._id.toString(), req });
+  } catch (err: any) {
+    if (err.code === 11000) return sendError(res, 'Email or username already taken', 409);
+    if (err.name === 'CastError') return sendError(res, 'Invalid ID', 400);
     next(err);
   }
 };

@@ -14,6 +14,7 @@ import {
   scheduleLabOrder,
   scheduleRadiologyOrder,
   confirmRoomBooking,
+  cancelRoomBooking,
   cancelAppointment,
   getPrescriptions,
   getLabResults,
@@ -64,6 +65,7 @@ router.post('/lab-orders/:id/schedule', scheduleLabOrder);
 router.get('/radiology-results', getRadiologyResults);
 router.post('/radiology-orders/:id/schedule', scheduleRadiologyOrder);
 router.post('/rooms/bookings/:id/confirm', confirmRoomBooking);
+router.delete('/rooms/bookings/:id', cancelRoomBooking);
 router.post('/pharmacy/order', validateRequest(createPharmacyOrderSchema), createPharmacyOrder);
 router.get('/pharmacy/orders', getPharmacyOrders);
 router.post('/rooms/book', validateRequest(bookRoomSchema), bookRoom);

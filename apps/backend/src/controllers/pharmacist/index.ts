@@ -285,6 +285,58 @@ export const getPrescriptionById = async (req: AuthRequest, res: Response, next:
   }
 };
 
+export const verifyPrescription = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const prescription = await Prescription.findById(req.params.id)
+      .populate('patient', 'username email')
+      .populate('doctor', 'username email')
+      .populate('items.medication', 'name unit category price');
+
+    if (!prescription) return sendError(res, 'Prescription not found', 404);
+
+    const now = new Date();
+    const isValid = prescription.status === 'active' && prescription.expires_at > now;
+    if (!isValid) {
+      return sendError(
+        res,
+        prescription.status !== 'active' ? `Prescription is ${prescription.status}` : 'Prescription has expired',
+        400
+      );
+    }
+
+    const patientProfile = await Profile.findOne({ user: prescription.patient })
+      .select('first_name last_name insurance_provider insurance_number insurance_discount_pct')
+      .lean();
+
+    sendSuccess(res, {
+      ...prescription.toJSON(),
+      patient_profile: patientProfile,
+      validity_check: { is_valid: true, reason: null },
+    }, 'Prescription verified');
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid prescription ID', 400);
+    next(err);
+  }
+};
+
+export const rejectPrescription = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const prescription = await Prescription.findById(req.params.id);
+    if (!prescription) return sendError(res, 'Prescription not found', 404);
+    if (prescription.status !== 'active') {
+      return sendError(res, `Cannot reject a ${prescription.status} prescription`, 400);
+    }
+
+    prescription.status = 'cancelled';
+    await prescription.save();
+
+    sendSuccess(res, prescription, 'Prescription rejected');
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid prescription ID', 400);
+    next(err);
+  }
+};
+
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 export const listPharmacyOrders = async (req: AuthRequest, res: Response, next: NextFunction) => {

@@ -5,6 +5,7 @@ import { validateRequest } from '../middlewares/validateRequest';
 import { addVitalsSchema, medicationGivenSchema, emergencyFlagSchema } from '../validations/nurse.validation';
 import {
   getNursePatients,
+  getPatientVitals,
   addVitals,
   getMedicationSchedule,
   markMedicationGiven,
@@ -18,6 +19,7 @@ const router = Router();
 router.use(authenticate, requireCompleteProfile, authorize('nurse'));
 
 router.get('/patients', getNursePatients);
+router.get('/patients/:id/vitals', getPatientVitals);
 router.post('/patients/:id/vitals', validateRequest(addVitalsSchema), addVitals);
 router.get('/patients/:id/medication-schedule', getMedicationSchedule);
 router.patch('/patients/:id/medication/:item_id/given', validateRequest(medicationGivenSchema), markMedicationGiven);

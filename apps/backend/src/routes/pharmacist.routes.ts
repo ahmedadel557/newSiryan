@@ -14,6 +14,8 @@ import {
 import {
   getPrescriptions,
   getPrescriptionById,
+  verifyPrescription,
+  rejectPrescription,
   listPharmacyOrders,
   getPharmacyOrderById,
   approvePharmacyOrder,
@@ -65,6 +67,8 @@ router.use(authenticate, requireCompleteProfile, authorize('pharmacist'));
 
 router.get('/prescriptions', getPrescriptions);
 router.get('/prescriptions/:id', getPrescriptionById);
+router.post('/prescriptions/:id/verify', verifyPrescription);
+router.post('/prescriptions/:id/reject', rejectPrescription);
 
 router.get('/orders', listPharmacyOrders);
 router.get('/orders/:id', getPharmacyOrderById);

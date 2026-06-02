@@ -1,0 +1,306 @@
+Route-Diff Report — 2026-06-02T16:46:43.656Z
+────────────────────────────────────────────────────────────────
+Backend routes:  287
+Frontend calls:  270 parsed, 4 unparseable
+
+❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
+
+⚠️   BACKEND ROUTES NOTHING CALLS  (40)
+────────────────────────────────────────────────────────────────
+  DELETE  /api/admin/insurance/:param  [admin.routes.ts]
+  DELETE  /api/upload/avatar  [upload.routes.ts]
+  GET     /api/admin/insurance  [admin.routes.ts]
+  GET     /api/admin/profile  [admin.routes.ts]
+  GET     /api/cashier/patients/:param/history  [cashier.routes.ts]
+  GET     /api/cashier/profile  [cashier.routes.ts]
+  GET     /api/doctor/:param/availability  [doctor.routes.ts]
+  GET     /api/doctor/:param/schedule-info  [doctor.routes.ts]
+  GET     /api/doctor/list  [doctor.routes.ts]
+  GET     /api/inventory/profile  [inventory.routes.ts]
+  GET     /api/lab/orders  [lab.routes.ts]
+  GET     /api/lab/profile  [lab.routes.ts]
+  GET     /api/nurse/profile  [nurse.routes.ts]
+  GET     /api/patient/notifications  [patient.routes.ts]
+  GET     /api/pharmacy/orders/:param/delivery  [pharmacist.routes.ts]
+  GET     /api/pharmacy/profile  [pharmacist.routes.ts]
+  GET     /api/radiology/orders  [radiology.routes.ts]
+  GET     /api/radiology/profile  [radiology.routes.ts]
+  GET     /api/receptionist/profile  [receptionist.routes.ts]
+  GET     /api/settings/pricing  [settings.routes.ts]
+  PATCH   /api/patient/notifications/:param/read  [patient.routes.ts]
+  PATCH   /api/patient/notifications/read-all  [patient.routes.ts]
+  POST    /api/admin/cleanup-profiles  [admin.routes.ts]
+  POST    /api/admin/fix-google-profiles  [admin.routes.ts]
+  POST    /api/admin/insurance  [admin.routes.ts]
+  POST    /api/auth/refresh-token  [auth.routes.ts]
+  POST    /api/auth/register/staff  [auth.routes.ts]
+  POST    /api/pharmacy/refill-request  [pharmacist.routes.ts]
+  POST    /api/upload/avatar  [upload.routes.ts]
+  PUT     /api/admin/insurance/:param  [admin.routes.ts]
+  PUT     /api/admin/profile  [admin.routes.ts]
+  PUT     /api/admin/settings/pricing/lab/:param  [admin.routes.ts]
+  PUT     /api/admin/settings/pricing/radiology/:param  [admin.routes.ts]
+  PUT     /api/cashier/profile  [cashier.routes.ts]
+  PUT     /api/inventory/profile  [inventory.routes.ts]
+  PUT     /api/lab/profile  [lab.routes.ts]
+  PUT     /api/nurse/profile  [nurse.routes.ts]
+  PUT     /api/pharmacy/profile  [pharmacist.routes.ts]
+  PUT     /api/radiology/profile  [radiology.routes.ts]
+  PUT     /api/receptionist/profile  [receptionist.routes.ts]
+
+✅  MATCHED  (247)
+────────────────────────────────────────────────────────────────
+  DELETE  /api/admin/announcements/:param
+  DELETE  /api/admin/appointments/:param
+  DELETE  /api/admin/departments/:param
+  DELETE  /api/admin/doctors/:param/schedule/slot
+  DELETE  /api/admin/insurance-companies/:param
+  DELETE  /api/admin/settings/pricing/lab/:param
+  DELETE  /api/admin/settings/pricing/radiology/:param
+  DELETE  /api/admin/shifts/:param
+  DELETE  /api/admin/system/maintenance
+  DELETE  /api/admin/users/:param
+  DELETE  /api/doctor/notes/:param
+  DELETE  /api/doctor/schedule/blocks/:param
+  DELETE  /api/inventory/items/:param
+  DELETE  /api/inventory/rooms/:param
+  DELETE  /api/inventory/rooms/:param/items/:param
+  DELETE  /api/inventory/suppliers/:param
+  DELETE  /api/notifications
+  DELETE  /api/notifications/:param
+  DELETE  /api/patient/appointments/:param
+  DELETE  /api/patient/medical-record-shares/:param
+  DELETE  /api/patient/rooms/bookings/:param
+  DELETE  /api/settings/account
+  GET     /api/admin/announcements
+  GET     /api/admin/appointments
+  GET     /api/admin/audit-log
+  GET     /api/admin/deletion-requests
+  GET     /api/admin/departments
+  GET     /api/admin/departments/:param/staff
+  GET     /api/admin/doctors/:param/schedule
+  GET     /api/admin/email-templates
+  GET     /api/admin/insurance-companies
+  GET     /api/admin/invoices
+  GET     /api/admin/reports/doctors
+  GET     /api/admin/reports/occupancy
+  GET     /api/admin/reports/pharmacy
+  GET     /api/admin/reports/ratings
+  GET     /api/admin/reports/revenue
+  GET     /api/admin/schedules
+  GET     /api/admin/settings/pricing
+  GET     /api/admin/shifts
+  GET     /api/admin/shifts/today
+  GET     /api/admin/staff-requests
+  GET     /api/admin/stats
+  GET     /api/admin/system/health
+  GET     /api/admin/system/logs
+  GET     /api/admin/system/maintenance
+  GET     /api/admin/users
+  GET     /api/admin/users/:param
+  GET     /api/auth/check-username
+  GET     /api/auth/me
+  GET     /api/cashier/invoices
+  GET     /api/cashier/invoices/:param
+  GET     /api/cashier/patients
+  GET     /api/cashier/patients/:param/unbilled
+  GET     /api/cashier/pending
+  GET     /api/cashier/reports/daily
+  GET     /api/doctor/:param/ratings
+  GET     /api/doctor/me/ratings
+  GET     /api/doctor/notes/:param
+  GET     /api/doctor/patients
+  GET     /api/doctor/patients/:param
+  GET     /api/doctor/patients/:param/lab-orders
+  GET     /api/doctor/patients/:param/prescriptions
+  GET     /api/doctor/patients/:param/radiology-orders
+  GET     /api/doctor/patients/:param/record
+  GET     /api/doctor/patients/:param/records
+  GET     /api/doctor/profile
+  GET     /api/doctor/queue/today
+  GET     /api/doctor/room-bookings
+  GET     /api/doctor/schedule
+  GET     /api/doctor/schedule/blocks
+  GET     /api/doctor/shared-records
+  GET     /api/doctor/shared-records/:param
+  GET     /api/doctor/video/token/:param
+  GET     /api/inventory/analytics/consumption
+  GET     /api/inventory/budget
+  GET     /api/inventory/budget/history
+  GET     /api/inventory/expiring
+  GET     /api/inventory/forecast
+  GET     /api/inventory/items
+  GET     /api/inventory/items/:param
+  GET     /api/inventory/items/:param/locations
+  GET     /api/inventory/items/:param/prices
+  GET     /api/inventory/low-stock
+  GET     /api/inventory/purchase-orders
+  GET     /api/inventory/reports/consumption
+  GET     /api/inventory/reports/monthly
+  GET     /api/inventory/reports/suppliers
+  GET     /api/inventory/reports/waste
+  GET     /api/inventory/rooms
+  GET     /api/inventory/rooms/:param
+  GET     /api/inventory/rooms/:param/items
+  GET     /api/inventory/suppliers
+  GET     /api/inventory/suppliers/:param/performance
+  GET     /api/inventory/supply-requests
+  GET     /api/inventory/warehouse
+  GET     /api/inventory/waste
+  GET     /api/lab/orders/:param
+  GET     /api/lab/schedule
+  GET     /api/notifications
+  GET     /api/nurse/patients
+  GET     /api/nurse/patients/:param/medication-schedule
+  GET     /api/nurse/patients/:param/vitals
+  GET     /api/patient/appointments
+  GET     /api/patient/appointments/:param/rating
+  GET     /api/patient/appointments/:param/waiting-estimate
+  GET     /api/patient/insurance-companies
+  GET     /api/patient/invoices
+  GET     /api/patient/lab-results
+  GET     /api/patient/medical-record
+  GET     /api/patient/medical-record-shares
+  GET     /api/patient/pharmacy/orders
+  GET     /api/patient/prescriptions
+  GET     /api/patient/profile
+  GET     /api/patient/radiology-results
+  GET     /api/patient/rooms/bookings
+  GET     /api/pharmacy/history
+  GET     /api/pharmacy/medications
+  GET     /api/pharmacy/medications/:param/batches
+  GET     /api/pharmacy/medications/:param/substitutes
+  GET     /api/pharmacy/orders
+  GET     /api/pharmacy/orders/:param
+  GET     /api/pharmacy/prescriptions
+  GET     /api/pharmacy/prescriptions/:param
+  GET     /api/pharmacy/refill-requests
+  GET     /api/pharmacy/reports/daily
+  GET     /api/radiology/orders/:param
+  GET     /api/radiology/schedule
+  GET     /api/receptionist/appointments
+  GET     /api/receptionist/lab-orders
+  GET     /api/receptionist/patients
+  GET     /api/receptionist/patients/:param/appointments
+  GET     /api/receptionist/radiology-orders
+  GET     /api/receptionist/requests
+  GET     /api/settings
+  GET     /api/settings/maintenance
+  PATCH   /api/admin/deletion-requests/:param/approve
+  PATCH   /api/admin/deletion-requests/:param/reject
+  PATCH   /api/admin/insurance-companies/:param
+  PATCH   /api/admin/staff-requests/:param/approve
+  PATCH   /api/admin/staff-requests/:param/reject
+  PATCH   /api/admin/users/:param/activate
+  PATCH   /api/admin/users/:param/profile
+  PATCH   /api/admin/users/:param/role
+  PATCH   /api/auth/change-password
+  PATCH   /api/cashier/invoices/:param/cancel
+  PATCH   /api/cashier/invoices/:param/partial
+  PATCH   /api/cashier/invoices/:param/pay
+  PATCH   /api/inventory/purchase-orders/:param/receive
+  PATCH   /api/inventory/purchase-orders/:param/status
+  PATCH   /api/inventory/rooms/:param/status
+  PATCH   /api/inventory/supply-requests/:param/fulfill
+  PATCH   /api/inventory/supply-requests/:param/receive
+  PATCH   /api/inventory/supply-requests/:param/reject
+  PATCH   /api/inventory/warehouse/:param/assign
+  PATCH   /api/lab/orders/:param/results
+  PATCH   /api/lab/orders/:param/status
+  PATCH   /api/notifications/:param/read
+  PATCH   /api/notifications/read-all
+  PATCH   /api/nurse/patients/:param/medication/:param/given
+  PATCH   /api/pharmacy/orders/:param/approve
+  PATCH   /api/pharmacy/orders/:param/approve-prescription
+  PATCH   /api/pharmacy/orders/:param/delivery-status
+  PATCH   /api/pharmacy/orders/:param/reject
+  PATCH   /api/pharmacy/refill-requests/:param/approve
+  PATCH   /api/pharmacy/refill-requests/:param/reject
+  PATCH   /api/radiology/orders/:param/results
+  PATCH   /api/radiology/orders/:param/status
+  PATCH   /api/receptionist/appointments/:param/cancel
+  PATCH   /api/receptionist/appointments/:param/confirm
+  PATCH   /api/receptionist/appointments/:param/reschedule
+  POST    /api/admin/announcements
+  POST    /api/admin/departments
+  POST    /api/admin/insurance-companies
+  POST    /api/admin/invoices
+  POST    /api/admin/settings/pricing/lab
+  POST    /api/admin/settings/pricing/radiology
+  POST    /api/admin/shifts
+  POST    /api/admin/system/maintenance
+  POST    /api/admin/users
+  POST    /api/auth/complete-profile
+  POST    /api/auth/forgot-password
+  POST    /api/auth/login
+  POST    /api/auth/logout
+  POST    /api/auth/register
+  POST    /api/cashier/invoices
+  POST    /api/cashier/patients/:param/generate-invoice
+  POST    /api/doctor/appointments/:param/cancel-request
+  POST    /api/doctor/appointments/:param/reschedule-request
+  POST    /api/doctor/notes
+  POST    /api/doctor/patients/:param/diagnosis
+  POST    /api/doctor/patients/:param/follow-up
+  POST    /api/doctor/patients/:param/lab-order
+  POST    /api/doctor/patients/:param/prescription
+  POST    /api/doctor/patients/:param/radiology-order
+  POST    /api/doctor/patients/:param/room-request
+  POST    /api/doctor/schedule/block
+  POST    /api/doctor/video/call/:param
+  POST    /api/doctor/video/call/:param/end
+  POST    /api/inventory/budget
+  POST    /api/inventory/items
+  POST    /api/inventory/items/:param/locations
+  POST    /api/inventory/items/:param/prices
+  POST    /api/inventory/purchase-orders
+  POST    /api/inventory/reports/monthly/generate
+  POST    /api/inventory/rooms
+  POST    /api/inventory/rooms/:param/items
+  POST    /api/inventory/suppliers
+  POST    /api/inventory/supply-requests
+  POST    /api/inventory/transfer
+  POST    /api/inventory/waste
+  POST    /api/nurse/patients/:param/emergency-flag
+  POST    /api/nurse/patients/:param/vitals
+  POST    /api/patient/appointments
+  POST    /api/patient/appointments/:param/pay-mock
+  POST    /api/patient/appointments/:param/rate
+  POST    /api/patient/chatbot
+  POST    /api/patient/lab-orders/:param/schedule
+  POST    /api/patient/medical-records/:param/share
+  POST    /api/patient/pharmacy/order
+  POST    /api/patient/radiology-orders/:param/schedule
+  POST    /api/patient/rooms/book
+  POST    /api/patient/rooms/bookings/:param/confirm
+  POST    /api/pharmacy/check-interactions
+  POST    /api/pharmacy/medications/:param/batch
+  POST    /api/pharmacy/prescriptions/:param/reject
+  POST    /api/pharmacy/prescriptions/:param/verify
+  POST    /api/pharmacy/supply-request
+  POST    /api/receptionist/appointments
+  POST    /api/receptionist/checkin/:param
+  POST    /api/receptionist/patients
+  PUT     /api/admin/doctors/:param/schedule
+  PUT     /api/admin/email-templates/:param
+  PUT     /api/admin/settings/pricing
+  PUT     /api/admin/shifts/:param
+  PUT     /api/admin/staff/:param/department
+  PUT     /api/doctor/notes/:param
+  PUT     /api/doctor/profile
+  PUT     /api/inventory/items/:param
+  PUT     /api/inventory/items/:param/locations/:param
+  PUT     /api/inventory/items/:param/prices/:param
+  PUT     /api/inventory/rooms/:param
+  PUT     /api/inventory/suppliers/:param
+  PUT     /api/patient/profile
+  PUT     /api/settings/appearance
+  PUT     /api/settings/notifications
+  PUT     /api/settings/password
+
+⚠️   UNPARSEABLE TEMPLATE LITERALS  (4)
+────────────────────────────────────────────────────────────────
+  admin.service.ts: GET `/admin/reports/revenue${qs ? `
+  admin.service.ts: GET `/admin/appointments${qs ? `
+  admin.service.ts: GET `/admin/schedules${qs ? `
+  admin.service.ts: GET `/admin/shifts${qs ? `

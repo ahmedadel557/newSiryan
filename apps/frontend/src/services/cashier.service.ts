@@ -58,11 +58,6 @@ export const cashierService = {
     return normalizeInvoice(res.data.data);
   },
 
-  async getDailyStats(): Promise<{ total_collected: number; pending_amount: number }> {
-    const res = await apiClient.get<ApiResponse<{ total_collected: number; pending_amount: number }>>('/cashier/stats/daily');
-    return res.data.data;
-  },
-
   // Raw daily report — NOT routed through normalizeInvoice (preserves patient_name, mixed, paid_at).
   async getDailyReport(date?: string): Promise<DailyReport> {
     const res = await apiClient.get<ApiResponse<DailyReport>>('/cashier/reports/daily', {

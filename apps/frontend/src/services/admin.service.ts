@@ -209,14 +209,18 @@ export const adminService = {
     if (params?.from) query.set('from', params.from);
     if (params?.to) query.set('to', params.to);
     const qs = query.toString();
-    const res = await apiClient.get<ApiResponse<Shift[]>>(`/admin/shifts${qs ? `?${qs}` : ''}`);
-    const list = Array.isArray(res.data.data) ? res.data.data : [];
+    const res = await apiClient.get<ApiResponse<any>>(`/admin/shifts${qs ? `?${qs}` : ''}`);
+    // BE returns { shifts: Record<dept, Shift[]>, total } — flatten to Shift[]
+    const raw = res.data.data;
+    const list: any[] = Array.isArray(raw) ? raw : (Object.values((raw as any)?.shifts ?? {}).flat() as any[]);
     return list.map((s: any) => normalize<Shift>(s));
   },
 
   async getTodayShifts(): Promise<Shift[]> {
-    const res = await apiClient.get<ApiResponse<Shift[]>>('/admin/shifts/today');
-    const list = Array.isArray(res.data.data) ? res.data.data : [];
+    const res = await apiClient.get<ApiResponse<any>>('/admin/shifts/today');
+    // BE returns { shifts: Record<dept, Shift[]>, total } — flatten to Shift[]
+    const raw = res.data.data;
+    const list: any[] = Array.isArray(raw) ? raw : (Object.values((raw as any)?.shifts ?? {}).flat() as any[]);
     return list.map((s: any) => normalize<Shift>(s));
   },
 
@@ -329,15 +333,20 @@ export const adminService = {
     return list.map((r: any) => normalize<DeletionRequest>(r));
   },
 
-  async processDeletionRequest(id: string, action: 'approve' | 'reject'): Promise<DeletionRequest> {
-    const res = await apiClient.patch<ApiResponse<DeletionRequest>>(`/admin/deletion-requests/${id}`, { action });
-    return normalize<DeletionRequest>(res.data.data);
+  async approveDeletionRequest(id: string): Promise<void> {
+    await apiClient.patch(`/admin/deletion-requests/${id}/approve`);
+  },
+
+  async rejectDeletionRequest(id: string): Promise<void> {
+    await apiClient.patch(`/admin/deletion-requests/${id}/reject`);
   },
 
   // --- Department Staff ---
   async getDepartmentStaff(id: string): Promise<User[]> {
-    const res = await apiClient.get<ApiResponse<{ staff: any[] }>>(`/admin/departments/${id}/staff`);
-    const list = res.data.data?.staff ?? [];
+    const res = await apiClient.get<ApiResponse<{ department: string; staff: Record<string, any[]> }>>(`/admin/departments/${id}/staff`);
+    // BE returns { department, staff: Record<role, Profile[]> } — flatten to flat array
+    const raw = res.data.data?.staff ?? {};
+    const list: any[] = Array.isArray(raw) ? raw : (Object.values(raw).flat() as any[]);
     return list.map((u: any) => normalize<User>(u));
   },
 

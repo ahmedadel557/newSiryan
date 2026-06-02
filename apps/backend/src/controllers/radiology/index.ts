@@ -151,6 +151,30 @@ export const uploadRadiologyResults = async (req: AuthRequest, res: Response, ne
   }
 };
 
+export const getRadiologyOrderById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const order = await RadiologyOrder.findById(req.params.id)
+      .populate('patient', '_id username')
+      .populate('doctor', '_id username');
+
+    if (!order) return sendError(res, 'Radiology order not found', 404);
+
+    const pid = (order.patient as any)?._id?.toString() ?? order.patient.toString();
+    const did = (order.doctor as any)?._id?.toString()  ?? order.doctor.toString();
+    const profileMap = await buildProfileMap([pid, did]);
+
+    const obj = order.toJSON() as any;
+    sendSuccess(res, {
+      ...obj,
+      patient_name: profileMap.get(pid) ?? (order.patient as any)?.username ?? '',
+      doctor_name:  profileMap.get(did)  ?? (order.doctor  as any)?.username ?? '',
+    });
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid order ID', 400);
+    next(err);
+  }
+};
+
 export const getRadiologySchedule = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const orders = await RadiologyOrder.find({

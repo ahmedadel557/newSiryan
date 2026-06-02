@@ -142,6 +142,51 @@
 
 ---
 
+## Route-Diff Script Findings (2026-06-02) — run `npm run audit:routes` to refresh
+
+### ❌ Real mismatches (FE calls BE doesn't define)
+
+| # | Method | FE path | Notes |
+|---|--------|---------|-------|
+| RD-1 | GET | `/api/cashier/stats/daily` | FE calls wrong path — BE has `GET /cashier/reports/daily` (different path + richer shape) |
+| RD-2 | GET | `/api/nurse/patients/:id/vitals` | BE only has `POST /nurse/patients/:id/vitals` (add vitals); no GET for reading patient vitals |
+| RD-3 | POST | `/api/receptionist/appointments` | No BE route — receptionist creates appointments through a different flow |
+| RD-4 | POST | `/api/receptionist/patients` | No BE route — patient creation not implemented for receptionist role |
+| RD-5 | DELETE | `/api/patient/rooms/bookings/:id` | No BE route — patient room booking cancellation not implemented |
+| RD-6 | GET | `/api/lab/orders/:id` | No BE route for single lab order by ID (only list + status update) |
+| RD-7 | GET | `/api/radiology/orders/:id` | No BE route for single radiology order by ID |
+| RD-8 | POST | `/api/pharmacy/prescriptions/:id/verify` | No BE route — prescription verify endpoint missing |
+| RD-9 | POST | `/api/pharmacy/prescriptions/:id/reject` | No BE route — prescription reject endpoint missing |
+
+### ⚠️ Known script limitations (false positives)
+- `GET/PUT /api/:param/profile` (staff.service.ts) — dynamic `/${role}/profile` pattern; BE has per-role routes
+- `PATCH /api/admin/deletion-requests/:param/:param` — script can't match `${action}` ('approve'|'reject') against literal BE path segments `/approve` and `/reject`; this IS correctly wired at runtime
+
+---
+
+## [BUG-CONTRACT-1] getShifts / getTodayShifts always returned empty array
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Navigate to `/dashboard/admin/shifts` — shift list is always empty even though shifts exist in the DB.
+- **Root Cause:** Backend `getShifts` and `getTodayShifts` (`apps/backend/src/controllers/admin/index.ts` lines 1264, 1357) group shifts by department and return `{ shifts: Record<dept, Shift[]>, total }`. Frontend did `Array.isArray(res.data.data) ? res.data.data : []` — an object is never an array, so the fallback always triggered and returned `[]`.
+- **Fix:** Changed both methods to flatten the grouped object: `Object.values(raw.shifts ?? {}).flat()`. Backward-compatible (still handles bare-array case).
+- **File:** `apps/frontend/src/services/admin.service.ts` (`getShifts` line 213, `getTodayShifts` line 219)
+
+## [BUG-CONTRACT-2] getDepartmentStaff threw TypeError when staff existed
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Navigate to `/dashboard/admin/departments/:id/staff` — TypeError in console.
+- **Root Cause:** Backend returns `{ department: string, staff: Record<role, Profile[]> }` (grouped by role). Frontend did `res.data.data?.staff.map(...)` — `.map()` does not exist on a plain object.
+- **Fix:** Changed to `Object.values(raw.staff ?? {}).flat()` to produce a flat array before mapping.
+- **File:** `apps/frontend/src/services/admin.service.ts` (`getDepartmentStaff` line 340)
+
+## [BUG-CONTRACT-3] processDeletionRequest sent PATCH to non-existent route (404)
+- **Status:** resolved (2026-06-02)
+- **Reproduction:** Admin approves or rejects a GDPR deletion request → 404 network error.
+- **Root Cause:** Frontend called `PATCH /admin/deletion-requests/:id` with `{ action }` body. Backend has no such route — it has separate `PATCH /deletion-requests/:id/approve` and `PATCH /deletion-requests/:id/reject` endpoints (admin.routes.ts lines 136–137).
+- **Fix:** Changed URL to `/admin/deletion-requests/${id}/${action}`. Return type changed from `Promise<DeletionRequest>` to `Promise<void>` (both BE handlers return `null`).
+- **File:** `apps/frontend/src/services/admin.service.ts` (`processDeletionRequest` line 332)
+
+---
+
 ## Template
 
 ### [BUG-N] Title

@@ -77,8 +77,12 @@ export default function CompliancePage() {
     if (!confirmAction) return;
     setProcessing(true);
     try {
-      const updated = await adminService.processDeletionRequest(confirmAction.id, confirmAction.action);
-      setRequests((prev) => prev.map((r) => (r.id === confirmAction.id ? updated : r)));
+      if (confirmAction.action === 'approve') {
+        await adminService.approveDeletionRequest(confirmAction.id);
+      } else {
+        await adminService.rejectDeletionRequest(confirmAction.id);
+      }
+      setRequests((prev) => prev.filter((r) => r.id !== confirmAction.id));
       showToast(`Request ${confirmAction.action}d`);
       setConfirmAction(null);
     } catch {

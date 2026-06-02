@@ -75,6 +75,21 @@ export const getNursePatients = async (req: AuthRequest, res: Response, next: Ne
   }
 };
 
+export const getPatientVitals = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const patientId = req.params.id;
+    const record = await MedicalRecord.findOne({ patient: patientId })
+      .sort({ createdAt: -1 })
+      .select('vital_signs')
+      .lean();
+
+    sendSuccess(res, record?.vital_signs ?? []);
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid patient ID', 400);
+    next(err);
+  }
+};
+
 export const addVitals = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const patientId = req.params.id;

@@ -24,4 +24,19 @@
 - [x] Admin Flow — all parts complete (Parts 1–4, real-time, edge cases, appointments, staff profile edit, invoice create)
 
 ---
+
+## Route-Diff Gaps (from audit:routes 2026-06-02 — implement before these features are needed)
+- [ ] [HIGH] cashier.service.ts calls `GET /cashier/stats/daily` but BE only has `GET /cashier/reports/daily` — either add a lightweight stats endpoint or fix the FE call to use the reports endpoint
+- [ ] [MEDIUM] Nurse vitals GET missing — FE calls `GET /nurse/patients/:id/vitals` but BE only has POST; add a GET endpoint if the nurse needs to read historical vitals
+- [ ] [MEDIUM] Receptionist create appointment/patient — FE calls `POST /receptionist/appointments` and `POST /receptionist/patients` which have no BE routes; implement when receptionist booking flow is built
+- [ ] [LOW] Patient room booking cancel — `DELETE /patient/rooms/bookings/:id` has no BE route; implement when patient room management is built
+- [ ] [LOW] Individual lab/radiology order GET — `GET /lab/orders/:id` and `GET /radiology/orders/:id` have no BE routes
+- [ ] [LOW] Pharmacy prescription verify/reject — `POST /pharmacy/prescriptions/:id/verify` and `/reject` have no BE routes
+
+## Post-Launch (do after all features complete + stable)
+- [ ] [HIGH] Shared Contract — create `packages/contracts` with zod schemas for all API responses, imported by both backend (validates sendSuccess shape) and frontend (z.infer replaces manual types). Eliminates API contract drift at compile time. Pattern: @asteasolutions/zod-to-openapi or manual zod schemas per endpoint.
+- [ ] [HIGH] E2E Test Suite — supertest harness hitting every route against seeded DB, asserting request + response shape. Needs: stable seed data, jest config for backend, running app. Do after shared contract so tests assert against the contract schemas.
+- [ ] [MEDIUM] Convert audit:routes script to CI GitHub Actions check — runs on every push, blocks merge if new FE service call has no matching BE route.
+
+---
 Format: `[PRIORITY]` high | medium | low | debt

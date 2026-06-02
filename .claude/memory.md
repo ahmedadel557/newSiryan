@@ -177,3 +177,11 @@ Admin real-time (full catalog):
 - `getSocket()` — singleton socket client, auto-connects with credentials
 
 ## No test suites. Run `npm run lint` before commits.
+
+## API Contract Health
+- Global Mongoose toJSON transform (_id→id) in server.ts:33 — all res.json() responses use id not _id
+- Frontend normalizes defensively: `{ ...d, id: d._id ?? d.id }` in every service
+- Shape mismatches fixed (2026-06-02): getShifts/getTodayShifts (grouped→flat), getDepartmentStaff (grouped→flat), processDeletionRequest (wrong URL fixed)
+- Route-diff script: `cd apps/backend && npm run audit:routes` — re-run after adding new routes
+- Shape-fallback hotspots audited (2026-06-02) — see .claude/api-contract-report.md
+- Post-launch: shared contract (packages/contracts) + E2E tests — tracked in todos.md
