@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Share2, X } from 'lucide-react';
 import apiClient from '@/services/api.client';
 import { patientService } from '@/services/patient.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { ApiResponse } from '@/types';
 
 interface DoctorOption {

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { HeartPulse, AlertTriangle, Pill } from 'lucide-react';
-import { useNurse } from '@/hooks/useNurse';
+import { useNurse } from '@/hooks/nurse';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { VitalsDrawer } from '@/components/staff/nurse/VitalsDrawer';
 import { EmergencyFlagModal } from '@/components/staff/nurse/EmergencyFlagModal';

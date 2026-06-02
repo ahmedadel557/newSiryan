@@ -1,12 +1,12 @@
-'use client';
+﻿'use client';
 
 import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 import { cashierService } from '@/services/cashier.service';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import type { PendingPatient } from '@/types';
 
 export function useCashierPending() {

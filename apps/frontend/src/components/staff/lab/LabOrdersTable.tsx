@@ -1,7 +1,7 @@
-import { FlaskConical } from 'lucide-react';
+﻿import { FlaskConical } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/hooks/shared';
 import type { LabOrder, OrderStatus } from '@/types';
 
 const thClass =

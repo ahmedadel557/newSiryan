@@ -1,12 +1,12 @@
-'use client';
+﻿'use client';
 
 import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import type { AdminInvoice, CreateAdminInvoiceDto } from '@/types';
 
 export function useAdminInvoices() {

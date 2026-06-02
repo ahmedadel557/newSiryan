@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 import { useState, useRef, forwardRef } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Bell, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/hooks/shared';
 import type { Notification } from '@/types';
 import type React from 'react';
 

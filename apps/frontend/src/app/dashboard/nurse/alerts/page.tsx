@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { AlertTriangle, AlertCircle } from 'lucide-react';
-import { useNurse } from '@/hooks/useNurse';
+import { useNurse } from '@/hooks/nurse';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';

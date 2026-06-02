@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, Trash2, Users, X, Building2 } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';

@@ -1,8 +1,8 @@
-import { Video, MapPin, Phone, UserCheck } from 'lucide-react';
+﻿import { Video, MapPin, Phone, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Appointment } from '@/types';
-import type { QueueFilter } from '@/hooks/useReceptionist';
+import type { QueueFilter } from '@/hooks/receptionist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

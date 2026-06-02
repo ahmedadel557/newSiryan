@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTheme } from 'next-themes';
@@ -6,10 +6,10 @@ import { User, Bell, Palette, Lock, Eye, EyeOff, Sun, Moon, Monitor } from 'luci
 import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StaffShell } from '@/components/layouts/StaffShell';
-import { useAuth } from '@/hooks/useAuth';
-import { useSettings } from '@/hooks/useSettings';
+import { useAuth } from '@/hooks/shared';
+import { useSettings } from '@/hooks/shared';
 import { staffService } from '@/services/staff.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { roleNavMap } from '@/config/navItems';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/types';

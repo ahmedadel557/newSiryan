@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { Announcement, Role, CreateAnnouncementDto } from '@/types';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import { Plus, Trash2, X, AlertTriangle, Megaphone } from 'lucide-react';
 
 const ALL_ROLES: Role[] = ['doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_technician', 'radiology_technician', 'inventory_manager', 'patient', 'admin'];

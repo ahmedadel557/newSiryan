@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistMedications } from '@/hooks/usePharmacistMedications';
+import { usePharmacistMedications } from '@/hooks/pharmacist';
 import { BatchesModal } from '@/components/staff/pharmacist/BatchesModal';
 import { Send, Layers, AlertTriangle, Clock } from 'lucide-react';
 import type { PharmaMedication } from '@/types';

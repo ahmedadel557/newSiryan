@@ -1,14 +1,14 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { ShoppingCart, ClipboardList, ShoppingBag } from 'lucide-react';
-import { usePharmacy } from '@/hooks/usePharmacy';
+import { usePharmacy } from '@/hooks/patient';
 import { MedicationCatalog } from '@/components/patient/MedicationCatalog';
 import { CartPanel } from '@/components/patient/CartPanel';
 import { PrescriptionSelectModal } from '@/components/patient/PrescriptionSelectModal';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
-import type { PharmTab } from '@/hooks/usePharmacy';
+import type { PharmTab } from '@/hooks/patient';
 
 const TABS: { key: PharmTab; label: string }[] = [
   { key: 'catalog', label: 'Catalog' },

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';

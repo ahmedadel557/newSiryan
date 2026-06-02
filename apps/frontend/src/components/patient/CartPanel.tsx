@@ -1,8 +1,8 @@
-import { Info, ShoppingBag } from 'lucide-react';
+﻿import { Info, ShoppingBag } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { CartItemRow } from './CartItemRow';
 import type { CartItem } from '@/types';
-import type { DeliveryType } from '@/hooks/usePharmacy';
+import type { DeliveryType } from '@/hooks/patient';
 
 interface CartPanelProps {
   cart: CartItem[];

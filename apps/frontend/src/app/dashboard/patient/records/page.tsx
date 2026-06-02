@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
 import { Share2, Stethoscope, TestTube, Scan, Pill, X } from 'lucide-react';
-import { usePatientRecords } from '@/hooks/usePatientRecords';
+import { usePatientRecords } from '@/hooks/patient';
 import { patientService } from '@/services/patient.service';
 import { ShareRecordModal } from '@/components/patient/ShareRecordModal';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { RecordsTabBar } from '@/components/patient/RecordsTabBar';
 import { VisitCard } from '@/components/patient/VisitCard';
 import { LabResultRow } from '@/components/patient/LabResultRow';
@@ -12,7 +12,7 @@ import { ImagingRow } from '@/components/patient/ImagingRow';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
-import type { RecordsTab } from '@/hooks/usePatientRecords';
+import type { RecordsTab } from '@/hooks/patient';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

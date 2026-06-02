@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
 import type { DoctorSchedule, ScheduleSlot } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { ArrowLeft, Plus, Trash2, Ban, ExternalLink, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 
 const slotColor: Record<string, string> = {

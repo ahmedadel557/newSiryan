@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { Clock } from 'lucide-react';
-import { useWaitingEstimate } from '@/hooks/useWaitingEstimate';
+import { useWaitingEstimate } from '@/hooks/shared';
 
 interface Props {
   appointmentId: string;

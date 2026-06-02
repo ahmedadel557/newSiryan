@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Building2, Star } from 'lucide-react';
@@ -6,7 +6,7 @@ import { inventoryService } from '@/services/inventory.service';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { Supplier, SupplierPerformance, PurchaseOrder } from '@/types';
 
 const thClass = 'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { FileBarChart, Download } from 'lucide-react';
 import { inventoryService } from '@/services/inventory.service';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { Supplier } from '@/types';
 
 type ReportTab = 'monthly' | 'consumption' | 'waste' | 'suppliers';

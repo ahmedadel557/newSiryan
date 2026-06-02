@@ -1,7 +1,7 @@
-import { Scan } from 'lucide-react';
+﻿import { Scan } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/hooks/shared';
 import type { RadiologyOrder, OrderStatus } from '@/types';
 
 const thClass =

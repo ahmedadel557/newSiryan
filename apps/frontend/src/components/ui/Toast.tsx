@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
-import { useToast, type Toast } from '@/hooks/useToast';
+import { useToast, type Toast } from '@/hooks/shared';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 
 const variantStyles: Record<Toast['variant'], string> = {

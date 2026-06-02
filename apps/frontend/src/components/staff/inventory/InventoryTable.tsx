@@ -1,8 +1,8 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { Package, Pencil, Trash2, ArrowLeftRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/hooks/shared';
 import type { InventoryItem, Room } from '@/types';
 
 const thClass =

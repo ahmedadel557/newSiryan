@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { Shift, ShiftType, User, Role, AssignShiftDto } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 
 const SHIFT_TYPES: ShiftType[] = ['morning', 'afternoon', 'night', 'on_call'];

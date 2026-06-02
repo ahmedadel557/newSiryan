@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -10,7 +10,7 @@ import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AddRoomModal } from '@/components/staff/inventory/AddRoomModal';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { RoomDetail, InventoryItem, AddRoomDto } from '@/types';
 
 const thClass =

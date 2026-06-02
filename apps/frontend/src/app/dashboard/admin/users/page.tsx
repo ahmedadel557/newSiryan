@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useAdminUsers, type UserRoleFilter } from '@/hooks/admin';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { UsersTable } from '@/components/staff/admin/UsersTable';
 import { CreateStaffModal } from '@/components/staff/admin/CreateStaffModal';

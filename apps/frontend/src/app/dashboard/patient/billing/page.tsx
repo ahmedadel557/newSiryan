@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { ShieldCheck, CreditCard, X, Banknote, Smartphone, Wifi } from 'lucide-react';
-import { usePatientBilling } from '@/hooks/usePatientBilling';
+import { usePatientBilling } from '@/hooks/patient';
 import { BillingSummaryCards } from '@/components/patient/BillingSummaryCards';
 import { InvoiceList } from '@/components/patient/InvoiceList';
 import { InvoiceDetailModal } from '@/components/patient/InvoiceDetailModal';

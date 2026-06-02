@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 import { adminService } from '@/services/admin.service';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useSocketEvent } from '@/hooks/shared';
 
 interface RevenueParams {
   from?: string;

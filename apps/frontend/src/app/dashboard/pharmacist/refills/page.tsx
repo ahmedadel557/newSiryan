@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistRefills } from '@/hooks/usePharmacistRefills';
+import { usePharmacistRefills } from '@/hooks/pharmacist';
 import { RefillRequestCard } from '@/components/staff/pharmacist/RefillRequestCard';
 import { RejectModal } from '@/components/staff/pharmacist/RejectModal';
 

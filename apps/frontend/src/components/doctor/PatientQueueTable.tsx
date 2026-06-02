@@ -1,8 +1,8 @@
-import { Search, ArrowRight, TriangleAlert } from 'lucide-react';
+﻿import { Search, ArrowRight, TriangleAlert } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import type { QueueFilter, QueueRow } from '@/hooks/useDoctor';
+import type { QueueFilter, QueueRow } from '@/hooks/doctor';
 import type { AppointmentStatus } from '@/types';
 
 const FILTERS: { key: QueueFilter; label: string }[] = [

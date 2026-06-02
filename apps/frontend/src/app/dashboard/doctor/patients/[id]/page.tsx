@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, TriangleAlert, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { usePatientRecord } from '@/hooks/usePatientRecord';
+import { usePatientRecord } from '@/hooks/patient';
 import { PatientHeader } from '@/components/doctor/PatientHeader';
 import { PatientSummaryCard } from '@/components/doctor/PatientSummaryCard';
 import { OverviewTab } from '@/components/doctor/OverviewTab';
@@ -18,7 +18,7 @@ import { LabOrderModal } from '@/components/doctor/LabOrderModal';
 import { RadiologyOrderModal } from '@/components/doctor/RadiologyOrderModal';
 import { RoomRequestModal } from '@/components/doctor/RoomRequestModal';
 import { FollowUpModal } from '@/components/doctor/FollowUpModal';
-import type { RecordTab } from '@/hooks/usePatientRecord';
+import type { RecordTab } from '@/hooks/patient';
 
 const TABS: { id: RecordTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },

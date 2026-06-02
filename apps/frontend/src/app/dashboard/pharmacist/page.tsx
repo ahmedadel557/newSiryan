@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistDashboard } from '@/hooks/usePharmacistDashboard';
+import { usePharmacistDashboard } from '@/hooks/pharmacist';
 import { PharmacistSummaryCards } from '@/components/staff/pharmacist/PharmacistSummaryCards';
 import { RecentOrdersList } from '@/components/staff/pharmacist/RecentOrdersList';
 import { LowStockAlertList } from '@/components/staff/pharmacist/LowStockAlertList';

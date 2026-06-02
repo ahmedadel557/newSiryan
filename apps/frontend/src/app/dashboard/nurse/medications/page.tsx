@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { Pill, Printer, CheckSquare } from 'lucide-react';
-import { useNurse } from '@/hooks/useNurse';
+import { useNurse } from '@/hooks/nurse';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { MedRoundGroup } from '@/components/staff/nurse/MedRoundGroup';
 import { EmptyState } from '@/components/ui/EmptyState';

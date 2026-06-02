@@ -1,12 +1,12 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, ShieldOff, Trash2, AlertTriangle, Pencil } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/shared';
+import { useToast } from '@/hooks/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { User, Profile, Role, Department } from '@/types';
 

@@ -1,5 +1,5 @@
-import { Calendar, Clock, User, Stethoscope, Wallet } from 'lucide-react';
-import type { BookingFormData } from '@/hooks/useBooking';
+﻿import { Calendar, Clock, User, Stethoscope, Wallet } from 'lucide-react';
+import type { BookingFormData } from '@/hooks/shared';
 import type { DoctorAvailability } from '@/types';
 import { feeForVisitType, formatEGP } from '@/lib/pricing';
 

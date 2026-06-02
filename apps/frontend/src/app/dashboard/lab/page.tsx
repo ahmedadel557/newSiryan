@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { FlaskConical, CalendarDays, ArrowRight } from 'lucide-react';
-import { useLab } from '@/hooks/useLab';
+import { useLab } from '@/hooks/lab';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { LabOrdersTable } from '@/components/staff/lab/LabOrdersTable';
 import { UploadResultsModal } from '@/components/staff/lab/UploadResultsModal';

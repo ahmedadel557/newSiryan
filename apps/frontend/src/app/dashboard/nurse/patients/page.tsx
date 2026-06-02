@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, HeartPulse, Pill, ChevronRight } from 'lucide-react';
-import { useNurse } from '@/hooks/useNurse';
+import { useNurse } from '@/hooks/nurse';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';

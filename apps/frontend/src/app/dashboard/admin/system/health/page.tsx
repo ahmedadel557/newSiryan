@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { SystemHealth, ErrorLog } from '@/types';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import { RefreshCw, Database, Layers, Wifi, Clock, Cpu } from 'lucide-react';
 
 function StatusDot({ status }: { status: 'ok' | 'error' | 'degraded' }) {

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Bell, CheckCheck } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { NotificationType } from '@/types';

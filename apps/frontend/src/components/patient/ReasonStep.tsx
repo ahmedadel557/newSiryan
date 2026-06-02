@@ -1,4 +1,4 @@
-import type { BookingFormData } from '@/hooks/useBooking';
+﻿import type { BookingFormData } from '@/hooks/shared';
 
 const DEPARTMENTS = [
   'Cardiology',

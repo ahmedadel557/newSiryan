@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistOrders } from '@/hooks/usePharmacistOrders';
+import { usePharmacistOrders } from '@/hooks/pharmacist';
 import { OrderCard } from '@/components/staff/pharmacist/OrderCard';
 import { DrugInteractionModal } from '@/components/staff/pharmacist/DrugInteractionModal';
 import { SubstitutionModal } from '@/components/staff/pharmacist/SubstitutionModal';
 import { RejectModal } from '@/components/staff/pharmacist/RejectModal';
-import type { OrderStatusFilter, OrderTypeFilter } from '@/hooks/usePharmacistOrders';
+import type { OrderStatusFilter, OrderTypeFilter } from '@/hooks/pharmacist';
 
 const STATUS_TABS: { id: OrderStatusFilter; label: string }[] = [
   { id: 'all', label: 'All' },

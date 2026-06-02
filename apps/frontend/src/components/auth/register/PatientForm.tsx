@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useAuth } from '@/hooks/useAuth';
-import { useUsernameCheck } from '@/hooks/useUsernameCheck';
+import { useAuth } from '@/hooks/shared';
+import { useUsernameCheck } from '@/hooks/shared';
 import StepIndicator from '@/components/auth/shared/StepIndicator';
 import PersonalInfoStep from '@/components/auth/register/steps/PersonalInfoStep';
 import MedicalInfoStep from '@/components/auth/register/steps/MedicalInfoStep';

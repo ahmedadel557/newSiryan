@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { StreamVideo, StreamCall } from '@stream-io/video-react-sdk';
-import { useAuth } from '@/hooks/useAuth';
-import { usePatientVideoCall } from '@/hooks/usePatientVideoCall';
+import { useAuth } from '@/hooks/shared';
+import { usePatientVideoCall } from '@/hooks/shared';
 import { VideoCallLayout } from '@/components/doctor/video/VideoCallLayout';
 import { CallStatusOverlay } from '@/components/doctor/video/CallStatusOverlay';
 

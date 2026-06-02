@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import Link from 'next/link';
 import {
   Mail,
@@ -9,7 +9,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/shared';
 import PasswordInput from '@/components/shared/PasswordInput';
 import AuthDivider from '@/components/auth/shared/AuthDivider';
 import SocialLogin from '@/components/auth/login/SocialLogin';

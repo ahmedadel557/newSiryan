@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Plus, Truck, Users } from 'lucide-react';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/hooks/inventory';
 import { RejectSupplyRequestModal } from '@/components/staff/inventory/RejectSupplyRequestModal';
 import { inventoryService } from '@/services/inventory.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';

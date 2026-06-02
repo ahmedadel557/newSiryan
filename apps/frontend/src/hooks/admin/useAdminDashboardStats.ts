@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -6,8 +6,8 @@ import { queryKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 import { adminService } from '@/services/admin.service';
 import { inventoryService } from '@/services/inventory.service';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import type { DashboardStats, InventoryItem } from '@/types';
 
 type PaymentReceived = {

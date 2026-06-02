@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { Scan, CalendarDays, ArrowRight } from 'lucide-react';
-import { useRadiology } from '@/hooks/useRadiology';
+import { useRadiology } from '@/hooks/radiology';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { RadiologyOrdersTable } from '@/components/staff/radiology/RadiologyOrdersTable';
 import { UploadScanModal } from '@/components/staff/radiology/UploadScanModal';

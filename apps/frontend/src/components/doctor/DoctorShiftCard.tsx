@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { doctorService } from '@/services/doctor.service';
 import type { Profile } from '@/types';
 

@@ -1,15 +1,15 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { InventoryTable } from '@/components/staff/inventory/InventoryTable';
 import { AddItemModal } from '@/components/staff/inventory/AddItemModal';
 import { EditItemModal } from '@/components/staff/inventory/EditItemModal';
 import { TransferStockModal } from '@/components/staff/inventory/TransferStockModal';
 import { inventoryService } from '@/services/inventory.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { InventoryItem, TransferStockDto } from '@/types';
 
 const CATEGORIES: (InventoryItem['category'] | 'all')[] = ['all', 'equipment', 'supply', 'bed', 'oxygen', 'other'];

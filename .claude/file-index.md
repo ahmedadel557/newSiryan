@@ -177,9 +177,35 @@ newSiryan_frontEnd/src/components/staff/receptionist/DoctorRequestBanner.tsx
 newSiryan_frontEnd/src/components/staff/receptionist/ConflictWarningBanner.tsx
 - Critical-colored banner: doctor tried to cancel a checked-in patient → shown on receptionist dashboard
 
-## Frontend — Hooks (Real-time)
-newSiryan_frontEnd/src/hooks/useSocketEvent.ts
-- Generic hook: useSocketEvent<T>(event, handler) — registers/cleans up socket listener
+## Frontend — Hooks (Role-based, TanStack Query v5)
 
-newSiryan_frontEnd/src/hooks/useNotifications.ts
-- Manages notification state; listens to notification:new; polls every 30s as fallback
+All hooks are in `apps/frontend/src/hooks/`. The folder structure after Part 1–3 migration:
+
+```
+hooks/
+  index.ts              ← root barrel (conflict-safe aliases for QueueFilter clash)
+  admin/                ← 7 TanStack hooks + index.ts (useAdminUsers, useAdminStaffRequests, etc.)
+  cashier/              ← 5 TanStack hooks + index.ts
+  doctor/               ← 5 TanStack hooks + index.ts (useDoctor, useDoctorNotes, useDoctorQueue, useDoctorRatings, useDoctorSchedule)
+  patient/              ← 7 TanStack hooks + index.ts (usePatientAppointments, usePatientBilling, usePatientProfile, usePatientRecord, usePatientRecords, usePatientRequests, usePharmacy)
+  nurse/                ← 1 TanStack hook + index.ts (useNurse — fan-out query)
+  receptionist/         ← 1 TanStack hook + index.ts (useReceptionist — 4 parallel queries)
+  pharmacist/           ← 8 TanStack hooks + index.ts
+  lab/                  ← 1 TanStack hook + index.ts (useLab)
+  radiology/            ← 1 TanStack hook + index.ts (useRadiology)
+  inventory/            ← 7 hooks + index.ts (6 focused + useInventory combining wrapper)
+  shared/               ← 14 non-TanStack hooks + index.ts (useAuth, useToast, useSocketEvent,
+                           useNotifications [TanStack], useChatbot, useMediaQuery, useBooking,
+                           useVideoCall, usePatientVideoCall, useInCallChat, useRooms,
+                           useSettings, useUsernameCheck, useWaitingEstimate)
+```
+
+Import from: `@/hooks/[role]` or `@/hooks` (root). Old `@/hooks/useXxx` barrel files deleted.
+
+Key files:
+apps/frontend/src/hooks/index.ts                   — root barrel (all roles)
+apps/frontend/src/hooks/shared/useSocketEvent.ts   — Generic useSocketEvent<T>(event, handler)
+apps/frontend/src/hooks/shared/useNotifications.ts — TanStack Query (refetchInterval 30s, socket → setQueryData)
+apps/frontend/src/lib/queryKeys.ts                 — ALL query key factories (admin through notifications/chatbot)
+apps/frontend/src/lib/queryClient.ts               — Singleton QueryClient
+apps/frontend/src/providers/QueryProvider.tsx      — QueryClientProvider wrapper

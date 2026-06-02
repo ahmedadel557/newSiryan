@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { BarChart2 } from 'lucide-react';
 import { inventoryService } from '@/services/inventory.service';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { ConsumptionAnalytics, ForecastItem } from '@/types';
 
 type Period = 'weekly' | 'monthly' | 'annual';

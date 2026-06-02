@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistHistory } from '@/hooks/usePharmacistHistory';
+import { usePharmacistHistory } from '@/hooks/pharmacist';
 import { Download } from 'lucide-react';
 
 export default function PharmacistHistoryPage() {

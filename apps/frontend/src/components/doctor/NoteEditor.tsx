@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { StickyNote, Pencil, Trash2, Check, X } from 'lucide-react';
-import { useDoctorNotes } from '@/hooks/useDoctorNotes';
+import { useDoctorNotes } from '@/hooks/doctor';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface NoteEditorProps {

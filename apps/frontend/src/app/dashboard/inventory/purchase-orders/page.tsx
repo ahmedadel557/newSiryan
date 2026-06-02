@@ -1,14 +1,14 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { inventoryService } from '@/services/inventory.service';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { CreatePurchaseOrderModal } from '@/components/staff/inventory/CreatePurchaseOrderModal';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { PurchaseOrder, CreatePurchaseOrderDto, Supplier } from '@/types';
 
 type StatusTab = 'all' | PurchaseOrder['status'];

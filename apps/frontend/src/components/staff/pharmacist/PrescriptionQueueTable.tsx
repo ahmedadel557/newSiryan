@@ -1,8 +1,8 @@
-import { Lock, Pill } from 'lucide-react';
+﻿import { Lock, Pill } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { PharmacistRx } from '@/types';
-import type { RxFilter } from '@/hooks/usePharmacist';
+import type { RxFilter } from '@/hooks/pharmacist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

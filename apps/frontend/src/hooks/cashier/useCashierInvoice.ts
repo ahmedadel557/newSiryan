@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { cashierService } from '@/services/cashier.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { CashierInvoice, CashierPaymentInput } from '@/types';
 
 export function useCashierInvoice(id: string) {

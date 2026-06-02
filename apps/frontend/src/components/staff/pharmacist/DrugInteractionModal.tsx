@@ -1,5 +1,5 @@
-import { X, AlertTriangle, XOctagon } from 'lucide-react';
-import type { InteractionCheck } from '@/hooks/usePharmacistOrders';
+﻿import { X, AlertTriangle, XOctagon } from 'lucide-react';
+import type { InteractionCheck } from '@/hooks/pharmacist';
 
 interface Props {
   check: InteractionCheck | null;

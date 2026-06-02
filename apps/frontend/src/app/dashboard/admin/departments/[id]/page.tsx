@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { adminService } from '@/services/admin.service';
 import type { User, Department, Role } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 
 const ROLE_LABELS: Partial<Record<Role, string>> = {

@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { DoctorSchedule, Department, ScheduleSlot } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import Link from 'next/link';
 import { RefreshCw, ExternalLink, X, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 

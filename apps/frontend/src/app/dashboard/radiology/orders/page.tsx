@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { useRadiology } from '@/hooks/useRadiology';
+import { useRadiology } from '@/hooks/radiology';
 import { RadiologyOrdersTable } from '@/components/staff/radiology/RadiologyOrdersTable';
 import { UploadScanModal } from '@/components/staff/radiology/UploadScanModal';
 import type { OrderStatus } from '@/types';

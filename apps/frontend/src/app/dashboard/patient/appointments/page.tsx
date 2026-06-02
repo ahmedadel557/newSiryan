@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { RateVisitModal } from '@/components/patient/RateVisitModal';
 import { WaitingEstimateBadge } from '@/components/patient/WaitingEstimateBadge';
-import { usePatientAppointments, type AppointmentTab } from '@/hooks/usePatientAppointments';
+import { usePatientAppointments, type AppointmentTab } from '@/hooks/patient';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';

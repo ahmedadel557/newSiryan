@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { ChevronLeft, ChevronRight, Ban } from 'lucide-react';
-import { useDoctorSchedule } from '@/hooks/useDoctorSchedule';
+import { useDoctorSchedule } from '@/hooks/doctor';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { WeekCalendarGrid } from '@/components/doctor/WeekCalendarGrid';
 import { BlockTimeModal } from '@/components/doctor/BlockTimeModal';

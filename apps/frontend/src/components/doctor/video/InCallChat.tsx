@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { X, Send } from 'lucide-react';
-import { useInCallChat } from '@/hooks/useInCallChat';
+import { useInCallChat } from '@/hooks/shared';
 
 interface InCallChatProps {
   apiKey: string | null;

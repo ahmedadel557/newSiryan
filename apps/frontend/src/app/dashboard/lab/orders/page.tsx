@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { useLab } from '@/hooks/useLab';
+import { useLab } from '@/hooks/lab';
 import { LabOrdersTable } from '@/components/staff/lab/LabOrdersTable';
 import { UploadResultsModal } from '@/components/staff/lab/UploadResultsModal';
 import type { OrderStatus } from '@/types';

@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { FileText, Inbox, MessageSquare, UserRound } from 'lucide-react';
 import { doctorService } from '@/services/doctor.service';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useSocketEvent } from '@/hooks/shared';
 
 type ShareItem = Awaited<ReturnType<typeof doctorService.listSharedRecords>>[number];
 type ShareDetail = Awaited<ReturnType<typeof doctorService.getSharedRecord>>;

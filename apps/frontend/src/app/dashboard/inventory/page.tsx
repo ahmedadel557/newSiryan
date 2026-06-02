@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, ShoppingCart, Trash2, ArrowLeftRight, X } from 'lucide-react';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { LowStockBanner } from '@/components/staff/inventory/LowStockBanner';
 import { InventoryTable } from '@/components/staff/inventory/InventoryTable';
@@ -15,8 +15,8 @@ import { LogWasteModal } from '@/components/staff/inventory/LogWasteModal';
 import { TransferStockModal } from '@/components/staff/inventory/TransferStockModal';
 import { CreatePurchaseOrderModal } from '@/components/staff/inventory/CreatePurchaseOrderModal';
 import { inventoryService } from '@/services/inventory.service';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
 import type { BudgetSummary, InventoryItem, CreatePurchaseOrderDto } from '@/types';
 

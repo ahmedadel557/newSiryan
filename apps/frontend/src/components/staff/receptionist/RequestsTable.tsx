@@ -1,8 +1,8 @@
-import { Badge } from '@/components/ui/Badge';
+﻿import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { GitPullRequest } from 'lucide-react';
 import type { CancelRequest } from '@/types';
-import type { RequestFilter } from '@/hooks/useReceptionist';
+import type { RequestFilter } from '@/hooks/receptionist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

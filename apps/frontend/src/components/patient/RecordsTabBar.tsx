@@ -1,5 +1,5 @@
-import { Layers, Stethoscope, TestTube, Scan, Pill } from 'lucide-react';
-import type { RecordsTab } from '@/hooks/usePatientRecords';
+﻿import { Layers, Stethoscope, TestTube, Scan, Pill } from 'lucide-react';
+import type { RecordsTab } from '@/hooks/patient';
 
 interface Tab {
   key: RecordsTab;

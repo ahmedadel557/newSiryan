@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { FileText, Search, Plus, Trash2, X } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
 import { useAdminInvoices } from '@/hooks/admin';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';

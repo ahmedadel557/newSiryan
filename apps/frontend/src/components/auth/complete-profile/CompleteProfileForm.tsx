@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { AlertCircle, Check } from 'lucide-react';
 import { authService } from '@/services/auth.service';
-import { useUsernameCheck } from '@/hooks/useUsernameCheck';
+import { useUsernameCheck } from '@/hooks/shared';
 import PasswordInput from '@/components/shared/PasswordInput';
 import PasswordStrength from '@/components/auth/shared/PasswordStrength';
 import UsernameField from '@/components/auth/shared/UsernameField';

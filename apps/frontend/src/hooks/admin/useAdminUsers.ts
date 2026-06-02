@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { CreateUserDto, Role, User } from '@/types';
 
 export type UserRoleFilter = 'all' | 'doctor' | 'nurse' | 'support' | 'patient';

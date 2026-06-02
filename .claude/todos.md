@@ -2,8 +2,8 @@
 
 ## High Priority
 - [ ] Test full doctor flow locally with real Stream credentials (set backend `STREAM_API_KEY`/`STREAM_API_SECRET` + frontend `NEXT_PUBLIC_STREAM_API_KEY`; verify video call + in-call chat doctor↔patient). In-call chat also needs the **Chat product enabled** on the Stream app.
-- [ ] Browser smoke-test the TanStack Query migration (Admin + Cashier). Pages to verify: admin overview/users/staff-requests/appointments/invoices/reports/audit/audit-log; cashier dashboard/invoices list/invoice detail/pending/reports. Confirm socket-driven cache invalidations fire (`payment:received`, `staff_request:new`, `invoice:new`, `pharmacy:order:created`, `pharmacy:order:status`, `payment:pending`) and that mutations update the list/detail without a manual refresh.
-- [ ] Decide whether to extend TanStack Query to the remaining modules (doctor / patient / nurse / pharmacist / lab / radiology / receptionist) once Admin + Cashier are validated in the browser.
+- [ ] Browser smoke-test the full TanStack Query migration (all 10 roles now migrated). Key things to verify: (1) Admin/cashier pages; (2) nurse alerts, receptionist queue, pharmacist orders, lab/radiology; (3) socket-driven cache invalidations across roles; (4) notifications bell updates in real time via socket + refetchInterval.
+- [ ] Consider adding React Query Devtools for staging only — exclude from production build using `process.env.NODE_ENV !== 'production'` guard in `QueryProvider.tsx`. (The devtools package `@tanstack/react-query-devtools` is already installed.)
 - [ ] Browser-verify [BUG-AUTH-1] fix: submit a staff registration with SendGrid temporarily slowed or the API key wrong — success screen should render in ≤1s now that `sendEmail` is fire-and-forget. The receipt email may not arrive in that scenario, which is expected; the user is told "Awaiting admin approval" via the response.
 - [ ] Browser-verify [BUG-ADMIN-2] fix: open two tabs as admin. In tab A, approve or reject a pending request. In tab B, the sidebar badge + the staff-requests row should both update without a manual refresh (one via mutation invalidation, one via the `staff_request:new` socket).
 

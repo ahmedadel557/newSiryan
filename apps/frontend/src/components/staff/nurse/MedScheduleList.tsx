@@ -1,7 +1,7 @@
-import { Pill, Check } from 'lucide-react';
+﻿import { Pill, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { NurseMedRow } from '@/hooks/useNurse';
+import type { NurseMedRow } from '@/hooks/nurse';
 
 interface MedScheduleListProps {
   rows: NurseMedRow[];

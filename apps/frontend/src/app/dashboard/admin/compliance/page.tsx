@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { User, DeletionRequest } from '@/types';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { Download, Search, X, Check, Ban } from 'lucide-react';
 
 export default function CompliancePage() {

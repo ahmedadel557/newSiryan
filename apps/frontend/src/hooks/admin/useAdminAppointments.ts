@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 
 interface AppointmentFilters {
   status?: string;

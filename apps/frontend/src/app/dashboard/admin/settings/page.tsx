@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { adminService } from '@/services/admin.service';
 import type { PricingSettings, PricingTestItem, RadiologyScanItem, MaintenanceStatus, EmailTemplate } from '@/types';
-import { useToast } from '@/hooks/useToast';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useToast } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
 import { Plus, Trash2, Save, Eye, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 
 type Tab = 'pricing' | 'maintenance' | 'email';

@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CalendarDays, Activity, UserRound, Sparkles, Stethoscope, Pill, BedDouble } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { usePatientProfile } from '@/hooks/usePatientProfile';
-import { usePatientAppointments } from '@/hooks/usePatientAppointments';
+import { useAuth } from '@/hooks/shared';
+import { usePatientProfile } from '@/hooks/patient';
+import { usePatientAppointments } from '@/hooks/patient';
 import { HeroCard } from '@/components/patient/HeroCard';
 import { ShortcutGrid } from '@/components/patient/ShortcutGrid';
 import { AppointmentRow } from '@/components/patient/AppointmentRow';

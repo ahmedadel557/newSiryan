@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { LogWasteModal } from '@/components/staff/inventory/LogWasteModal';
 import { TransferStockModal } from '@/components/staff/inventory/TransferStockModal';
 import { AddItemLocationModal } from '@/components/staff/inventory/AddItemLocationModal';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { InventoryItemDetail, ItemPrice, WasteEntry, ItemLocation } from '@/types';
 
 const thClass = 'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';

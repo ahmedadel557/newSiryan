@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { ClipboardList } from 'lucide-react';
-import { useDoctorQueue } from '@/hooks/useDoctorQueue';
+import { useDoctorQueue } from '@/hooks/doctor';
 import { QueueItem } from '@/components/doctor/QueueItem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';

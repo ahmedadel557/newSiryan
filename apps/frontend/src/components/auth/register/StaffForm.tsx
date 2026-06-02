@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import type { SubmitHandler } from 'react-hook-form';
 import apiClient from '@/services/api.client';
-import { useUsernameCheck } from '@/hooks/useUsernameCheck';
+import { useUsernameCheck } from '@/hooks/shared';
 import StepIndicator from '@/components/auth/shared/StepIndicator';
 import StaffProfessionalStep from '@/components/auth/register/steps/StaffProfessionalStep';
 import StaffSecurityStep from '@/components/auth/register/steps/StaffSecurityStep';

@@ -1,7 +1,7 @@
-import { Check } from 'lucide-react';
+﻿import { Check } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
-import type { NurseMedRow } from '@/hooks/useNurse';
+import type { NurseMedRow } from '@/hooks/nurse';
 
 interface MedRoundGroupProps {
   time: string;

@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { FlaskConical } from 'lucide-react';
-import { useLab } from '@/hooks/useLab';
+import { useLab } from '@/hooks/lab';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { EmptyState } from '@/components/ui/EmptyState';
 

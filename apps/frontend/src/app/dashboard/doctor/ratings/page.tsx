@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { Star } from 'lucide-react';
-import { useDoctorRatings } from '@/hooks/useDoctorRatings';
+import { useDoctorRatings } from '@/hooks/doctor';
 import { RatingStars } from '@/components/doctor/RatingStars';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';

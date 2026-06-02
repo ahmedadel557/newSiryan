@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDoctor } from '@/hooks/useDoctor';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useDoctor } from '@/hooks/doctor';
+import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { DoctorShiftCard } from '@/components/doctor/DoctorShiftCard';
 import { DoctorRatingsCard } from '@/components/doctor/DoctorRatingsCard';

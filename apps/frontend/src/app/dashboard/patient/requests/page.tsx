@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { TestTube, Scan, Bed, Calendar, ClipboardCheck, AlertCircle } from 'lucide-react';
-import { usePatientRequests } from '@/hooks/usePatientRequests';
+import { usePatientRequests } from '@/hooks/patient';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 

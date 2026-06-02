@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { BedDouble, RotateCcw, X, Check } from 'lucide-react';
-import { useRooms } from '@/hooks/useRooms';
+import { useRooms } from '@/hooks/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';

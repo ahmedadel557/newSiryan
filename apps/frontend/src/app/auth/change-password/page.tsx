@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Lock, KeyRound, AlertCircle, ShieldCheck, CheckCircle2, Circle } from 'lucide-react';
 import { authService } from '@/services/auth.service';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/shared';
 
 const schema = yup.object({
   newPassword: yup.string().min(8, 'At least 8 characters').required('New password is required'),

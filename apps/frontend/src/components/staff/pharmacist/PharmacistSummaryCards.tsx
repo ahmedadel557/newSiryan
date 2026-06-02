@@ -1,5 +1,5 @@
-import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
-import type { PharmacistDashboardStats } from '@/hooks/usePharmacistDashboard';
+﻿import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import type { PharmacistDashboardStats } from '@/hooks/pharmacist';
 
 interface Props {
   stats: PharmacistDashboardStats;

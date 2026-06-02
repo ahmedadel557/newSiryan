@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, FileText } from 'lucide-react';
 import { useCashierDashboard } from '@/hooks/cashier';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { TodaysTransactions } from '@/components/staff/cashier/TodaysTransactions';
 import { CreateInvoiceModal } from '@/components/staff/cashier/CreateInvoiceModal';

@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Lock, CheckCircle2 } from 'lucide-react';
 import { patientService } from '@/services/patient.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import {
   MOCK_PAYMENT_METHODS,
   feeForVisitType,

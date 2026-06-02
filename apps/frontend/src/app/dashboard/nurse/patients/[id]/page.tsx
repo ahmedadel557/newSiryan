@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { EmergencyFlagModal } from '@/components/staff/nurse/EmergencyFlagModal';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { NursePatient, Prescription, VitalsEntry, RecordVitalsDto, EmergencyFlagDto } from '@/types';
 
 /* ─── helpers ─── */

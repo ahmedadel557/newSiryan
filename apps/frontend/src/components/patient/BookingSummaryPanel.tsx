@@ -1,5 +1,5 @@
-import { Info } from 'lucide-react';
-import type { BookingFormData } from '@/hooks/useBooking';
+﻿import { Info } from 'lucide-react';
+import type { BookingFormData } from '@/hooks/shared';
 import type { DoctorAvailability } from '@/types';
 import { feeForVisitType, formatEGP } from '@/lib/pricing';
 import React, { Fragment } from 'react';

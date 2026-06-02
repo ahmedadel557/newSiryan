@@ -1,18 +1,18 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserCheck, Calendar, ArrowRight, Clock, FlaskConical, Inbox } from 'lucide-react';
 import Link from 'next/link';
-import { useReceptionist } from '@/hooks/useReceptionist';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
+import { useReceptionist } from '@/hooks/receptionist';
+import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { DoctorRequestBanner } from '@/components/staff/receptionist/DoctorRequestBanner';
 import { ConflictWarningBanner } from '@/components/staff/receptionist/ConflictWarningBanner';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { DoctorRequestPayload, AppointmentConflictPayload } from '@/types';
 
 const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {

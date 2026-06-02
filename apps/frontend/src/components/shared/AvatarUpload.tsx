@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 import { useRef, useState } from 'react';
 import { Camera, Loader2, Trash2 } from 'lucide-react';
 import apiClient from '@/services/api.client';
 import { authService } from '@/services/auth.service';
-import { useToast } from '@/hooks/useToast';
-import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/shared';
+import { useAuth } from '@/hooks/shared';
 
 interface AvatarUploadProps {
   currentUrl?: string;

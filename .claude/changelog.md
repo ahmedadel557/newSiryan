@@ -1,5 +1,30 @@
 # Changelog
 
+## [2026-06-02] TanStack Query Migration — Part 3 (Hook Cleanup + Notifications)
+
+### Goal
+Finish the 3-part TanStack Query migration: clean up 39 backward-compat barrel files, migrate `useNotifications` to TanStack, create a root `hooks/index.ts`, and update all imports across the codebase.
+
+### Changed Files
+- `apps/frontend/src/lib/queryKeys.ts` — added `notifications()` and `chatbotHistory(sessionId?)` keys
+- `apps/frontend/src/hooks/shared/useNotifications.ts` — replaced `useState`+`setInterval(30s)` with `useQuery(refetchInterval:30_000)`; socket `notification:new` → `setQueryData`; markRead/markAllRead/deleteOne/clearAll as `useMutation`; return shape identical
+- 111 page/component/hook files — import path updates only: `@/hooks/useXxx` → `@/hooks/[role]` or `@/hooks/shared`
+
+### Created Files
+- `apps/frontend/src/hooks/index.ts` — root barrel; conflict-safe aliases for `QueueFilter` (exported by both doctor/ and receptionist/)
+
+### Deleted Files (39 barrel re-export files)
+`hooks/use{Auth,Booking,Chatbot,Doctor,DoctorNotes,DoctorQueue,DoctorRatings,DoctorSchedule,InCallChat,Inventory,Lab,MediaQuery,Notifications,Nurse,PatientAppointments,PatientBilling,PatientProfile,PatientRecord,PatientRecords,PatientRequests,PatientVideoCall,Pharmacist,PharmacistDashboard,PharmacistHistory,PharmacistMedications,PharmacistOrders,PharmacistPrescriptions,PharmacistRefills,PharmacistReport,Pharmacy,Radiology,Receptionist,Rooms,Settings,SocketEvent,Toast,UsernameCheck,VideoCall,WaitingEstimate}.ts`
+
+### Conventions
+- `useChatbot` NOT migrated to TanStack — it has no server fetch; session-local conversational state only. `chatbotHistory` key added as placeholder.
+- Lint errors (315) are all pre-existing; 0 new errors in modified files.
+
+### Verification
+- `npx tsc --noEmit` → 0 errors
+- `grep -r "from '@/hooks/use"` → 0 matches
+- `grep -r "apiClient" src/app` → 0 matches (no direct API calls in pages)
+
 ## [2026-06-02] Bugfix — Staff registration response held by inline `await sendEmail`
 
 ### Symptom

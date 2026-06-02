@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { DollarSign } from 'lucide-react';
 import { inventoryService } from '@/services/inventory.service';
 import { BudgetGauge } from '@/components/staff/inventory/BudgetGauge';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import type { BudgetSummary, BudgetHistoryEntry } from '@/types';
 
 const inputClass = 'border border-[var(--border-1)] rounded-[var(--radius-md)] px-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] w-full';

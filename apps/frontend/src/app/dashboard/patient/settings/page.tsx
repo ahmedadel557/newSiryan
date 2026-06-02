@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTheme } from 'next-themes';
@@ -7,9 +7,9 @@ import { User, Bell, Palette, Lock, AlertTriangle, Eye, EyeOff, Sun, Moon, Monit
 import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { TagInput } from '@/components/ui/TagInput';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { usePatientProfile } from '@/hooks/usePatientProfile';
-import { useSettings } from '@/hooks/useSettings';
-import { useAuth } from '@/hooks/useAuth';
+import { usePatientProfile } from '@/hooks/patient';
+import { useSettings } from '@/hooks/shared';
+import { useAuth } from '@/hooks/shared';
 import { patientService } from '@/services/patient.service';
 import { cn } from '@/lib/utils';
 import type { InsuranceCompany } from '@/types';

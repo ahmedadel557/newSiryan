@@ -1,10 +1,34 @@
 # Current Task
 
 ## Task
-Two bugfixes (2026-06-02): (1) staff-registration slow response; (2) admin pending-staff badge stale.
+TanStack Query Migration — Part 3 of 3 (2026-06-02): hook folder cleanup + useNotifications migration.
 
 ## Status
 COMPLETE.
+
+## What was done
+- Migrated `useNotifications` from polling/useState to TanStack Query (`refetchInterval: 30_000`, socket → `setQueryData`, mutations for markRead/markAllRead/deleteOne/clearAll)
+- Added `notifications` and `chatbotHistory` queryKeys to `queryKeys.ts`
+- Created root `hooks/index.ts` — unified barrel re-exporting all subfolder hooks (conflict-safe aliases for `QueueFilter` clash between doctor/ and receptionist/)
+- Updated all 111 files that still imported `@/hooks/useXxx` barrel paths → proper subfolder paths (`@/hooks/shared`, `@/hooks/doctor`, `@/hooks/patient`, etc.)
+- Deleted all 39 barrel re-export files from `hooks/` root
+- Verification: `npx tsc --noEmit` → 0 errors; `grep '@/hooks/use'` → 0 matches; lint errors are all pre-existing (315 total, same baseline)
+
+## Files Changed
+- `apps/frontend/src/lib/queryKeys.ts` — added notifications + chatbotHistory keys
+- `apps/frontend/src/hooks/shared/useNotifications.ts` — TanStack Query migration
+- `apps/frontend/src/hooks/index.ts` — NEW: root barrel re-exporting all subfolders
+- 111 page/component/hook files — import path updates only (no logic changes)
+- 39 `hooks/useXxx.ts` barrel files — DELETED
+
+## Next Steps
+- Doctor system integration testing (video calls with real Stream credentials, browser smoke-test of all hooks)
+- Browser smoke-test the remaining TanStack migrations (nurse/receptionist/pharmacist/lab/radiology/inventory) — especially socket-driven cache invalidations
+
+---
+
+## Previous Task
+Bugfixes (2026-06-02) — staff-registration slow response + admin pending-staff badge stale — COMPLETE.
 
 ## Context / Decisions
 

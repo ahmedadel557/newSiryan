@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { Scan } from 'lucide-react';
-import { useRadiology } from '@/hooks/useRadiology';
+import { useRadiology } from '@/hooks/radiology';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { EmptyState } from '@/components/ui/EmptyState';
 

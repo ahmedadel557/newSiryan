@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ShieldPlus } from 'lucide-react';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';

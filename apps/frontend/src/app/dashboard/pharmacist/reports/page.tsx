@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { usePharmacistReport } from '@/hooks/usePharmacistReport';
+import { usePharmacistReport } from '@/hooks/pharmacist';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Download, RefreshCw } from 'lucide-react';
 

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 import { useCallback } from 'react';
-import { useBooking } from '@/hooks/useBooking';
-import { useSocketEvent } from '@/hooks/useSocketEvent';
-import { useToast } from '@/hooks/useToast';
+import { useBooking } from '@/hooks/shared';
+import { useSocketEvent } from '@/hooks/shared';
+import { useToast } from '@/hooks/shared';
 import { BookingProgress } from '@/components/patient/BookingProgress';
 import { ReasonStep } from '@/components/patient/ReasonStep';
 import { DoctorStep } from '@/components/patient/DoctorStep';
