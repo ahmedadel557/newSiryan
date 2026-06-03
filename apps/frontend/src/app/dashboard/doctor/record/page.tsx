@@ -7,20 +7,19 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Appointment, AppointmentStatus, Profile } from '@/types';
 
-type BadgeVariant = 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
-
-const statusConfig: Record<AppointmentStatus, { label: string; variant: BadgeVariant }> = {
-  pending: { label: 'Pending', variant: 'caution' },
-  confirmed: { label: 'Confirmed', variant: 'positive' },
-  scheduled: { label: 'Scheduled', variant: 'caution' },
-  in_progress: { label: 'In progress', variant: 'brand' },
-  completed: { label: 'Completed', variant: 'neutral' },
-  cancelled: { label: 'Cancelled', variant: 'critical' },
-  rescheduled: { label: 'Rescheduled', variant: 'info' },
-  no_show: { label: 'No show', variant: 'neutral' },
-  checked_in: { label: 'Checked in', variant: 'positive' },
+const statusLabel: Record<AppointmentStatus, string> = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  scheduled: 'Scheduled',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  rescheduled: 'Rescheduled',
+  no_show: 'No show',
+  checked_in: 'Checked in',
 };
 
 function calcAge(dob?: string): string {
@@ -162,7 +161,9 @@ export default function DoctorRecordSearchPage() {
                 {filtered.map((p) => {
                   const lastAppt = lastVisitByPatient.get(p.id);
                   const fullName = `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || 'Unknown';
-                  const status = lastAppt ? statusConfig[lastAppt.status] : null;
+                  const status = lastAppt
+                    ? { label: statusLabel[lastAppt.status], variant: getStatusVariant(lastAppt.status) }
+                    : null;
                   return (
                     <tr
                       key={p.id}

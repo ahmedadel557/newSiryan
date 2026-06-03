@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Appointment } from '@/types';
 
 type TabFilter = 'all' | 'today' | 'pending' | 'confirmed' | 'checked_in' | 'cancelled';
@@ -19,15 +20,6 @@ const TABS: { key: TabFilter; label: string }[] = [
   { key: 'checked_in', label: 'Checked in' },
   { key: 'cancelled', label: 'Cancelled' },
 ];
-
-const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {
-  pending: 'caution',
-  confirmed: 'info',
-  checked_in: 'positive',
-  completed: 'positive',
-  cancelled: 'critical',
-  rescheduled: 'caution',
-};
 
 function fmtDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-US', {
@@ -207,7 +199,7 @@ export default function ReceptionistAppointmentsPage() {
                       {apt.visit_type ?? '—'}
                     </td>
                     <td className="px-5 py-3">
-                      <Badge variant={STATUS_BADGE[apt.status] ?? 'info'}>
+                      <Badge variant={getStatusVariant(apt.status)}>
                         {apt.status.replace('_', ' ')}
                       </Badge>
                     </td>

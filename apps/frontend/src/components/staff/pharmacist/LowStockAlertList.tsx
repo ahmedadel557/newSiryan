@@ -1,4 +1,5 @@
 import { AlertTriangle, Send } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import type { PharmaMedication } from '@/types';
 
 interface Props {
@@ -22,7 +23,7 @@ export function LowStockAlertList({ medications, supplyLoading, onRequestSupply 
       <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--border-1)]">
         <AlertTriangle size={16} className="text-[var(--caution)]" />
         <h2 className="text-[15px] font-semibold text-[var(--fg-1)]">Low stock</h2>
-        <span className="chip chip-caut">{medications.length}</span>
+        <Badge variant="caution">{medications.length}</Badge>
       </div>
       {medications.map((med) => (
         <div

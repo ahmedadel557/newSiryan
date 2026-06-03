@@ -19,13 +19,6 @@ const thClass =
 const tdClass =
   'py-3 px-[14px] border-b border-[var(--border-1)] text-[var(--fg-1)] text-[13px]';
 
-const STATUS_VARIANT = {
-  completed: 'positive',
-  in_progress: 'info',
-  pending: 'caution',
-  cancelled: 'neutral',
-} as const;
-
 function SectionCard({
   icon,
   title,

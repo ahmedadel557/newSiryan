@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { LogWasteModal } from '@/components/staff/inventory/LogWasteModal';
 import { inventoryService } from '@/services/inventory.service';
 import { useToast } from '@/hooks/shared';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { WarehouseEntry, Room, WasteEntry } from '@/types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -19,12 +20,6 @@ const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
 const inputClass =
   'border border-[var(--border-1)] rounded-[var(--radius-md)] px-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] w-full';
 const labelClass = 'text-[12px] font-medium text-[var(--fg-2)]';
-
-const statusVariant: Record<WarehouseEntry['status'], 'caution' | 'neutral' | 'positive'> = {
-  unassigned: 'caution',
-  partial: 'neutral',
-  assigned: 'positive',
-};
 
 const statusLabel: Record<WarehouseEntry['status'], string> = {
   unassigned: 'Unassigned',
@@ -392,7 +387,7 @@ export default function WarehousePage() {
                   <td className={`${tdClass} font-semibold text-[var(--fg-1)]`}>{entry.quantity_remaining}</td>
                   <td className={`${tdClass} text-[var(--fg-3)]`}>{entry.unit}</td>
                   <td className={tdClass}>
-                    <Badge variant={statusVariant[entry.status]} dot>
+                    <Badge variant={getStatusVariant(entry.status)} dot>
                       {statusLabel[entry.status]}
                     </Badge>
                   </td>

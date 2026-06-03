@@ -98,15 +98,12 @@ export const createStaff = async (req: AuthRequest, res: Response, next: NextFun
       throw profileErr;
     }
 
-    try {
-      await sendEmail(
-        email,
-        'Your Siryan Hospital Account',
-        `<p>Hello ${first_name},</p><p>Your account has been created. Your temporary password is: <strong>${tempPassword}</strong></p><p>Please log in and change your password immediately.</p>`
-      );
-    } catch (mailErr) {
-      console.error('Failed to send welcome email:', mailErr);
-    }
+    // Fire-and-forget: don't hold the HTTP response on the SMTP round-trip.
+    sendEmail(
+      email,
+      'Your Siryan Hospital Account',
+      `<p>Hello ${first_name},</p><p>Your account has been created. Your temporary password is: <strong>${tempPassword}</strong></p><p>Please log in and change your password immediately.</p>`
+    ).catch((mailErr) => console.error('Failed to send welcome email:', mailErr));
 
     sendSuccess(res, { user, profile }, 'Staff account created', 201);
     logAudit({ performedBy: req.user!.id, action: 'create_staff', resource: 'user', resourceId: user._id.toString(), details: `role=${role}`, req });
@@ -424,6 +421,7 @@ export const getStaffRequests = async (req: AuthRequest, res: Response, next: Ne
   try {
     const { status = 'pending' } = req.query as { status?: string };
     const users = await User.find({ approval_status: status, role: { $in: STAFF_APPROVAL_ROLES } })
+      .select('-password -reset_token -reset_token_expires') // .lean() bypasses the model toJSON that normally strips these
       .sort({ createdAt: -1 })
       .lean();
     const profiles = await Profile.find({ user: { $in: users.map(u => u._id) } }).lean();
@@ -448,7 +446,8 @@ export const approveStaff = async (req: AuthRequest, res: Response, next: NextFu
     const profile = await Profile.findOne({ user: id }).lean();
     const displayName = profile ? `${(profile as any).first_name || ''} ${(profile as any).last_name || ''}`.trim() : user.email;
 
-    await sendEmail(
+    // Fire-and-forget: don't hold the HTTP response on the SMTP round-trip.
+    sendEmail(
       user.email,
       'Your registration has been approved',
       `<p>Congratulations! Your registration request for Siryan has been approved. You can now log in with your credentials.</p>`,

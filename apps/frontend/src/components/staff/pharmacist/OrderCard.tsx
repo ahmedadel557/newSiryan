@@ -1,12 +1,7 @@
 import { CheckCircle, XCircle, Truck, FileText, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmacyOrderFull } from '@/types';
-
-const statusChip: Record<string, string> = {
-  pending: 'chip chip-caut',
-  approved: 'chip chip-pos',
-  rejected: 'chip chip-crit',
-  dispensed: 'chip chip-neut',
-};
 
 const DELIVERY_STAGES = ['preparing', 'dispatched', 'delivered'] as const;
 
@@ -34,14 +29,14 @@ export function OrderCard({ order, actionLoading, onApproveOtc, onApprovePrescri
             <p className="text-[15px] font-semibold text-[var(--fg-1)]">
               {order.patient_name ?? 'Unknown patient'}
             </p>
-            <span className={statusChip[order.status] ?? 'chip chip-neut'}>{order.status}</span>
-            <span className={`chip ${isPrescription ? 'chip-info' : 'chip-neut'}`}>
+            <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+            <Badge variant={isPrescription ? 'info' : 'neutral'}>
               {isPrescription ? 'Prescription' : 'OTC'}
-            </span>
+            </Badge>
             {order.delivery_type === 'delivery' && (
-              <span className="chip chip-brand flex items-center gap-1">
+              <Badge variant="brand" className="flex items-center gap-1">
                 <Truck size={10} /> Delivery
-              </span>
+              </Badge>
             )}
           </div>
           <p className="text-[12px] text-[var(--fg-3)] mt-1">

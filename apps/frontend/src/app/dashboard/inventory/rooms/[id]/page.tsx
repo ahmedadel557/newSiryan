@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AddRoomModal } from '@/components/staff/inventory/AddRoomModal';
 import { useToast } from '@/hooks/shared';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { RoomDetail, InventoryItem, AddRoomDto } from '@/types';
 
 const thClass =
@@ -19,12 +20,6 @@ const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
 const inputClass =
   'border border-[var(--border-1)] rounded-[var(--radius-md)] px-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] w-full';
 const labelClass = 'text-[12px] font-medium text-[var(--fg-2)]';
-
-const statusVariant: Record<RoomDetail['status'], 'positive' | 'caution' | 'critical'> = {
-  available: 'positive',
-  occupied: 'caution',
-  maintenance: 'critical',
-};
 
 const typeLabel: Record<RoomDetail['type'], string> = {
   operation: 'Operation',
@@ -186,7 +181,7 @@ export default function RoomDetailPage() {
             <Badge variant="neutral" className="text-black">
               {typeLabel[roomDetail.type]}
             </Badge>
-            <Badge variant={statusVariant[roomDetail.status]} dot>
+            <Badge variant={getStatusVariant(roomDetail.status)} dot>
               {roomDetail.status.charAt(0).toUpperCase() + roomDetail.status.slice(1)}
             </Badge>
           </div>

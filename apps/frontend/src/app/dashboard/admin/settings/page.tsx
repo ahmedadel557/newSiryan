@@ -317,7 +317,7 @@ function MaintenanceTab() {
       )}
 
       {status?.is_active && (
-        <button className="btn" style={{ background: 'var(--critical)', color: '#fff' }} onClick={handleDisable} disabled={working}>
+        <button className="btn btn-danger" onClick={handleDisable} disabled={working}>
           {working ? 'Disabling...' : 'Disable Maintenance Mode'}
         </button>
       )}

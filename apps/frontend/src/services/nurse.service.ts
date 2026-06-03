@@ -1,5 +1,5 @@
 import apiClient from './api.client';
-import type { ApiResponse, NursePatient, Vitals, VitalsEntry, Prescription, RecordVitalsDto, EmergencyFlagDto } from '@/types';
+import type { ApiResponse, NursePatient, Vitals, VitalsEntry, Prescription, RecordVitalsDto, EmergencyFlagDto, EmergencyFlag, EmergencyFlagKPIs } from '@/types';
 
 const normalize = <T>(data: any): T => ({ ...data, id: data._id ?? data.id });
 const normalizeList = <T>(list: any[]): T[] => list.map((item) => normalize<T>(item));
@@ -32,5 +32,16 @@ export const nurseService = {
 
   async sendEmergencyFlag(patientId: string, data: EmergencyFlagDto): Promise<void> {
     await apiClient.post(`/nurse/patients/${patientId}/emergency-flag`, data);
+  },
+
+  async getEmergencyFlags(status?: string): Promise<{ flags: EmergencyFlag[]; kpis: EmergencyFlagKPIs }> {
+    const res = await apiClient.get<ApiResponse<{ flags: any[]; kpis: EmergencyFlagKPIs }>>(
+      `/nurse/emergency-flags${status ? `?status=${status}` : ''}`,
+    );
+    const { flags, kpis } = res.data.data;
+    return {
+      flags: (flags ?? []).map((f) => ({ ...f, id: f._id ?? f.id, created_at: f.createdAt ?? f.created_at })),
+      kpis,
+    };
   },
 };

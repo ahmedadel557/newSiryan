@@ -97,3 +97,9 @@ export const blockSlotSchema = z.object({
     path: ['end_time'],
   }),
 });
+
+export const resolveEmergencyFlagSchema = z.object({
+  body: z.object({
+    notes: z.string().optional(),
+  }),
+});

@@ -3,6 +3,7 @@
 import { Receipt } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Badge, type BadgeVariant } from '@/components/ui/Badge';
 import type { DailyTransaction } from '@/types';
 
 function fmtLBP(n: number) {
@@ -14,11 +15,11 @@ function fmtTime(iso?: string) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
-const METHOD_CHIP: Record<string, string> = {
-  cash: 'chip-pos',
-  card: 'chip-brand',
-  insurance: 'chip-caut',
-  mixed: 'chip-neut',
+const METHOD_VARIANT: Record<string, BadgeVariant> = {
+  cash: 'positive',
+  card: 'brand',
+  insurance: 'caution',
+  mixed: 'neutral',
 };
 
 interface TodaysTransactionsProps {
@@ -57,9 +58,9 @@ export function TodaysTransactions({ transactions, loading, title = "Today's tra
                   <p className="text-[12px] text-[var(--fg-3)]">{fmtTime(t.paid_at)}</p>
                 </div>
                 {t.payment_method && (
-                  <span className={`chip ${METHOD_CHIP[t.payment_method] ?? 'chip-neut'}`}>
+                  <Badge variant={METHOD_VARIANT[t.payment_method] ?? 'neutral'}>
                     {t.payment_method}
-                  </span>
+                  </Badge>
                 )}
                 <p className="text-[14px] font-semibold text-[var(--fg-1)] tabular-nums w-[120px] text-right">
                   {fmtLBP(t.amount_paid)}

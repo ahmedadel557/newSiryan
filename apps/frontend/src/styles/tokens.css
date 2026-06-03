@@ -104,6 +104,7 @@
   --caution: var(--amber-400);
   --caution-soft-bg: var(--amber-50);
   --caution-soft-fg: var(--amber-500);
+  --warning: var(--caution); /* alias — kept for callers that reference --warning */
 
   --critical: var(--coral-400);
   --critical-soft-bg: var(--coral-50);
@@ -112,6 +113,9 @@
   --info: var(--iris-500);
   --info-soft-bg: var(--iris-50);
   --info-soft-fg: var(--iris-600);
+
+  --neutral-soft-bg: var(--sand-100);
+  --neutral-soft-fg: var(--fg-2);
 
   --focus-ring: color-mix(in oklab, var(--forest-500) 35%, transparent);
 
@@ -238,6 +242,9 @@
 
   --info-soft-bg: rgba(62, 68, 160, 0.15);
   --info-soft-fg: #b0b4ec;
+
+  --neutral-soft-bg: rgba(255, 255, 255, 0.08);
+  --neutral-soft-fg: var(--fg-1);
 
   --focus-ring: color-mix(in oklab, var(--forest-400) 35%, transparent);
 

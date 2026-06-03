@@ -21,5 +21,6 @@ export const emergencyFlagSchema = z.object({
   body: z.object({
     message:  z.string().min(1),
     severity: z.enum(['low', 'medium', 'high', 'critical']),
+    notes:    z.string().optional(),
   }),
 });

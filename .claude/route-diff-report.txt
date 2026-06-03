@@ -1,7 +1,7 @@
-Route-Diff Report — 2026-06-02T17:41:30.655Z
+Route-Diff Report — 2026-06-03T11:16:16.179Z
 ────────────────────────────────────────────────────────────────
-Backend routes:  289
-Frontend calls:  272 parsed, 4 unparseable
+Backend routes:  293
+Frontend calls:  276 parsed, 5 unparseable
 
 ❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
 
@@ -48,7 +48,7 @@ Frontend calls:  272 parsed, 4 unparseable
   PUT     /api/radiology/profile  [radiology.routes.ts]
   PUT     /api/receptionist/profile  [receptionist.routes.ts]
 
-✅  MATCHED  (249)
+✅  MATCHED  (253)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/announcements/:param
   DELETE  /api/admin/appointments/:param
@@ -107,6 +107,7 @@ Frontend calls:  272 parsed, 4 unparseable
   GET     /api/cashier/pending
   GET     /api/cashier/reports/daily
   GET     /api/doctor/:param/ratings
+  GET     /api/doctor/emergency-flags
   GET     /api/doctor/me/ratings
   GET     /api/doctor/notes/:param
   GET     /api/doctor/patients
@@ -150,6 +151,7 @@ Frontend calls:  272 parsed, 4 unparseable
   GET     /api/lab/orders/:param
   GET     /api/lab/schedule
   GET     /api/notifications
+  GET     /api/nurse/emergency-flags
   GET     /api/nurse/patients
   GET     /api/nurse/patients/:param/medication-schedule
   GET     /api/nurse/patients/:param/vitals
@@ -200,6 +202,8 @@ Frontend calls:  272 parsed, 4 unparseable
   PATCH   /api/cashier/invoices/:param/cancel
   PATCH   /api/cashier/invoices/:param/partial
   PATCH   /api/cashier/invoices/:param/pay
+  PATCH   /api/doctor/emergency-flags/:param/acknowledge
+  PATCH   /api/doctor/emergency-flags/:param/resolve
   PATCH   /api/inventory/purchase-orders/:param/receive
   PATCH   /api/inventory/purchase-orders/:param/status
   PATCH   /api/inventory/rooms/:param/status
@@ -300,9 +304,10 @@ Frontend calls:  272 parsed, 4 unparseable
   PUT     /api/settings/notifications
   PUT     /api/settings/password
 
-⚠️   UNPARSEABLE TEMPLATE LITERALS  (4)
+⚠️   UNPARSEABLE TEMPLATE LITERALS  (5)
 ────────────────────────────────────────────────────────────────
   admin.service.ts: GET `/admin/reports/revenue${qs ? `
   admin.service.ts: GET `/admin/appointments${qs ? `
   admin.service.ts: GET `/admin/schedules${qs ? `
   admin.service.ts: GET `/admin/shifts${qs ? `
+  nurse.service.ts: GET `/nurse/emergency-flags${status ? `

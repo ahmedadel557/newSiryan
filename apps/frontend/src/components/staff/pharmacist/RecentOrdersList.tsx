@@ -1,12 +1,7 @@
 import { Package } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmacyOrderFull } from '@/types';
-
-const statusChip: Record<string, string> = {
-  pending: 'chip chip-caut',
-  approved: 'chip chip-pos',
-  rejected: 'chip chip-crit',
-  dispensed: 'chip chip-neut',
-};
 
 interface Props {
   orders: PharmacyOrderFull[];
@@ -63,9 +58,9 @@ export function RecentOrdersList({ orders, loading }: Props) {
             <span className="text-[12px] text-[var(--fg-3)] tabular-nums">
               EGP {order.total_amount.toLocaleString()}
             </span>
-            <span className={statusChip[order.status] ?? 'chip chip-neut'}>
+            <Badge variant={getStatusVariant(order.status)}>
               {order.status}
-            </span>
+            </Badge>
           </div>
         </div>
       ))}

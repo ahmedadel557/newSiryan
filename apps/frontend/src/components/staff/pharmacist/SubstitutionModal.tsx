@@ -1,4 +1,5 @@
 import { X, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import type { PharmaMedication } from '@/types';
 
 interface Props {
@@ -36,9 +37,9 @@ export function SubstitutionModal({ data, onClose, onProceedToReject }: Props) {
                   {med.category} · {med.stock_quantity} in stock · EGP {med.price}
                 </p>
               </div>
-              <span className={`chip shrink-0 ${med.stock_quantity > 0 ? 'chip-pos' : 'chip-crit'}`}>
+              <Badge variant={med.stock_quantity > 0 ? 'positive' : 'critical'} className="shrink-0">
                 {med.stock_quantity > 0 ? 'Available' : 'Out of stock'}
-              </span>
+              </Badge>
             </div>
           ))}
         </div>
@@ -48,8 +49,7 @@ export function SubstitutionModal({ data, onClose, onProceedToReject }: Props) {
             Cancel
           </button>
           <button
-            className="btn btn-primary flex items-center gap-1"
-            style={{ background: 'var(--critical)', color: '#fff' }}
+            className="btn btn-danger flex items-center gap-1"
             onClick={onProceedToReject}
           >
             Proceed to Reject

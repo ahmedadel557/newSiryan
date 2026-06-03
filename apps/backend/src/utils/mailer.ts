@@ -4,6 +4,11 @@ const transporter = nodemailer.createTransport({
   host: 'smtp.sendgrid.net',
   port: 587,
   auth: { user: 'apikey', pass: process.env.SENDGRID_API_KEY },
+  // Fail fast when SMTP is slow/misconfigured instead of holding the HTTP response
+  // for ~2 min (nodemailer's default socket timeout). Email is non-critical / fire-and-forget.
+  connectionTimeout: 7000,
+  greetingTimeout: 7000,
+  socketTimeout: 7000,
 });
 
 export const sendEmail = async (to: string, subject: string, html: string): Promise<void> => {

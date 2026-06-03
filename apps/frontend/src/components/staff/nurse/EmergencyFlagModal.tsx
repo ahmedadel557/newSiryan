@@ -121,7 +121,7 @@ export function EmergencyFlagModal({ open, patientName, onClose, onSubmit }: Pro
             <button type="button" className="btn btn-secondary" onClick={handleClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" style={{ background: 'var(--critical)', color: '#fff' }} disabled={isSubmitting}>
+            <button type="submit" className="btn btn-danger" disabled={isSubmitting}>
               {isSubmitting ? 'Flagging…' : 'Flag emergency'}
             </button>
           </div>

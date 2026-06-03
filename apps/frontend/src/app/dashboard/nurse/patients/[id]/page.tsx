@@ -489,8 +489,7 @@ export default function NursePatientDetailPage() {
             )}
 
             <button
-              className="btn btn-primary text-[14px] px-6 py-[10px] flex items-center gap-2"
-              style={{ background: 'var(--critical)', color: '#fff' }}
+              className="btn btn-danger text-[14px] px-6 py-[10px] flex items-center gap-2"
               onClick={() => setFlagOpen(true)}
             >
               <AlertTriangle size={15} /> Flag emergency for {patient.first_name}

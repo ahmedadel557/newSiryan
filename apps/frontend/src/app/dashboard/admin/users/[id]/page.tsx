@@ -454,8 +454,7 @@ export default function AdminUserDetailPage() {
                 Permanently delete this account?
               </span>
               <button
-                className="btn text-[12px] px-3 py-1.5"
-                style={{ background: 'var(--critical)', color: '#fff' }}
+                className="btn btn-danger text-[12px] px-3 py-1.5"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >

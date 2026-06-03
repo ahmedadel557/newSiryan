@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import type { PharmaMedication } from '@/types';
 
 interface Props {
@@ -25,7 +26,7 @@ export function ExpiringAlertList({ medications }: Props) {
       <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--border-1)]">
         <Clock size={16} className="text-[var(--caution)]" />
         <h2 className="text-[15px] font-semibold text-[var(--fg-1)]">Expiring soon</h2>
-        <span className="chip chip-caut">{medications.length}</span>
+        <Badge variant="caution">{medications.length}</Badge>
       </div>
       {medications.map((med) => {
         const days = med.expiry_date ? daysUntil(med.expiry_date) : null;
@@ -41,11 +42,9 @@ export function ExpiringAlertList({ medications }: Props) {
               </p>
             </div>
             {days !== null && (
-              <span
-                className={`chip shrink-0 ${days <= 7 ? 'chip-crit' : 'chip-caut'}`}
-              >
+              <Badge variant={days <= 7 ? 'critical' : 'caution'} className="shrink-0">
                 {days === 0 ? 'Expires today' : `${days}d left`}
-              </span>
+              </Badge>
             )}
           </div>
         );

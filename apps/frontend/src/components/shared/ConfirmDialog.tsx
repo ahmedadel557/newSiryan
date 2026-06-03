@@ -48,8 +48,7 @@ export function ConfirmDialog({ open, title, description, confirmLabel = 'Confir
             Cancel
           </button>
           <button
-            className="btn btn-primary"
-            style={danger ? { background: 'var(--critical)', color: '#fff' } : undefined}
+            className={danger ? 'btn btn-danger' : 'btn btn-primary'}
             onClick={onConfirm}
             disabled={isLoading}
           >

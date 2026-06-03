@@ -7,6 +7,7 @@ import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { AdminAppointment } from '@/types';
 
 type StatusFilter = 'all' | AdminAppointment['status'];
@@ -19,15 +20,6 @@ const STATUS_TABS: { id: StatusFilter; label: string }[] = [
   { id: 'completed',  label: 'Completed' },
   { id: 'cancelled',  label: 'Cancelled' },
 ];
-
-function statusVariant(status: AdminAppointment['status']) {
-  if (status === 'confirmed')  return 'positive' as const;
-  if (status === 'checked_in') return 'info'     as const;
-  if (status === 'completed')  return 'neutral'  as const;
-  if (status === 'cancelled')  return 'critical' as const;
-  if (status === 'rescheduled') return 'caution' as const;
-  return 'caution' as const;
-}
 
 function statusLabel(status: AdminAppointment['status']) {
   return status === 'checked_in' ? 'Checked In' : status.charAt(0).toUpperCase() + status.slice(1);
@@ -91,8 +83,7 @@ function CancelModal({ appointment, onConfirm, onClose }: CancelModalProps) {
           <button
             onClick={handleConfirm}
             disabled={!reason.trim() || confirming}
-            className="btn text-[13px] px-4 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'var(--critical)', color: '#fff' }}
+            className="btn btn-danger text-[13px] px-4 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {confirming ? 'Cancelling…' : 'Confirm cancellation'}
           </button>
@@ -250,7 +241,7 @@ export default function AdminAppointmentsPage() {
                         })}
                       </td>
                       <td className={tdClass}>
-                        <Badge variant={statusVariant(appt.status)} dot>{statusLabel(appt.status)}</Badge>
+                        <Badge variant={getStatusVariant(appt.status)} dot>{statusLabel(appt.status)}</Badge>
                       </td>
                       <td className={`${tdClass} text-right`}>
                         {canCancel && (

@@ -13,16 +13,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/shared';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { DoctorRequestPayload, AppointmentConflictPayload } from '@/types';
-
-const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {
-  pending: 'caution',
-  confirmed: 'info',
-  checked_in: 'positive',
-  cancelled: 'critical',
-  rescheduled: 'caution',
-  completed: 'positive',
-};
 
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -175,7 +167,7 @@ export default function ReceptionistDashboardPage() {
                       {apt.doctor_name ? `Dr. ${apt.doctor_name}` : ''} {apt.visit_type ? `· ${apt.visit_type}` : ''}
                     </p>
                   </div>
-                  <Badge variant={STATUS_BADGE[apt.status] ?? 'info'}>
+                  <Badge variant={getStatusVariant(apt.status)}>
                     {apt.status.replace('_', ' ')}
                   </Badge>
                   <div className="flex gap-1.5 shrink-0">

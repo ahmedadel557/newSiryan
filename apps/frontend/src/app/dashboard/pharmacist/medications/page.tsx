@@ -2,6 +2,7 @@
 
 import { usePharmacistMedications } from '@/hooks/pharmacist';
 import { BatchesModal } from '@/components/staff/pharmacist/BatchesModal';
+import { Badge } from '@/components/ui/Badge';
 import { Send, Layers, AlertTriangle, Clock } from 'lucide-react';
 import type { PharmaMedication } from '@/types';
 
@@ -106,7 +107,7 @@ export default function PharmacistMedicationsPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-medium text-[var(--fg-1)]">{med.name}</span>
                       {isExpiringSoon(med) && (
-                        <span className="chip chip-caut" style={{ fontSize: 11 }}>Expiring</span>
+                        <Badge variant="caution" className="text-[11px]">Expiring</Badge>
                       )}
                     </div>
                   </td>
@@ -126,9 +127,9 @@ export default function PharmacistMedicationsPage() {
                   <td className="tabular-nums text-[13px] text-[var(--fg-3)]">{med.low_stock_threshold}</td>
                   <td>
                     {med.requires_prescription ? (
-                      <span className="chip chip-info">Yes</span>
+                      <Badge variant="info">Yes</Badge>
                     ) : (
-                      <span className="chip chip-neut">No</span>
+                      <Badge variant="neutral">No</Badge>
                     )}
                   </td>
                   <td className="tabular-nums text-[13px]">EGP {med.price.toLocaleString()}</td>

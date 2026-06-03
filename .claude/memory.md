@@ -36,10 +36,22 @@ JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Paylo
 
 ## Backend State
 - Entry: `src/server.ts` → Mongo → seed → Redis → cron → initSocket → attachRedisAdapter → listen
-- 14 route files, 14 controller folders, 8 service files, 25 Mongoose models
+- 14 route files, 14 controller folders, 8 service files, 26 Mongoose models
 - Validation: Zod. Response helpers: `sendSuccess` / `sendError`
 - 3 cron jobs: inventoryAlert, appointmentReminder, profileCleanup
 - Audit logging is fire-and-forget (never blocks)
+
+### Emergency Flags (2026-06-03, Part 1 backend)
+- `models/EmergencyFlag.ts` — `{patient,nurse,doctor}` refs, `message`, `severity`,
+  `status: notified|acknowledged|resolved`, `vitals_snapshot` subdoc, `notes`,
+  `acknowledged_at`, `resolved_at` (snake_case, like every other model).
+- Endpoints: nurse `POST /nurse/patients/:id/emergency-flag` (persists flag + vitals snapshot,
+  notifies doctor) and `GET /nurse/emergency-flags?status=` (list + kpis); doctor
+  `GET /doctor/emergency-flags`, `PATCH /doctor/emergency-flags/:flagId/acknowledge`,
+  `.../resolve`. Acknowledge/resolve emit `emergency:acknowledged`/`emergency:resolved` to the nurse.
+- **`VitalSign.ts` is an empty stub** — vitals live as an embedded `vital_signs[]` array on the
+  latest `MedicalRecord` (snake_case sub-fields); the flag's `vitals_snapshot` is read from there.
+- Frontend wiring (alerts page, hooks, services) is **Part 2 — not yet built**.
 
 ## Redis Integration (2026-05-30) — ALL PARTS COMPLETE
 - `src/config/cacheTtl.ts` — TTL constants + CACHE_KEYS namespaced factory

@@ -1,21 +1,13 @@
 ﻿import { Video, MapPin, Phone, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Appointment } from '@/types';
 import type { QueueFilter } from '@/hooks/receptionist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<string, 'positive' | 'caution' | 'critical' | 'neutral' | 'brand'> = {
-  confirmed: 'positive',
-  in_progress: 'brand',
-  scheduled: 'caution',
-  cancelled: 'critical',
-  completed: 'neutral',
-  no_show: 'neutral',
-};
 
 const statusLabel: Record<string, string> = {
   confirmed: 'Arrived',
@@ -136,7 +128,7 @@ export function AppointmentQueueTable({
                   )}
                 </td>
                 <td className={tdClass}>
-                  <Badge variant={statusVariant[appt.status] ?? 'neutral'} dot>
+                  <Badge variant={getStatusVariant(appt.status)} dot>
                     {statusLabel[appt.status] ?? appt.status}
                   </Badge>
                 </td>

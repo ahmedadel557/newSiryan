@@ -1,18 +1,12 @@
 import { TestTube } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { LabOrder, OrderStatus } from '@/types';
+import { getStatusVariant } from '@/lib/statusBadge';
+import type { LabOrder } from '@/types';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<OrderStatus, 'positive' | 'caution' | 'info' | 'neutral'> = {
-  completed: 'positive',
-  in_progress: 'info',
-  pending: 'caution',
-  cancelled: 'neutral',
-};
 
 interface LabResultsTabProps {
   labs: LabOrder[];
@@ -58,7 +52,7 @@ export function LabResultsTab({ labs, onNew }: LabResultsTabProps) {
                   {new Date(lab.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </td>
                 <td className={tdClass}>
-                  <Badge variant={statusVariant[lab.status]} dot>
+                  <Badge variant={getStatusVariant(lab.status)} dot>
                     {lab.status}
                   </Badge>
                 </td>

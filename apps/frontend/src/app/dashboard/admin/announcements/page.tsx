@@ -238,7 +238,7 @@ export default function AnnouncementsPage() {
             <p className="t-body" style={{ color: 'var(--fg-2)' }}>This will permanently remove the announcement.</p>
             <div className="flex gap-2 justify-end">
               <button className="btn btn-ghost" onClick={() => setConfirmDelete(null)}>Cancel</button>
-              <button className="btn" style={{ background: 'var(--critical)', color: '#fff' }} onClick={handleDelete} disabled={deleting}>
+              <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>

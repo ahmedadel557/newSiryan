@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatEGP } from '@/lib/pricing';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { AdminInvoice, CashierInvoiceStatus, User, CreateAdminInvoiceDto } from '@/types';
 
 const ITEM_CATEGORIES = ['appointment', 'pharmacy', 'lab', 'radiology', 'room', 'other'] as const;
@@ -180,13 +181,6 @@ const STATUS_TABS: { id: StatusFilter; label: string }[] = [
   { id: 'partially_paid', label: 'Partial' },
   { id: 'cancelled', label: 'Cancelled' },
 ];
-
-function statusVariant(status: CashierInvoiceStatus) {
-  if (status === 'paid') return 'positive' as const;
-  if (status === 'partially_paid') return 'caution' as const;
-  if (status === 'cancelled') return 'neutral' as const;
-  return 'critical' as const;
-}
 
 function statusLabel(status: CashierInvoiceStatus) {
   if (status === 'partially_paid') return 'Partial';
@@ -404,7 +398,7 @@ export default function AdminInvoicesPage() {
                     </td>
                     <td className="px-5 py-3 text-right tabular-nums font-semibold text-[var(--fg-1)]">{formatEGP(inv.total_due)}</td>
                     <td className="px-5 py-3">
-                      <Badge variant={statusVariant(inv.status)} dot>{statusLabel(inv.status)}</Badge>
+                      <Badge variant={getStatusVariant(inv.status)} dot>{statusLabel(inv.status)}</Badge>
                     </td>
                     <td className="px-5 py-3 text-[var(--fg-3)] capitalize">{inv.payment_method ?? '—'}</td>
                   </tr>

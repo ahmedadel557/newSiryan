@@ -3,23 +3,10 @@
 import { Video, ArrowRight } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { DoctorQueueItem } from '@/types';
 
 const VIDEO_WINDOW_MS = 5 * 60 * 1000;
-
-type BadgeVariant = 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
-
-const statusVariant: Record<string, BadgeVariant> = {
-  pending: 'caution',
-  confirmed: 'positive',
-  scheduled: 'caution',
-  checked_in: 'positive',
-  in_progress: 'brand',
-  completed: 'neutral',
-  cancelled: 'critical',
-  rescheduled: 'info',
-  no_show: 'neutral',
-};
 
 interface QueueItemProps {
   item: DoctorQueueItem;
@@ -41,7 +28,7 @@ export function QueueItem({ item, onOpen, onStartVideo }: QueueItemProps) {
       <Avatar name={item.patient_name} size="sm" />
       <p className="font-semibold text-[13px] text-[var(--fg-1)] flex-1 min-w-0 truncate">{item.patient_name}</p>
       <Badge variant={item.type === 'online' ? 'info' : 'neutral'}>{item.type}</Badge>
-      <Badge variant={statusVariant[item.status] ?? 'neutral'} dot>
+      <Badge variant={getStatusVariant(item.status)} dot>
         {item.status.replace('_', ' ')}
       </Badge>
       {showVideo && (

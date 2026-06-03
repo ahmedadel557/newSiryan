@@ -10,6 +10,7 @@ import {
   getMedicationSchedule,
   markMedicationGiven,
   emergencyFlag,
+  getNurseEmergencyFlags,
 } from '../controllers/nurse';
 import { getStaffProfile, updateStaffProfile } from '../controllers/staff/profile';
 import { updateStaffProfileSchema } from '../validations/staff.validation';
@@ -18,6 +19,7 @@ const router = Router();
 
 router.use(authenticate, requireCompleteProfile, authorize('nurse'));
 
+router.get('/emergency-flags', getNurseEmergencyFlags);
 router.get('/patients', getNursePatients);
 router.get('/patients/:id/vitals', getPatientVitals);
 router.post('/patients/:id/vitals', validateRequest(addVitalsSchema), addVitals);

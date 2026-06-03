@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatEGP, feeForVisitType } from '@/lib/pricing';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Appointment } from '@/types';
 
 const VIDEO_WINDOW_MS = 5 * 60 * 1000;
@@ -31,8 +32,6 @@ const TABS: { key: AppointmentTab; label: string }[] = [
   { key: 'past', label: 'Past' },
   { key: 'cancelled', label: 'Cancelled' },
 ];
-
-type BadgeVariant = 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
 
 const STATUS_LABEL: Record<string, string> = {
   pending: 'Pending',
@@ -45,29 +44,11 @@ const STATUS_LABEL: Record<string, string> = {
   no_show: 'No show',
 };
 
-const STATUS_VARIANT: Record<string, BadgeVariant> = {
-  pending: 'caution',
-  scheduled: 'caution',
-  confirmed: 'info',
-  in_progress: 'info',
-  completed: 'positive',
-  cancelled: 'critical',
-  rescheduled: 'info',
-  no_show: 'critical',
-};
-
 const PAYMENT_LABEL: Record<string, string> = {
   paid: 'Paid',
   unpaid: 'Unpaid',
   partially_paid: 'Partial',
   cancelled: 'Voided',
-};
-
-const PAYMENT_VARIANT: Record<string, BadgeVariant> = {
-  paid: 'positive',
-  unpaid: 'caution',
-  partially_paid: 'info',
-  cancelled: 'neutral',
 };
 
 function DateBlock({ dateStr }: { dateStr: string }) {
@@ -121,7 +102,7 @@ function AppointmentCard({
             <p className="text-[15px] font-semibold text-[var(--fg-1)] truncate">
               {(appt as Appointment & { doctor_name?: string }).doctor_name ?? 'Doctor'}
             </p>
-            <Badge variant={STATUS_VARIANT[appt.status] ?? 'neutral'} dot>
+            <Badge variant={getStatusVariant(appt.status)} dot>
               {STATUS_LABEL[appt.status] ?? appt.status.replace(/_/g, ' ')}
             </Badge>
             {appt.follow_up_of && (
@@ -156,7 +137,7 @@ function AppointmentCard({
               <span className="inline-flex items-center gap-1 text-[12px] text-[var(--fg-2)] font-medium">
                 <Wallet size={12} /> {formatEGP(fee)}
               </span>
-              <Badge variant={PAYMENT_VARIANT[payment] ?? 'neutral'}>
+              <Badge variant={getStatusVariant(payment)}>
                 {payment === 'paid' && <CheckCircle2 size={11} />}
                 {PAYMENT_LABEL[payment] ?? payment}
               </Badge>

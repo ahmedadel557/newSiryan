@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AddRoomModal } from '@/components/staff/inventory/AddRoomModal';
 import { Building2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Room } from '@/types';
 
 const thClass =
@@ -16,12 +17,6 @@ const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
 
 type TypeFilter = 'all' | Room['type'];
 type StatusFilter = 'all' | Room['status'];
-
-const statusVariant: Record<Room['status'], 'positive' | 'caution' | 'critical'> = {
-  available: 'positive',
-  occupied: 'caution',
-  maintenance: 'critical',
-};
 
 const typeLabel: Record<Room['type'], string> = {
   operation: 'Operation',
@@ -203,7 +198,7 @@ export default function InventoryRoomsPage() {
                     </td>
                     <td className={`${tdClass} text-[var(--fg-2)]`}>${room.price_per_day.toLocaleString()}/day</td>
                     <td className={tdClass}>
-                      <Badge variant={statusVariant[room.status]} dot>
+                      <Badge variant={getStatusVariant(room.status)} dot>
                         {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
                       </Badge>
                     </td>

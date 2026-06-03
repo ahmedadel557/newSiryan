@@ -2,18 +2,12 @@
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useIsMobile } from '@/hooks/shared';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { RadiologyOrder, OrderStatus } from '@/types';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<OrderStatus, 'caution' | 'info' | 'positive' | 'neutral'> = {
-  pending: 'caution',
-  in_progress: 'info',
-  completed: 'positive',
-  cancelled: 'neutral',
-};
 
 const statusLabel: Record<OrderStatus, string> = {
   pending: 'Ready to scan',
@@ -97,7 +91,7 @@ export function RadiologyOrdersTable({ orders, isLoading, onUpload, onUpdateStat
                 <span className="font-semibold text-sm text-[var(--fg-1)]">
                   {order.modality} — {order.body_part}
                 </span>
-                <Badge variant={statusVariant[order.status]} dot>
+                <Badge variant={getStatusVariant(order.status)} dot>
                   {statusLabel[order.status]}
                 </Badge>
               </div>
@@ -156,7 +150,7 @@ export function RadiologyOrdersTable({ orders, isLoading, onUpload, onUpdateStat
                 </Badge>
               </td>
               <td className={tdClass}>
-                <Badge variant={statusVariant[order.status]} dot>
+                <Badge variant={getStatusVariant(order.status)} dot>
                   {statusLabel[order.status]}
                 </Badge>
               </td>

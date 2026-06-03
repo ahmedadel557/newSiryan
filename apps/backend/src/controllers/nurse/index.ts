@@ -9,6 +9,7 @@ import MedicalRecord from '../../models/MedicalRecord';
 import Prescription from '../../models/Prescription';
 import RoomBooking from '../../models/RoomBooking';
 import Notification from '../../models/Notification';
+import EmergencyFlag from '../../models/EmergencyFlag';
 import { detectAbnormalVitals, summarizeAbnormalities, topSeverity } from '../../utils/vitals';
 import { emitToUser } from '../../config/socket';
 
@@ -243,7 +244,7 @@ export const emergencyFlag = async (req: AuthRequest, res: Response, next: NextF
     const parsed = emergencyFlagSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
-    const { message, severity } = parsed.data.body;
+    const { message, severity, notes } = parsed.data.body;
 
     const appointment = await Appointment.findOne({ patient: patientId }).sort({ createdAt: -1 }).select('doctor');
     if (!appointment) return sendError(res, 'No appointment found for this patient', 404);
@@ -255,15 +256,49 @@ export const emergencyFlag = async (req: AuthRequest, res: Response, next: NextF
       ? `${patientProfile.first_name ?? ''} ${patientProfile.last_name ?? ''}`.trim() || 'Unknown Patient'
       : 'Unknown Patient';
 
+    // Snapshot the patient's most recent vitals (embedded on the latest MedicalRecord).
+    // Optional — if the patient has no recorded vitals the flag still creates.
+    let vitals_snapshot: Record<string, unknown> | undefined;
+    const latestRecord = await MedicalRecord.findOne({ patient: patientId })
+      .sort({ createdAt: -1 })
+      .select('vital_signs')
+      .lean();
+    const vitals = latestRecord?.vital_signs;
+    if (vitals && vitals.length > 0) {
+      const latest = vitals.reduce((a, b) =>
+        new Date(b.recorded_at).getTime() >= new Date(a.recorded_at).getTime() ? b : a
+      );
+      vitals_snapshot = {
+        blood_pressure_sys: latest.blood_pressure_sys,
+        blood_pressure_dia: latest.blood_pressure_dia,
+        heart_rate:         latest.heart_rate,
+        temperature:        latest.temperature,
+        oxygen_level:       latest.oxygen_level,
+        blood_sugar:        latest.blood_sugar,
+        recorded_at:        latest.recorded_at,
+      };
+    }
+
+    const flag = await EmergencyFlag.create({
+      patient: patientId,
+      nurse:   req.user!.id,
+      doctor:  doctorId,
+      message,
+      severity,
+      notes,
+      vitals_snapshot,
+    });
+
     const notif = await Notification.create({
       user: doctorId,
       type: 'emergency',
       title: `Emergency [${severity.toUpperCase()}]`,
       message: `Nurse flagged emergency for patient: ${message}`,
-      metadata: { patientId, patientName, severity, nurse: req.user!.id },
+      metadata: { flag_id: flag.id, patientId, patientName, severity, nurse: req.user!.id },
     });
 
     emitToUser(doctorId, 'emergency:flag', {
+      flag_id: flag.id,
       patientId,
       patientName,
       severity,
@@ -282,9 +317,60 @@ export const emergencyFlag = async (req: AuthRequest, res: Response, next: NextF
       req,
     });
 
-    sendSuccess(res, { severity, doctor_id: doctorId }, 'Emergency alert sent to doctor');
+    sendSuccess(res, { flag }, 'Emergency flag sent', 201);
   } catch (err: any) {
     if (err.name === 'CastError') return sendError(res, 'Invalid patient ID', 400);
+    next(err);
+  }
+};
+
+export const getNurseEmergencyFlags = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { status } = req.query as { status?: string };
+    const query: Record<string, unknown> = { nurse: req.user!.id };
+    if (status && ['notified', 'acknowledged', 'resolved'].includes(status)) query.status = status;
+
+    const flags = await EmergencyFlag.find(query).sort({ createdAt: -1 }).lean();
+
+    // Names live on Profile, not User — resolve patient + doctor names in one lookup.
+    const userIds = [...new Set(flags.flatMap((f: any) => [f.patient.toString(), f.doctor.toString()]))];
+    const profiles = await Profile.find({ user: { $in: userIds } })
+      .select('user first_name last_name specialization')
+      .lean();
+    const pmap = new Map(profiles.map((p: any) => [p.user.toString(), p]));
+    const nameOf = (id: string) => {
+      const p = pmap.get(id);
+      return p ? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() : '';
+    };
+
+    const result = flags.map((f: any) => ({
+      ...f,
+      id: f._id.toString(),
+      patient_name: nameOf(f.patient.toString()),
+      doctor_name: nameOf(f.doctor.toString()),
+      doctor_specialization: pmap.get(f.doctor.toString())?.specialization ?? null,
+    }));
+
+    const acknowledgedFlags = flags.filter((f: any) => f.acknowledged_at);
+    const avg_response_minutes = acknowledgedFlags.length
+      ? Math.round(
+          acknowledgedFlags.reduce(
+            (sum: number, f: any) => sum + (new Date(f.acknowledged_at).getTime() - new Date(f.createdAt).getTime()),
+            0
+          ) / acknowledgedFlags.length / 60000
+        )
+      : null;
+
+    const kpis = {
+      total: flags.length,
+      active: flags.filter((f: any) => f.status === 'notified').length,
+      acknowledged: flags.filter((f: any) => f.status === 'acknowledged').length,
+      resolved: flags.filter((f: any) => f.status === 'resolved').length,
+      avg_response_minutes,
+    };
+
+    sendSuccess(res, { flags: result, kpis });
+  } catch (err) {
     next(err);
   }
 };

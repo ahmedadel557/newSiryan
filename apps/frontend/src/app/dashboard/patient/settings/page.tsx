@@ -29,7 +29,7 @@ const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 function PasswordStrength({ password }: { password: string }) {
   const checks = [password.length >= 8, /[A-Z]/.test(password), /[0-9]/.test(password), /[^A-Za-z0-9]/.test(password)];
   const score = checks.filter(Boolean).length;
-  const colors = ['var(--critical)', 'var(--warning, #f59e0b)', '#84cc16', 'var(--brand)'];
+  const colors = ['var(--critical)', 'var(--caution)', 'var(--positive)', 'var(--brand)'];
   const labels = ['Weak', 'Fair', 'Good', 'Strong'];
   if (!password) return null;
   return (

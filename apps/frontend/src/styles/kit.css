@@ -64,21 +64,27 @@ button {
   border-color: var(--border-2);
 }
 .btn-secondary:hover {
-  background: var(--sand-100);
+  background: var(--bg-sunken);
 }
 .btn-ghost {
   background: transparent;
   color: var(--fg-1);
 }
 .btn-ghost:hover {
-  background: var(--sand-100);
+  background: var(--bg-sunken);
 }
 .btn-danger {
-  background: var(--critical-soft-bg);
-  color: var(--critical-soft-fg);
+  background: var(--critical);
+  color: #fff;
+  border: none;
 }
 .btn-danger:hover {
-  background: var(--coral-100);
+  background: var(--critical-hover, var(--critical));
+  filter: brightness(0.92);
+}
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .btn-sm {
   height: 30px;
@@ -95,13 +101,6 @@ button {
   width: 36px;
   padding: 0;
   justify-content: center;
-}
-
-/*data-theme="dark" overrides for buttons */
-
-.dark .btn-ghost:hover {
-  background: var(--sand-100);
-  color: black;
 }
 
 /* ---------- INPUTS ---------- */
@@ -361,7 +360,7 @@ textarea.input:focus {
   border-bottom: none;
 }
 .tbl tr:hover td {
-  background: var(--sand-50);
+  background: var(--bg-sunken);
 }
 
 /* ---------- LUCIDE ---------- */

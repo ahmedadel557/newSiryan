@@ -9,19 +9,12 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { CreatePurchaseOrderModal } from '@/components/staff/inventory/CreatePurchaseOrderModal';
 import { useToast } from '@/hooks/shared';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PurchaseOrder, CreatePurchaseOrderDto, Supplier } from '@/types';
 
 type StatusTab = 'all' | PurchaseOrder['status'];
 
 const STATUS_TABS: StatusTab[] = ['all', 'draft', 'ordered', 'shipped', 'received', 'cancelled'];
-
-const statusVariant: Record<PurchaseOrder['status'], 'neutral' | 'info' | 'caution' | 'positive' | 'critical'> = {
-  draft: 'neutral',
-  ordered: 'info',
-  shipped: 'caution',
-  received: 'positive',
-  cancelled: 'critical',
-};
 
 const thClass = 'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
@@ -177,7 +170,7 @@ export default function PurchaseOrdersPage() {
                     <td className={`${tdClass} font-semibold text-[var(--fg-1)]`}>EGP {order.total_amount.toFixed(2)}</td>
                     <td className={`${tdClass} text-[var(--fg-3)]`}>{order.expected_delivery_date?.slice(0, 10) ?? '—'}</td>
                     <td className={tdClass}>
-                      <Badge variant={statusVariant[order.status]} dot>{order.status}</Badge>
+                      <Badge variant={getStatusVariant(order.status)} dot>{order.status}</Badge>
                     </td>
                     <td className={`${tdClass} text-[var(--fg-3)]`}>{order.createdAt?.slice(0, 10)}</td>
                     <td className={`${tdClass} text-right`}>

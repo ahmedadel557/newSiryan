@@ -1,18 +1,12 @@
 import { Truck } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { SupplyRequest } from '@/types';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<string, 'caution' | 'positive' | 'neutral' | 'critical'> = {
-  pending: 'caution',
-  approved: 'caution',
-  fulfilled: 'positive',
-  rejected: 'critical',
-};
 
 function requesterName(req: SupplyRequest): string {
   if (typeof req.requested_by === 'object' && req.requested_by !== null) {
@@ -96,7 +90,7 @@ export function SupplyRequestsTable({ requests, isLoading, onFulfill, limit }: S
                 {new Date(req.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </td>
               <td className={tdClass}>
-                <Badge variant={statusVariant[req.status] ?? 'neutral'} dot>
+                <Badge variant={getStatusVariant(req.status)} dot>
                   {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                 </Badge>
               </td>

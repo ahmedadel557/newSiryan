@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import { WaitingEstimateBadge } from './WaitingEstimateBadge';
 import type { Appointment, AppointmentStatus } from '@/types';
 
@@ -7,18 +8,6 @@ interface AppointmentRowProps {
   appointment: Appointment;
   onCancel: (id: string) => void;
 }
-
-const statusVariant: Record<AppointmentStatus, 'info' | 'positive' | 'brand' | 'neutral' | 'critical' | 'caution'> = {
-  pending: 'caution',
-  scheduled: 'info',
-  confirmed: 'positive',
-  in_progress: 'brand',
-  completed: 'neutral',
-  cancelled: 'critical',
-  rescheduled: 'info',
-  no_show: 'caution',
-  checked_in: 'positive',
-};
 
 const statusLabel: Record<AppointmentStatus, string> = {
   pending: 'Pending',
@@ -104,7 +93,7 @@ export function AppointmentRow({ appointment, onCancel }: AppointmentRowProps) {
           {smartLabel} · {time}
         </p>
         <div className="flex flex-wrap items-center gap-[6px] mt-2">
-          <Badge variant={statusVariant[appointment.status]} dot>
+          <Badge variant={getStatusVariant(appointment.status)} dot>
             {statusLabel[appointment.status]}
           </Badge>
           {isOnline && (

@@ -1,18 +1,12 @@
 import { Scan } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { OrderStatus, RadiologyOrder } from '@/types';
+import { getStatusVariant } from '@/lib/statusBadge';
+import type { RadiologyOrder } from '@/types';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<OrderStatus, 'positive' | 'caution' | 'info' | 'neutral'> = {
-  completed: 'positive',
-  in_progress: 'info',
-  pending: 'caution',
-  cancelled: 'neutral',
-};
 
 interface RadiologyTabProps {
   imaging: RadiologyOrder[];
@@ -56,7 +50,7 @@ export function RadiologyTab({ imaging, onNew }: RadiologyTabProps) {
                   <Badge variant={img.priority === 'stat' ? 'critical' : img.priority === 'urgent' ? 'caution' : 'neutral'}>{img.priority}</Badge>
                 </td>
                 <td className={tdClass}>
-                  <Badge variant={statusVariant[img.status]} dot>
+                  <Badge variant={getStatusVariant(img.status)} dot>
                     {img.status}
                   </Badge>
                 </td>

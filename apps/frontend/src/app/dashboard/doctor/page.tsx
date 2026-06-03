@@ -8,6 +8,7 @@ import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { DoctorShiftCard } from '@/components/doctor/DoctorShiftCard';
 import { DoctorRatingsCard } from '@/components/doctor/DoctorRatingsCard';
 import { PatientQueueTable } from '@/components/doctor/PatientQueueTable';
+import { ActiveAlertsCard } from '@/components/doctor/ActiveAlertsCard';
 import { EmergencyAlertBanner } from '@/components/doctor/EmergencyAlertBanner';
 import { LabResultBanner } from '@/components/doctor/LabResultBanner';
 import { CheckedInBanner } from '@/components/doctor/CheckedInBanner';
@@ -121,6 +122,8 @@ export default function DoctorQueuePage() {
       </div>
 
       <DoctorKPIStrip cards={kpiCards} />
+
+      <ActiveAlertsCard />
 
       <div className="grid gap-4 md:grid-cols-2">
         <DoctorShiftCard />

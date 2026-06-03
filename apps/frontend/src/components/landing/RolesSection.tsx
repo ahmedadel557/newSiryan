@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { UserRound, Stethoscope, Building2, Check, Sparkles, Pill, BedDouble, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import { Reveal } from './Reveal';
 
 type RoleKey = 'patient' | 'clinical' | 'admin';
@@ -152,10 +153,9 @@ function PatientMock() {
           <div className="rmock-appt-title">Cardiology follow-up</div>
           <div className="rmock-appt-sub">Dr. Saleh · 10:30 AM</div>
         </div>
-        <span className="chip chip-pos">
-          <span className="chip-dot" />
+        <Badge variant="positive" dot>
           Confirmed
-        </span>
+        </Badge>
       </div>
     </div>
   );
@@ -169,10 +169,10 @@ function ClinicalMock() {
           <div className="rmock-eyebrow">Today · 9 visits</div>
           <div className="rmock-page-title">My patients</div>
         </div>
-        <span className="chip chip-crit" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <Badge variant="critical">
           <AlertTriangle size={11} strokeWidth={1.75} />
           1 emergency
-        </span>
+        </Badge>
       </div>
       <div className="rmock-stats">
         <div>
@@ -243,14 +243,12 @@ function AdminMock() {
         />
       </svg>
       <div className="rmock-alerts">
-        <span className="chip chip-caut">
-          <span className="chip-dot" />
+        <Badge variant="caution" dot>
           3 low-stock items
-        </span>
-        <span className="chip chip-pos">
-          <span className="chip-dot" />
+        </Badge>
+        <Badge variant="positive" dot>
           All systems healthy
-        </span>
+        </Badge>
       </div>
     </div>
   );

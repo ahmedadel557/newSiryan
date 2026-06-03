@@ -1,18 +1,13 @@
 ﻿import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { GitPullRequest } from 'lucide-react';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { CancelRequest } from '@/types';
 import type { RequestFilter } from '@/hooks/receptionist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const statusVariant: Record<string, 'positive' | 'caution' | 'critical'> = {
-  approved: 'positive',
-  pending: 'caution',
-  rejected: 'critical',
-};
 
 interface RequestsTableProps {
   requests: CancelRequest[];
@@ -88,7 +83,7 @@ export function RequestsTable({ requests, filter, onFilterChange, onApprove, onR
                 </td>
                 <td className={`${tdClass} text-[12px] text-[var(--fg-3)] max-w-[180px]`}>{req.reason}</td>
                 <td className={tdClass}>
-                  <Badge variant={statusVariant[req.status] ?? 'neutral'} dot>
+                  <Badge variant={getStatusVariant(req.status)} dot>
                     {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                   </Badge>
                 </td>

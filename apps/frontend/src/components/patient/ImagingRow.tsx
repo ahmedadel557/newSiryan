@@ -1,12 +1,6 @@
 import { Badge } from '@/components/ui/Badge';
-import type { RadiologyOrder, OrderStatus } from '@/types';
-
-const statusVariant: Record<OrderStatus, 'positive' | 'caution' | 'info' | 'neutral'> = {
-  completed: 'positive',
-  in_progress: 'info',
-  pending: 'caution',
-  cancelled: 'neutral',
-};
+import { getStatusVariant } from '@/lib/statusBadge';
+import type { RadiologyOrder } from '@/types';
 
 interface ImagingRowProps {
   order: RadiologyOrder;
@@ -29,7 +23,7 @@ export function ImagingRow({ order }: ImagingRowProps) {
         {order.findings ?? '—'}
       </td>
       <td className="py-3 px-[14px] border-b border-[var(--border-1)]">
-        <Badge variant={statusVariant[order.status]} dot>
+        <Badge variant={getStatusVariant(order.status)} dot>
           {order.status}
         </Badge>
       </td>

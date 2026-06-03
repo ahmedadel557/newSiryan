@@ -5,6 +5,7 @@ import type {
   BlockedSlot,
   DiagnosisDto,
   DoctorNote,
+  EmergencyFlag,
   DoctorQueueItem,
   DoctorScheduleRoomBooking,
   LabOrder,
@@ -354,5 +355,25 @@ export const doctorService = {
   // --- Doctor ends the call for both participants (POST /doctor/video/call/:callId/end) ---
   async endVideoCall(callId: string): Promise<void> {
     await apiClient.post(`/doctor/video/call/${callId}/end`);
+  },
+
+  // --- Emergency flags (Part 2 backend: /doctor/emergency-flags) ---
+  async getDoctorEmergencyFlags(): Promise<{ flags: EmergencyFlag[] }> {
+    const res = await apiClient.get<ApiResponse<{ flags: any[] }>>('/doctor/emergency-flags');
+    return {
+      flags: (res.data.data.flags ?? []).map((f) => ({ ...f, id: f._id ?? f.id, created_at: f.createdAt ?? f.created_at })),
+    };
+  },
+
+  async acknowledgeFlag(flagId: string): Promise<{ flag: EmergencyFlag }> {
+    const res = await apiClient.patch<ApiResponse<{ flag: any }>>(`/doctor/emergency-flags/${flagId}/acknowledge`);
+    const f = res.data.data.flag;
+    return { flag: { ...f, id: f._id ?? f.id, created_at: f.createdAt ?? f.created_at } };
+  },
+
+  async resolveFlag(flagId: string, notes?: string): Promise<{ flag: EmergencyFlag }> {
+    const res = await apiClient.patch<ApiResponse<{ flag: any }>>(`/doctor/emergency-flags/${flagId}/resolve`, { notes });
+    const f = res.data.data.flag;
+    return { flag: { ...f, id: f._id ?? f.id, created_at: f.createdAt ?? f.created_at } };
   },
 };

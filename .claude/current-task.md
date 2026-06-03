@@ -1,10 +1,176 @@
 # Current Task
 
 ## Task
-Patient System Fixes — Part 2 (2026-06-02): Book Appointment Improvements.
+UI Polish — Part 1: foundational design-system unification I1/I2/I3/I5 (2026-06-03).
+
+## Status
+COMPLETE. Next = UI Polish Part 2 (remaining audit items: I4 ConfirmDialog rollout, I6 dead buttons,
+I7 settings de-dupe, I8 table overflow wrappers).
+
+## What was done
+Unified the four foundational design-system inconsistencies from the UI audit.
+
+- **I1 — shared status→variant map.** New `src/lib/statusBadge.ts` exporting `statusVariant` (one
+  canonical status→`BadgeVariant` map covering appointment / order / payment / room / warehouse /
+  pharmacy / emergency / user statuses) + `getStatusVariant(status)` (lowercases, falls back to
+  `'neutral'`). Exported a `BadgeVariant` type from `components/ui/Badge.tsx`. Removed the ~28 inline
+  status→variant maps/functions across receptionist/doctor/patient/admin/cashier/inventory/lab/
+  radiology/pharmacist files and routed every status `<Badge>` through `getStatusVariant`. **`cancelled`
+  is now `neutral` everywhere** (was `critical` in ~14 files, `neutral` in others). Label maps were
+  preserved per file. Left alone: `NursePatientTable` (derived mock VitalsStatus, not a backend status),
+  `InventoryTable.statusVariant(item)` (computed from quantity thresholds), priority/payment-method/
+  type maps (not statuses), and KPI `tone` props (metric colors, e.g. admin/appointments cancelled-count).
+- **I2 — single badge system.** Replaced every `chip chip-*` usage in components with `<Badge>` (pharmacist
+  cards/lists/modals, cashier TodaysTransactions, pharmacist medications page, landing RolesSection).
+  Status-bearing chips route through `getStatusVariant`; the rest map directly to a `BadgeVariant`.
+  The `chip-*` classes remain defined in `kit.css` (per constraint) but are no longer used by any component.
+- **I3 — one destructive button.** `.btn-danger` (kit.css) + `<Button variant="danger">` (button.tsx) are
+  now solid `var(--critical)` / white with `brightness(0.92)` hover + disabled state. Replaced the inline
+  `style={{ background: 'var(--critical)', color: '#fff' }}` destructive buttons (ConfirmDialog, 3
+  pharmacist modals, EmergencyFlagModal, admin announcements/appointments/settings/shifts/users[id],
+  nurse/patients[id]) with `btn-danger`. Left: `StaffShell` "Urgent" badge (a label, not a button) and
+  `admin/compliance` conditional approve/reject confirm.
+- **I5 — `--warning` token.** Added `--warning: var(--caution)` alias to `tokens.css`; replaced the
+  password-strength `colors` arrays in `settings/page.tsx` + `patient/settings/page.tsx` with
+  `['var(--critical)','var(--caution)','var(--positive)','var(--brand)']` (removed hardcoded `#f59e0b`/`#84cc16`).
+
+## Verification
+- `npx tsc --noEmit` (frontend) → 0 errors.
+- `grep '#84cc16'` → 0. `grep "cancelled.*critical"` → 1 (a KPI `tone`, not a status badge — left).
+  `grep "style.*var(--critical)"` → remaining hits are legitimate red icon/text colors, soft backgrounds,
+  and non-button badges; the only solid destructive button pattern left is the StaffShell urgent badge.
+
+---
+
+## Previous Task
+
+## Task
+Emergency Flag System — Part 2: Frontend wiring + dark-mode fixes C2/C3/C4 (2026-06-03).
 
 ## Status
 COMPLETE.
+
+## What was done
+Wired the previously-static `nurse/alerts` page to real data, added a doctor-side actionable
+"Active Alerts" section, and fixed the 3 systemic dark-mode bugs at their source.
+
+- **Types** (`types/index.ts`): `VitalsSnapshot`, `EmergencyFlag`, `EmergencyFlagKPIs`. Shape matches
+  the **real** backend response (flat `patient_name`/`doctor_name`/`nurse_name` strings, refs as id
+  strings, `createdAt`) — *not* the nested objects the Part-2 prompt assumed. Services normalize
+  `createdAt → created_at`.
+- **queryKeys**: `nurseEmergencyFlags(status?)`, `doctorEmergencyFlags()`.
+- **Services**: `nurseService.getEmergencyFlags(status?)`; `doctorService.getDoctorEmergencyFlags`,
+  `acknowledgeFlag`, `resolveFlag`.
+- **Hooks**: `useNurseAlerts` (status filter + socket-invalidate on `emergency:acknowledged`/`:resolved`),
+  `useDoctorEmergencyFlags` (ack/resolve mutations + socket-invalidate on `emergency:flag`). Both follow
+  the `useDoctorQueue` TanStack pattern.
+- **Nurse alerts page** rewritten: KPI strip (total/active/acknowledged/avg-response), filter pills,
+  real flag list with severity/status badges + vitals summary + relative times, loading/empty/error
+  states, and "Raise new flag" via a patient `<select>` → reused `EmergencyFlagModal`.
+- **Doctor overview**: new `components/doctor/ActiveAlertsCard.tsx` rendered below the KPI strip;
+  acknowledge + inline-notes resolve; renders nothing when no active flags; max 5 shown + "+N more".
+- **Dark mode (C2/C3/C4)**: `Skeleton` → `--bg-sunken` + `animate-pulse`; new `--neutral-soft-bg/-fg`
+  tokens (light + `.dark`) used by `Badge` neutral variant; table-row + secondary/ghost button hovers
+  → `--bg-sunken`; removed the `.dark .btn-ghost:hover { color: black }` hack.
+  > Note: the prompt named `--surface-raised`/`--surface-overlay` — these don't exist; used real tokens.
+
+## Verification
+- `npx tsc --noEmit` (frontend) → 0 errors.
+- `npm run audit:routes` → all 4 emergency-flag routes in ✅ MATCHED; FE-call-with-no-BE-route = 0.
+
+---
+
+## Previous Task
+
+## Task
+Emergency Flag System — Part 1: Backend persistence + lifecycle (2026-06-03).
+
+## Status
+COMPLETE.
+
+## What was done
+Built the persistence/read/lifecycle backend so emergency flags are real records (the
+`nurse/alerts` page was previously a static mockup with no backend support).
+
+- **NEW model** `models/EmergencyFlag.ts` — snake_case (`patient`/`nurse`/`doctor` refs,
+  `vitals_snapshot` subdoc, `acknowledged_at`/`resolved_at`), `status` enum
+  `notified|acknowledged|resolved`, `toJSON` (_id→id), indexes `{nurse,createdAt}` /
+  `{doctor,status}`. Registered in `models/index.ts`.
+- **`emergencyFlag`** (`controllers/nurse/index.ts`) now persists an `EmergencyFlag` +
+  snapshots the patient's latest vitals from `MedicalRecord.vital_signs` (optional — flag
+  still creates if none), adds `flag_id` to the `emergency:flag` socket payload, returns
+  `{ flag }` 201. Existing doctor Notification + sockets preserved.
+- **NEW `getNurseEmergencyFlags`** — list own flags (optional `?status=`) + `kpis`
+  (total/active/acknowledged/resolved/avg_response_minutes); names resolved via `Profile`.
+- **NEW `controllers/doctor/emergencyFlags.controller.ts`** — `getDoctorEmergencyFlags`
+  (non-resolved, severity-sorted), `acknowledgeFlag` (ownership 403 + status 400 guards),
+  `resolveFlag` (optional notes); both emit `emergency:acknowledged`/`emergency:resolved`
+  to the nurse.
+- Validations: nurse `emergencyFlagSchema` + `notes`; doctor `resolveEmergencyFlagSchema`.
+- Routes: `GET /nurse/emergency-flags`; `GET /doctor/emergency-flags`,
+  `PATCH /doctor/emergency-flags/:flagId/{acknowledge,resolve}` (literal path placed before
+  `/:id` wildcards to avoid the shadowing class fixed for `/me/ratings`).
+- Backend types: `EmergencyFlag` + `VitalsSnapshot` + `PopulatedUserRef` in `types/index.ts`.
+
+### Corrections applied vs the Part-1 prompt
+- `VitalSign.ts` is an empty stub — vitals read from `MedicalRecord.vital_signs` instead.
+- snake_case (not the prompt's camelCase) to match every other model.
+- Names resolved via `Profile` (not `populate` on `User`).
+- Logic kept controller-resident (no service layer) to match existing nurse/doctor code.
+
+## Verification
+- `npx tsc --noEmit` → 0 errors.
+- `npm run audit:routes` → ❌ FE-call-with-no-BE-route = **0**; 4 new routes listed as
+  backend-only (expected until Part 2); 249 matched.
+- Live lifecycle smoke (localhost:5000): nurse raise → 201 w/ vitals_snapshot;
+  doctor list → 200; wrong-doctor ack → 403; ack → 200; re-ack → 400; resolve → 200;
+  nurse `?status=resolved` → flag + kpis. ✅
+
+## Next Steps (Part 2 — frontend)
+- `nurseService`/`doctorService` methods + query keys; `useNurse`/doctor hooks.
+- Replace hardcoded `flags` in `app/dashboard/nurse/alerts/page.tsx`; wire Filter / Raise /
+  View; doctor acknowledge/resolve UI; `EmergencyAlertBanner` socket listeners
+  (`emergency:acknowledged`/`emergency:resolved`).
+
+---
+
+## Previous Task
+Full Integration Test Sweep — all 10 roles, API-level (2026-06-03). COMPLETE.
+
+## What was done
+First live end-to-end smoke test of every role against backend `:5000` (shared `siryandev`
+Atlas). Method: API-level curl + token-replay (cookies are `Secure`, so the `access_token`
+is captured from the login `Set-Cookie` and replayed via a `Cookie:` header) + static code
+audit. Rate limiters are bypassed for localhost in dev, so HTTP login/register were unlimited.
+
+Seeded test users (namespaced for cleanup — `*@siryan.test`, `ZZTest*`):
+- patient@siryan.test / Test1234!  · patient2@siryan.test / Test1234! (recep-registered)
+- nurse|receptionist|pharmacist|lab_technician|radiology_technician|cashier @siryan.test / Test@1234
+  (self-registered → admin-approved)
+- (pre-seeded) admin@test.com / Admin@123 · inventoryM@test.com / Inventory@123 ·
+  dr.sarah@siryan.com / Doctor@123 (+7 other dr.*@siryan.com / Doctor@123)
+
+Result: every role's core flow passes. 3 blocking bugs found + fixed inline; 4 non-blocking
+documented. See changelog 2026-06-03 + bugs.md for detail.
+
+### Blocking bugs fixed (verified 2xx after fix; tsc 0 errors; audit:routes 0 unmatched)
+- [BUG-DR-RATINGS] `/doctor/me/ratings` 500 → route shadowing by `/:id/ratings`. Fixed in `doctor.routes.ts`.
+- [BUG-RECEP-APPTS-NULL] `/receptionist/appointments` 500 on orphaned appt. Null-guarded `getAllAppointments`.
+- [BUG-MAIL-AWAIT] admin create/approve-staff hung ~2 min on SMTP. Added mailer timeouts + fire-and-forget.
+
+### Non-blocking (documented in bugs.md, not fixed)
+[BUG-RT-NOTIFYROLES], [BUG-RT-PRESC-PATIENT], [BUG-SEC-STAFFREQ], [BUG-AUTH-LOGOUT-STATELESS].
+
+## Remaining / next steps
+- Apply the 4 documented non-blocking fixes (see todos.md).
+- Browser/E2E pass still outstanding (this sweep was API-level only): Socket.io live
+  toasts, Stream video call join (needs the 5-min window + Chat product enabled).
+- Clean up test data when done: users `*@siryan.test`, records prefixed `ZZTest`.
+
+---
+
+## Previous Task
+Patient System Fixes — Part 2 (2026-06-02): Book Appointment Improvements. COMPLETE.
 
 ## What was done
 - **FIX 1** Removed dead "Save as draft" button from `BookingSummaryPanel`

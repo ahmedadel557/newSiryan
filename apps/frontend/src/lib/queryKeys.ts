@@ -50,6 +50,7 @@ export const queryKeys = {
   doctorPatientLabOrders: (patientId: string) => ['doctor', 'patients', patientId, 'lab-orders'] as const,
   doctorPatientRadiologyOrders: (patientId: string) => ['doctor', 'patients', patientId, 'radiology-orders'] as const,
   doctorMedications: () => ['doctor', 'medications'] as const,
+  doctorEmergencyFlags: () => ['doctor', 'emergency-flags'] as const,
 
   // Patient
   patientProfile: () => ['patient', 'profile'] as const,
@@ -70,6 +71,8 @@ export const queryKeys = {
   nursePatients: () => ['nurse', 'patients'] as const,
   nursePatient: (patientId: string) => ['nurse', 'patients', patientId] as const,
   nurseMedicationSchedule: (patientId: string) => ['nurse', 'medication-schedule', patientId] as const,
+  nurseEmergencyFlags: (status?: string) =>
+    (status ? ['nurse', 'emergency-flags', status] : ['nurse', 'emergency-flags']) as readonly unknown[],
 
   // Receptionist
   receptionistAppointments: (filters?: Record<string, unknown>) =>

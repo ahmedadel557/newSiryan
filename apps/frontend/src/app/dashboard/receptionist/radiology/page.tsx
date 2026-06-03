@@ -7,14 +7,8 @@ import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { RadiologyOrder } from '@/types';
-
-const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {
-  pending: 'caution',
-  in_progress: 'info',
-  completed: 'positive',
-  cancelled: 'critical',
-};
 
 const PRIORITY_BADGE: Record<string, 'info' | 'caution' | 'critical'> = {
   routine: 'info',
@@ -102,7 +96,7 @@ export default function ReceptionistRadiologyPage() {
                     {new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </td>
                   <td className="px-5 py-4">
-                    <Badge variant={STATUS_BADGE[o.status] ?? 'info'}>{o.status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
+                    <Badge variant={getStatusVariant(o.status)}>{o.status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</Badge>
                   </td>
                 </tr>
               ))}

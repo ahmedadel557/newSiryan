@@ -4,6 +4,7 @@ import { X, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { Badge } from '@/components/ui/Badge';
 import type { PharmaMedicationBatch } from '@/types';
 
 const schema = yup.object({
@@ -140,9 +141,9 @@ export function BatchesModal({ data, loading, onClose, onAddBatch }: Props) {
                     </td>
                     <td className="text-[13px]">{new Date(batch.expiry_date).toLocaleDateString()}</td>
                     <td>
-                      <span className={`chip ${batch.is_active ? 'chip-pos' : 'chip-neut'}`}>
+                      <Badge variant={batch.is_active ? 'positive' : 'neutral'}>
                         {batch.is_active ? 'Active' : 'Depleted'}
-                      </span>
+                      </Badge>
                     </td>
                   </tr>
                 ))}

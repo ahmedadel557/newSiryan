@@ -316,7 +316,7 @@ export default function ShiftsPage() {
             <p className="t-body" style={{ color: 'var(--fg-2)' }}>Are you sure you want to delete this shift assignment?</p>
             <div className="flex gap-2 justify-end">
               <button className="btn btn-ghost" onClick={() => setConfirmDelete(null)}>Cancel</button>
-              <button className="btn" style={{ background: 'var(--critical)', color: '#fff' }} onClick={handleDelete} disabled={deleting}>
+              <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>

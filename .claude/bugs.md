@@ -238,6 +238,79 @@
 - **Fix:** Removed `FALLBACK_DOCTORS`. On fetch error → empty list + `doctorsError=true`. DoctorStep shows "Unable to load doctors" + Retry button. Next button disabled when list is empty.
 - **Files:** `apps/frontend/src/hooks/shared/useBooking.ts`, `apps/frontend/src/components/patient/DoctorStep.tsx`, `apps/frontend/src/app/dashboard/patient/appointments/new/page.tsx`
 
+## [BUG-DR-RATINGS] GET /doctor/me/ratings → 500 (route shadowing)
+- **Status:** resolved (2026-06-03, found during full integration sweep)
+- **Reproduction:** Log in as a doctor, GET `/api/doctor/me/ratings` → 500 `{"message":"input must be a 24 character hex string, 12 byte Uint8Array, or an integer"}`. The doctor "My ratings" page crashes on load.
+- **Root Cause:** Route ordering. `router.get("/:id/ratings", …)` (the public `getDoctorPublicRatings`, line ~65) is registered **before** `router.get("/me/ratings", getMyRatings)` (line ~104). Express matches in order, so `/doctor/me/ratings` is captured by `/:id/ratings` with `id="me"`, and `getDoctorPublicRatings` runs `new mongoose.Types.ObjectId("me")` → throws. `getMyRatings` was never reached.
+- **Fix:** Registered `/me/ratings` with its full middleware chain (`authenticate, requireCompleteProfile, authorize("doctor")`) **above** the `/:id/...` wildcard routes, and removed the now-dead later registration.
+- **File:** `apps/backend/src/routes/doctor.routes.ts`
+- **Verify:** `/doctor/me/ratings` → 200 `{avg,count,recent}`; `/doctor/<realId>/ratings` still 200.
+
+## [BUG-RECEP-APPTS-NULL] GET /receptionist/appointments → 500 on orphaned appointment
+- **Status:** resolved (2026-06-03, found during full integration sweep)
+- **Reproduction:** Log in as receptionist, GET `/api/receptionist/appointments` → 500 `{"message":"Cannot read properties of null (reading 'toString')"}`. The receptionist appointments page (a core page) fails to load whenever the DB contains an appointment whose `patient` or `doctor` ref points at a deleted user.
+- **Root Cause:** `getAllAppointments` did `(a.patient as any)?._id?.toString() ?? a.patient.toString()`. After `.populate`, a ref to a deleted user resolves to `null`, so the `??` fallback calls `null.toString()`. Same latent risk in the `doctor` field. (Triggered here by a pre-existing orphaned appointment in the shared `siryandev` cluster.)
+- **Fix:** Added a null-safe `refId(ref)` helper, filtered nulls out of the id list passed to `buildProfileMap`, and guarded the name lookups. Orphaned appointments now render with empty patient/doctor names instead of crashing the whole list.
+- **File:** `apps/backend/src/controllers/receptionist/index.ts` (`getAllAppointments`)
+- **Note:** The same `?? ref.toString()` pattern repeats in `confirmAppointment`/`cancelAppointment`/etc. on a single found appointment — lower risk (the acted-on appointment is rarely orphaned) but worth an eventual audit. See [TODO].
+
+## [BUG-MAIL-AWAIT] Admin approve/create-staff hang ~30–120s on SMTP (await sendEmail)
+- **Status:** resolved (2026-06-03, found during full integration sweep — same class as [BUG-AUTH-1])
+- **Reproduction:** As admin, `POST /admin/users` (create staff) or `PATCH /admin/staff-requests/:id/approve`. The DB write succeeds immediately but the HTTP response hangs until the SendGrid SMTP round-trip times out (~2 min with the default/invalid key), making the admin UI appear frozen.
+- **Root Cause:** Both handlers `await sendEmail(...)` inline, and `mailer.ts` set **no** `connectionTimeout`/`socketTimeout` on the nodemailer transport (the exact follow-up flagged under [BUG-AUTH-1]). `getMyRatings`-style endpoints were fine; only the email-sending handlers stalled.
+- **Fix (two parts):**
+  1. `apps/backend/src/utils/mailer.ts` — added `connectionTimeout`/`greetingTimeout`/`socketTimeout` = 7000ms so any `sendEmail` call site fails fast instead of holding the response ~2 min.
+  2. `apps/backend/src/controllers/admin/index.ts` — made the `sendEmail` calls in `createStaff` and `approveStaff` fire-and-forget (`.catch(...)`), matching the earlier `registerStaff` fix. Both already write the user/notification before the email.
+- **Verify:** `POST /admin/users` with a fresh email now returns **201 in 0s**; staff approval returns immediately.
+
+## [BUG-RT-NOTIFYROLES] Staff notifications via notifyRoles are DB-only (no real-time socket) — NON-BLOCKING
+- **Status:** open (documented 2026-06-03)
+- **Reproduction:** Doctor creates a prescription / lab order / radiology order. The pharmacist / lab_technician / radiology_technician get the DB notification (visible on next poll or refresh) but **no live socket push** — so it appears only after the `useNotifications` 30s `refetchInterval`, not instantly.
+- **Root Cause:** `notifyRoles()` in `apps/backend/src/controllers/doctor/index.ts` (line ~40) only does `Notification.insertMany` — it never calls `emitToUser`/`emitToRole`. This is the same shape as the resolved [BUG-3] (`notifyReceptionists`), which was extended to emit sockets; `notifyRoles` was not.
+- **Impact:** Non-blocking — notifications still arrive within 30s and on page load. Real-time toast/badge is just delayed for these specific staff events.
+- **Suggested fix:** Extend `notifyRoles` to accept an optional socket payload and loop `emitToUser(u._id, 'notification:new', …)` like `notifyReceptionists` does.
+
+## [BUG-RT-PRESC-PATIENT] Prescription creation doesn't push patient socket notification — NON-BLOCKING
+- **Status:** open (documented 2026-06-03)
+- **Reproduction:** Doctor creates a prescription. The patient's `Notification` doc is created (`'New prescription'`) but `createPrescription` does **not** `emitToUser(patientId, 'notification:new', …)`. By contrast `createLabOrder`/`createRadiologyOrder` (same file) DO emit `lab:order:created`/`radiology:order:created` to the patient.
+- **Impact:** Non-blocking — patient sees the prescription notification within 30s (TanStack refetch) / on load, just not as a live push.
+- **File:** `apps/backend/src/controllers/doctor/index.ts` (`createPrescription`, ~line 459–475).
+
+## [BUG-SEC-STAFFREQ] Admin staff-requests response leaks bcrypt password hash — NON-BLOCKING
+- **Status:** open (documented 2026-06-03)
+- **Reproduction:** `GET /api/admin/staff-requests?status=pending` returns each user object **including** the `password` field (bcrypt hash). Pending staff users are returned without a `-password` projection.
+- **Impact:** Non-blocking for functionality but a security hygiene issue — password hashes should never leave the backend. (The `User` model strips `password` in its `toJSON`, but this endpoint appears to return lean/raw docs that bypass that transform.)
+- **File:** `apps/backend/src/controllers/admin/index.ts` (`getStaffRequests`) — add `.select('-password')` (and to the populated profile if needed).
+
+## [BUG-AUTH-LOGOUT-STATELESS] Logout does not invalidate the access token — INFO / BY-DESIGN
+- **Status:** open / by-design note (documented 2026-06-03)
+- **Observation:** `POST /auth/logout` clears cookies and blacklists the **refresh** token (verified: refresh reuse after logout → 401), but the 15-min **access** token remains valid until expiry (it is a stateless JWT and is not blacklisted). Replaying a captured access token after logout still returns 200.
+- **Impact:** Standard stateless-JWT trade-off; acceptable for most apps given the 15-min TTL. Documented so it's a conscious decision. If stricter logout is required, blacklist the access token's jti on logout and check it in `authenticate`.
+
+## [UI-C1] nurse/alerts was a static mockup, not wired to the backend
+- **Status:** resolved (2026-06-03, Emergency Flag Part 2)
+- **Reproduction:** `/dashboard/nurse/alerts` showed hardcoded fake patients/vitals/KPIs; Filter / Raise / View buttons had no handlers; empty state was unreachable.
+- **Fix:** Rewrote the page to drive from `useNurseAlerts()` (real `GET /nurse/emergency-flags` + kpis). Filter pills wired to `statusFilter`; "Raise new flag" opens the reused `EmergencyFlagModal` after a patient `<select>`; removed all fake data; loading/empty/error states added. Added a doctor-side `ActiveAlertsCard` for acknowledge/resolve.
+- **Files:** `apps/frontend/src/app/dashboard/nurse/alerts/page.tsx`, `hooks/nurse/useNurseAlerts.ts`, `hooks/doctor/useDoctorEmergencyFlags.ts`, `components/doctor/ActiveAlertsCard.tsx`, `services/{nurse,doctor}.service.ts`.
+
+## [UI-C2] Skeleton component didn't adapt to dark mode (used app-wide)
+- **Status:** resolved (2026-06-03)
+- **Root Cause:** `components/ui/Skeleton.tsx` used fixed light `bg-[var(--sand-200)] opacity-50` → pale blob on dark surfaces.
+- **Fix:** Replaced with `bg-[var(--bg-sunken)] animate-pulse` (theme-flipping token + shimmer).
+- **File:** `apps/frontend/src/components/ui/Skeleton.tsx`
+
+## [UI-C3] Badge neutral variant was light in dark mode (23+ usages)
+- **Status:** resolved (2026-06-03)
+- **Root Cause:** `Badge.tsx` neutral variant used raw `bg-[var(--sand-100)]`, bypassing the `.dark .chip-neut` override.
+- **Fix:** Added `--neutral-soft-bg` / `--neutral-soft-fg` tokens to `tokens.css` (`:root` + `.dark`, mirroring the chip-neut dark values) and pointed the Badge neutral variant at them. Propagates to all usages.
+- **Files:** `apps/frontend/src/styles/tokens.css`, `apps/frontend/src/components/ui/Badge.tsx`
+
+## [UI-C4] Hover states flashed light in dark mode (tables + secondary/ghost buttons)
+- **Status:** resolved (2026-06-03)
+- **Root Cause:** `.tbl tr:hover td`, `.btn-secondary:hover`, `.btn-ghost:hover` and the React Button secondary/ghost hovers used fixed `--sand-50`/`--sand-100`; a `.dark .btn-ghost:hover { color: black }` hack patched only one case.
+- **Fix:** Pointed all four hovers at `--bg-sunken` (theme-flipping) and deleted the dark ghost-hover color-black hack.
+- **Files:** `apps/frontend/src/styles/kit.css`, `apps/frontend/src/components/ui/button.tsx`
+
 ## Template
 
 ### [BUG-N] Title

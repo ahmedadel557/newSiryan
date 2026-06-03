@@ -7,16 +7,8 @@ import { useToast } from '@/hooks/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Profile, Appointment } from '@/types';
-
-const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {
-  pending: 'caution',
-  confirmed: 'info',
-  checked_in: 'positive',
-  completed: 'positive',
-  cancelled: 'critical',
-  rescheduled: 'caution',
-};
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -229,7 +221,7 @@ export default function ReceptionistPatientsPage() {
                         {apt.reason ? ` · ${apt.reason}` : ''}
                       </p>
                     </div>
-                    <Badge variant={STATUS_BADGE[apt.status] ?? 'info'}>
+                    <Badge variant={getStatusVariant(apt.status)}>
                       {apt.status.replace('_', ' ')}
                     </Badge>
                   </div>

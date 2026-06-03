@@ -1,7 +1,8 @@
 ﻿import { Search, ArrowRight, TriangleAlert } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
+import { Badge, type BadgeVariant } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { QueueFilter, QueueRow } from '@/hooks/doctor';
 import type { AppointmentStatus } from '@/types';
 
@@ -11,18 +12,16 @@ const FILTERS: { key: QueueFilter; label: string }[] = [
   { key: 'all', label: 'All' },
 ];
 
-type BadgeVariant = 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
-
-const statusConfig: Record<AppointmentStatus, { label: string; variant: BadgeVariant }> = {
-  pending: { label: 'Pending', variant: 'caution' },
-  confirmed: { label: 'Confirmed', variant: 'positive' },
-  in_progress: { label: 'In room', variant: 'brand' },
-  scheduled: { label: 'Awaiting', variant: 'caution' },
-  cancelled: { label: 'Cancelled', variant: 'critical' },
-  completed: { label: 'Completed', variant: 'neutral' },
-  rescheduled: { label: 'Rescheduled', variant: 'info' },
-  no_show: { label: 'No show', variant: 'neutral' },
-  checked_in: { label: 'Checked in', variant: 'positive' },
+const statusLabel: Record<AppointmentStatus, string> = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  in_progress: 'In room',
+  scheduled: 'Awaiting',
+  cancelled: 'Cancelled',
+  completed: 'Completed',
+  rescheduled: 'Rescheduled',
+  no_show: 'No show',
+  checked_in: 'Checked in',
 };
 
 function calcAge(dob: string): number {
@@ -108,7 +107,9 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
           ) : (
             rows.map(({ appointment, patient }) => {
               const cfg =
-                appointment.visit_type === 'online' ? { label: 'Online', variant: 'info' as BadgeVariant } : statusConfig[appointment.status];
+                appointment.visit_type === 'online'
+                  ? { label: 'Online', variant: 'info' as BadgeVariant }
+                  : { label: statusLabel[appointment.status], variant: getStatusVariant(appointment.status) };
               const age = patient.date_of_birth ? calcAge(patient.date_of_birth) : null;
               const fullName = `${patient.first_name ?? ''} ${patient.last_name ?? ''}`.trim();
 

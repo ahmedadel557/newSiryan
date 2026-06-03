@@ -5,6 +5,7 @@ import { useRooms } from '@/hooks/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { Room, RoomBookingDto } from '@/types';
 
 type RoomFilter = 'all' | 'operation' | 'icu' | 'radiology' | 'general';
@@ -16,12 +17,6 @@ const ROOM_FILTERS: { key: RoomFilter; label: string }[] = [
   { key: 'radiology', label: 'Radiology' },
   { key: 'general', label: 'General' },
 ];
-
-const STATUS_BADGE: Record<string, 'positive' | 'caution' | 'critical' | 'info'> = {
-  active: 'positive',
-  completed: 'info',
-  cancelled: 'critical',
-};
 
 const TYPE_COLORS: Record<string, string> = {
   icu: 'bg-[var(--critical-soft-bg)] text-[var(--critical-soft-fg)]',
@@ -342,7 +337,7 @@ export default function PatientRoomsPage() {
                           : '—'}
                       </td>
                       <td className="px-5 py-4">
-                        <Badge variant={STATUS_BADGE[b.status] ?? 'info'}>
+                        <Badge variant={getStatusVariant(b.status)}>
                           {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
                         </Badge>
                       </td>

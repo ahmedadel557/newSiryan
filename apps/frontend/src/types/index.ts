@@ -1005,6 +1005,43 @@ export interface EmergencyFlagDto {
   severity: EmergencySeverity;
 }
 
+export interface VitalsSnapshot {
+  blood_pressure_sys?: number;
+  blood_pressure_dia?: number;
+  heart_rate?: number;
+  temperature?: number;
+  oxygen_level?: number;
+  blood_sugar?: number;
+  recorded_at?: string;
+}
+
+export interface EmergencyFlag {
+  id: string;
+  patient: string; // user id (ref)
+  patient_name: string;
+  nurse: string; // user id (ref)
+  nurse_name?: string; // present on the doctor endpoint
+  doctor: string; // user id (ref)
+  doctor_name?: string; // present on the nurse endpoint
+  doctor_specialization?: string | null;
+  message: string;
+  severity: EmergencySeverity;
+  status: 'notified' | 'acknowledged' | 'resolved';
+  vitals_snapshot?: VitalsSnapshot;
+  notes?: string;
+  acknowledged_at?: string;
+  resolved_at?: string;
+  created_at: string; // normalized from backend `createdAt` in the service
+}
+
+export interface EmergencyFlagKPIs {
+  total: number;
+  active: number;
+  acknowledged: number;
+  resolved: number;
+  avg_response_minutes: number | null;
+}
+
 export interface NursePatient extends Profile {
   room_name?: string;
   last_vitals_at?: string;

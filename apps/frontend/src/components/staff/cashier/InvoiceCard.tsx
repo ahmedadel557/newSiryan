@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ChevronDown, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { CashierInvoice, CashierInvoiceStatus } from '@/types';
 
 function fmtLBP(n: number) {
@@ -14,11 +15,11 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-const STATUS_BADGE: Record<CashierInvoiceStatus, { variant: 'positive' | 'caution' | 'info' | 'neutral'; label: string }> = {
-  paid: { variant: 'positive', label: 'Paid' },
-  unpaid: { variant: 'caution', label: 'Unpaid' },
-  partially_paid: { variant: 'info', label: 'Partial' },
-  cancelled: { variant: 'neutral', label: 'Cancelled' },
+const STATUS_LABEL: Record<CashierInvoiceStatus, string> = {
+  paid: 'Paid',
+  unpaid: 'Unpaid',
+  partially_paid: 'Partial',
+  cancelled: 'Cancelled',
 };
 
 interface InvoiceCardProps {
@@ -31,7 +32,7 @@ interface InvoiceCardProps {
 export function InvoiceCard({ invoice, expanded, onToggle, onProcessPayment }: InvoiceCardProps) {
   const remaining = Math.max(0, invoice.total_due - invoice.amount_paid);
   const canPay = invoice.status === 'unpaid' || invoice.status === 'partially_paid';
-  const badge = STATUS_BADGE[invoice.status];
+  const badge = { variant: getStatusVariant(invoice.status), label: STATUS_LABEL[invoice.status] };
 
   return (
     <div className="card p-5 flex flex-col gap-3">

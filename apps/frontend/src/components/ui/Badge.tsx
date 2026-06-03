@@ -1,18 +1,20 @@
 import { cn } from '@/lib/utils';
 
+export type BadgeVariant = 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
+
 interface BadgeProps {
-  variant: 'positive' | 'caution' | 'critical' | 'info' | 'neutral' | 'brand';
+  variant: BadgeVariant;
   dot?: boolean;
   children: React.ReactNode;
   className?: string;
 }
 
-const variantClasses: Record<BadgeProps['variant'], string> = {
+const variantClasses: Record<BadgeVariant, string> = {
   positive: 'bg-[var(--positive-soft-bg)] text-[var(--positive-soft-fg)]',
   caution: 'bg-[var(--caution-soft-bg)]  text-[var(--caution-soft-fg)]',
   critical: 'bg-[var(--critical-soft-bg)] text-[var(--critical-soft-fg)]',
   info: 'bg-[var(--info-soft-bg)]     text-[var(--info-soft-fg)]',
-  neutral: 'bg-[var(--sand-100)]         text-[var(--fg-2)]',
+  neutral: 'bg-[var(--neutral-soft-bg)]  text-[var(--neutral-soft-fg)]',
   brand: 'bg-[var(--brand-soft-bg)]    text-[var(--brand-soft-fg)]',
 };
 

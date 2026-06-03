@@ -121,18 +121,20 @@ export const getAllAppointments = async (req: AuthRequest, res: Response, next: 
       .populate('doctor', '_id username')
       .sort({ scheduled_at: -1 });
 
-    const patientIds = appointments.map((a) => (a.patient as any)?._id?.toString() ?? a.patient.toString());
-    const doctorIds  = appointments.map((a) => (a.doctor as any)?._id?.toString()  ?? a.doctor.toString());
+    // Null-safe: a populated ref resolves to null when the referenced user was deleted (orphaned appointment)
+    const refId = (ref: any): string | null => (ref as any)?._id?.toString() ?? (ref ? ref.toString() : null);
+    const patientIds = appointments.map((a) => refId(a.patient)).filter((x): x is string => !!x);
+    const doctorIds  = appointments.map((a) => refId(a.doctor)).filter((x): x is string => !!x);
     const profileMap = await buildProfileMap([...patientIds, ...doctorIds]);
 
     const result = appointments.map((a) => {
       const obj = a.toJSON() as any;
-      const pid = (a.patient as any)?._id?.toString() ?? a.patient.toString();
-      const did = (a.doctor as any)?._id?.toString()  ?? a.doctor.toString();
+      const pid = refId(a.patient);
+      const did = refId(a.doctor);
       return {
         ...obj,
-        patient_name: profileMap.get(pid)?.name ?? (a.patient as any)?.username ?? '',
-        doctor_name:  profileMap.get(did)?.name  ?? (a.doctor  as any)?.username ?? '',
+        patient_name: (pid && profileMap.get(pid)?.name) ?? (a.patient as any)?.username ?? '',
+        doctor_name:  (did && profileMap.get(did)?.name)  ?? (a.doctor  as any)?.username ?? '',
       };
     });
 

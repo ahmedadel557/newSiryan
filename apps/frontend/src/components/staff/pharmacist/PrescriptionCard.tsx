@@ -1,12 +1,7 @@
 import { ChevronRight } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmaPrescription } from '@/types';
-
-const statusChip: Record<string, string> = {
-  active: 'chip chip-pos',
-  dispensed: 'chip chip-neut',
-  expired: 'chip chip-crit',
-  cancelled: 'chip chip-crit',
-};
 
 interface Props {
   prescription: PharmaPrescription;
@@ -25,9 +20,9 @@ export function PrescriptionCard({ prescription, onView }: Props) {
             <p className="text-[14px] font-semibold text-[var(--fg-1)]">
               {prescription.patient_name ?? 'Unknown patient'}
             </p>
-            <span className={statusChip[prescription.status] ?? 'chip chip-neut'}>
+            <Badge variant={getStatusVariant(prescription.status)}>
               {prescription.status}
-            </span>
+            </Badge>
           </div>
           <p className="text-[12px] text-[var(--fg-3)] mt-1">
             Dr. {prescription.doctor_name ?? 'Unknown'}

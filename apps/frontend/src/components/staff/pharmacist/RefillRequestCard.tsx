@@ -1,11 +1,7 @@
 import { CheckCircle, XCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmaRefillRequest } from '@/types';
-
-const statusChip: Record<string, string> = {
-  pending: 'chip chip-caut',
-  approved: 'chip chip-pos',
-  rejected: 'chip chip-crit',
-};
 
 interface Props {
   refill: PharmaRefillRequest;
@@ -25,7 +21,7 @@ export function RefillRequestCard({ refill, actionLoading, onApprove, onReject }
             <p className="text-[14px] font-semibold text-[var(--fg-1)]">
               {refill.patient_name ?? 'Unknown patient'}
             </p>
-            <span className={statusChip[refill.status] ?? 'chip chip-neut'}>{refill.status}</span>
+            <Badge variant={getStatusVariant(refill.status)}>{refill.status}</Badge>
           </div>
           {refill.medication_name && (
             <p className="text-[12px] text-[var(--fg-3)] mt-1">{refill.medication_name}</p>

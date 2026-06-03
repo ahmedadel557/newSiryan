@@ -60,8 +60,7 @@ export function RejectReasonModal({ rxId, onClose, onConfirm }: Props) {
               Cancel
             </button>
             <button
-              className="btn btn-primary flex items-center gap-1"
-              style={{ background: 'var(--critical)', color: '#fff' }}
+              className="btn btn-danger flex items-center gap-1"
               onClick={handleConfirm}
             >
               <XCircle size={14} />

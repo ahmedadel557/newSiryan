@@ -8,6 +8,7 @@ import { PaymentModal } from '@/components/staff/cashier/PaymentModal';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { CashierInvoice, CashierInvoiceStatus } from '@/types';
 
 function fmtEGP(n: number) {
@@ -147,11 +148,11 @@ function exportInvoicePdf(invoice: CashierInvoice) {
   w.print();
 }
 
-const STATUS_BADGE: Record<CashierInvoiceStatus, { variant: 'positive' | 'caution' | 'info' | 'neutral'; label: string }> = {
-  paid: { variant: 'positive', label: 'Paid' },
-  unpaid: { variant: 'caution', label: 'Unpaid' },
-  partially_paid: { variant: 'info', label: 'Partial' },
-  cancelled: { variant: 'neutral', label: 'Cancelled' },
+const STATUS_LABEL: Record<CashierInvoiceStatus, string> = {
+  paid: 'Paid',
+  unpaid: 'Unpaid',
+  partially_paid: 'Partial',
+  cancelled: 'Cancelled',
 };
 
 export default function CashierInvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -187,8 +188,8 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
                 <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">
                   {invoice.patient_name || 'Unknown patient'}
                 </h1>
-                <Badge variant={STATUS_BADGE[invoice.status].variant} dot>
-                  {STATUS_BADGE[invoice.status].label}
+                <Badge variant={getStatusVariant(invoice.status)} dot>
+                  {STATUS_LABEL[invoice.status]}
                 </Badge>
               </div>
               <p className="text-[14px] text-[var(--fg-3)] mt-[2px]">

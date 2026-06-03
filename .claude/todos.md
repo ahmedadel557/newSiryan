@@ -10,8 +10,12 @@
 ~~Verify lucide-react... uninstall (project uses react-icons)~~ — CORRECTION: the project standard **is** `lucide-react` (used in navItems + all components). `react-icons` is NOT used. Ignore the old rule.
 
 ## Technical Debt
-- [ ] Audit other request-handler call sites that `await sendEmail(...)` or `await sendTemplatedEmail(...)` — same pattern as [BUG-AUTH-1] could hold any HTTP response while SMTP settles.
-- [ ] Set `connectionTimeout` + `socketTimeout` on the nodemailer transport in `apps/backend/src/utils/mailer.ts` so a misconfigured `SENDGRID_API_KEY` fails fast (currently uses OS defaults).
+- [x] ~~Set `connectionTimeout`/`socketTimeout` on the nodemailer transport~~ — DONE 2026-06-03 (7000ms connection/greeting/socket timeouts in `mailer.ts`); also made `createStaff` + `approveStaff` `sendEmail` fire-and-forget. ([BUG-MAIL-AWAIT])
+- [ ] Audit remaining `await sendEmail(...)` / `await sendTemplatedEmail(...)` call sites beyond register/createStaff/approveStaff (forgot-password, deletion flows). Mailer timeout now bounds them to ≤7s, but dropping inline `await` is still preferable for non-critical mail.
+- [ ] (sweep) Make `notifyRoles` in `doctor/index.ts` emit sockets like `notifyReceptionists`, so pharmacist/lab/radiology get real-time pushes (not just 30s poll). ([BUG-RT-NOTIFYROLES])
+- [ ] (sweep) Add `emitToUser(patientId, 'notification:new', …)` to `createPrescription` for parity with lab/radiology order creation. ([BUG-RT-PRESC-PATIENT])
+- [ ] (sweep) `getStaffRequests` returns the bcrypt `password` hash — add `.select('-password')`. ([BUG-SEC-STAFFREQ])
+- [ ] (sweep) Audit the repeated `?? ref.toString()` populated-ref pattern in receptionist `confirmAppointment`/`cancelAppointment`/etc. — same null-orphan crash class fixed in `getAllAppointments`. ([BUG-RECEP-APPTS-NULL])
 - [ ] No test suite exists on either BE or FE — consider adding at minimum integration tests for auth and critical API routes
 - [ ] Backend uses `ts-node` in dev and compiles to `dist/` — confirm `tsconfig.json` is optimized for production build
 
@@ -25,13 +29,14 @@
 
 ---
 
-## Route-Diff Gaps (from audit:routes 2026-06-02 — implement before these features are needed)
+## Route-Diff Gaps (from audit:routes 2026-06-02 — most resolved by B1–B8; re-verified live 2026-06-03)
 - [ ] [HIGH] cashier.service.ts calls `GET /cashier/stats/daily` but BE only has `GET /cashier/reports/daily` — either add a lightweight stats endpoint or fix the FE call to use the reports endpoint
-- [ ] [MEDIUM] Nurse vitals GET missing — FE calls `GET /nurse/patients/:id/vitals` but BE only has POST; add a GET endpoint if the nurse needs to read historical vitals
-- [ ] [MEDIUM] Receptionist create appointment/patient — FE calls `POST /receptionist/appointments` and `POST /receptionist/patients` which have no BE routes; implement when receptionist booking flow is built
-- [ ] [LOW] Patient room booking cancel — `DELETE /patient/rooms/bookings/:id` has no BE route; implement when patient room management is built
-- [ ] [LOW] Individual lab/radiology order GET — `GET /lab/orders/:id` and `GET /radiology/orders/:id` have no BE routes
-- [ ] [LOW] Pharmacy prescription verify/reject — `POST /pharmacy/prescriptions/:id/verify` and `/reject` have no BE routes
+- [x] ~~Nurse vitals GET~~ — `GET /nurse/patients/:id/vitals` (B5) exists; verified 200 in sweep
+- [x] ~~Receptionist create appointment/patient~~ — `POST /receptionist/appointments` (B7) + `/patients` (B8) exist; verified 201 in sweep
+- [x] ~~Patient room booking cancel~~ — `DELETE /patient/rooms/bookings/:id` exists (route present); patient room book verified 201 in sweep
+- [x] ~~Individual lab/radiology order GET~~ — `GET /lab/orders/:id` (B1) + `/radiology/orders/:id` (B2) exist; verified 200 in sweep
+- [x] ~~Pharmacy prescription verify/reject~~ — `POST /pharmacy/prescriptions/:id/verify` (B3) + `/reject` (B4) exist; verified 200 in sweep
+- Note: `npm run audit:routes` on 2026-06-03 → **0 unmatched FE calls**, 249 matched.
 
 ## Post-Launch (do after all features complete + stable)
 - [ ] [HIGH] Shared Contract — create `packages/contracts` with zod schemas for all API responses, imported by both backend (validates sendSuccess shape) and frontend (z.infer replaces manual types). Eliminates API contract drift at compile time. Pattern: @asteasolutions/zod-to-openapi or manual zod schemas per endpoint.

@@ -1,12 +1,6 @@
 import { Badge } from '@/components/ui/Badge';
-import type { LabOrder, OrderStatus } from '@/types';
-
-const statusVariant: Record<OrderStatus, 'positive' | 'caution' | 'info' | 'neutral'> = {
-  completed: 'positive',
-  in_progress: 'info',
-  pending: 'caution',
-  cancelled: 'neutral',
-};
+import { getStatusVariant } from '@/lib/statusBadge';
+import type { LabOrder } from '@/types';
 
 interface LabResultRowProps {
   order: LabOrder;
@@ -26,7 +20,7 @@ export function LabResultRow({ order }: LabResultRowProps) {
       </td>
       <td className="py-3 px-[14px] border-b border-[var(--border-1)] text-[var(--fg-3)] text-[13px]">{date}</td>
       <td className="py-3 px-[14px] border-b border-[var(--border-1)]">
-        <Badge variant={statusVariant[order.status]} dot>
+        <Badge variant={getStatusVariant(order.status)} dot>
           {order.status}
         </Badge>
       </td>

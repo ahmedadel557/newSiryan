@@ -1,19 +1,13 @@
 ﻿import { Lock, Pill } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmacistRx } from '@/types';
 import type { RxFilter } from '@/hooks/pharmacist';
 
 const thClass =
   'text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)] text-left py-[10px] px-[14px] border-b border-[var(--border-1)]';
 const tdClass = 'py-3 px-[14px] border-b border-[var(--border-1)] text-[13px]';
-
-const stateVariant: Record<string, 'caution' | 'info' | 'positive' | 'neutral'> = {
-  awaiting_verification: 'caution',
-  verified: 'info',
-  dispensed: 'positive',
-  rejected: 'neutral',
-};
 
 const stateLabel: Record<string, string> = {
   awaiting_verification: 'Awaiting verification',
@@ -125,7 +119,7 @@ export function PrescriptionQueueTable({ prescriptions, filter, onFilterChange, 
                   )}
                 </td>
                 <td className={tdClass}>
-                  <Badge variant={stateVariant[rx.state] ?? 'neutral'} dot>
+                  <Badge variant={getStatusVariant(rx.state)} dot>
                     {stateLabel[rx.state] ?? rx.state}
                   </Badge>
                 </td>

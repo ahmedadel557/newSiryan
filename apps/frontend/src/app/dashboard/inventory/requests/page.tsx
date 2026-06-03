@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { SupplyRequest, Supplier, RequestedItem, ShipmentItem } from '@/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -24,12 +25,6 @@ const priorityVariant: Record<string, 'critical' | 'neutral' | 'positive'> = {
   urgent: 'critical',
   normal: 'neutral',
   low: 'positive',
-};
-const statusVariant: Record<string, 'positive' | 'caution' | 'neutral' | 'critical'> = {
-  pending: 'caution',
-  fulfilled: 'positive',
-  approved: 'neutral',
-  rejected: 'critical',
 };
 const categoryLabel: Record<string, string> = {
   medications: 'Medications',
@@ -726,7 +721,7 @@ export default function InventoryRequestsPage() {
                       </td>
                       <td className={`${tdClass} text-[var(--fg-2)]`}>{r.expected_delivery ? r.expected_delivery.slice(0, 10) : '—'}</td>
                       <td className={tdClass}>
-                        <Badge variant={statusVariant[r.status] ?? 'neutral'} dot>
+                        <Badge variant={getStatusVariant(r.status)} dot>
                           {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                         </Badge>
                       </td>

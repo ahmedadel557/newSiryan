@@ -7,16 +7,10 @@ import { useToast } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { LabOrder, RadiologyOrder } from '@/types';
 
 type Tab = 'lab' | 'radiology';
-
-const STATUS_BADGE: Record<string, 'caution' | 'info' | 'positive' | 'critical'> = {
-  pending: 'caution',
-  in_progress: 'info',
-  completed: 'positive',
-  cancelled: 'critical',
-};
 
 const PRIORITY_BADGE: Record<string, 'info' | 'caution' | 'critical'> = {
   routine: 'info',
@@ -31,7 +25,7 @@ function fmtDate(iso?: string) {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <Badge variant={STATUS_BADGE[status] ?? 'info'}>
+    <Badge variant={getStatusVariant(status)}>
       {status.replace('_', ' ')}
     </Badge>
   );

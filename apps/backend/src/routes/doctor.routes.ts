@@ -11,6 +11,7 @@ import {
   blockSlotSchema,
   createNoteSchema,
   updateNoteSchema,
+  resolveEmergencyFlagSchema,
 } from "../validations/doctor.validation";
 import {
   getDoctorList,
@@ -46,8 +47,13 @@ import { updateStaffProfileSchema } from "../validations/staff.validation";
 import { createVideoCall, endVideoCall, getVideoToken } from "../controllers/doctor/video.controller";
 import { createNote, getNotes, updateNote, deleteNote } from "../controllers/doctor/notes.controller";
 import { getTodayQueue } from "../controllers/doctor/queue.controller";
+import { getDoctorEmergencyFlags, acknowledgeFlag, resolveFlag } from "../controllers/doctor/emergencyFlags.controller";
 
 const router = Router();
+
+// Registered before "/:id/ratings" so the literal "me" is not captured as a doctor :id param
+// (otherwise getDoctorPublicRatings runs with id="me" → ObjectId cast 500).
+router.get("/me/ratings", authenticate, requireCompleteProfile, authorize("doctor"), getMyRatings);
 
 router.get("/list", authenticate, authorize("patient", "doctor", "receptionist", "admin"), getDoctorList);
 router.get(
@@ -73,6 +79,11 @@ router.get(
 router.get("/video/token/:appointmentId", authenticate, authorize("doctor", "patient"), getVideoToken);
 
 router.use(authenticate, requireCompleteProfile, authorize("doctor"));
+
+// Literal "/emergency-flags" routes registered ahead of any "/:id"-style routes to avoid wildcard shadowing.
+router.get("/emergency-flags", getDoctorEmergencyFlags);
+router.patch("/emergency-flags/:flagId/acknowledge", acknowledgeFlag);
+router.patch("/emergency-flags/:flagId/resolve", validateRequest(resolveEmergencyFlagSchema), resolveFlag);
 
 router.get("/patients", getPatients);
 router.get("/patients/:id/record", getPatientRecord);
@@ -101,7 +112,6 @@ router.post("/notes", validateRequest(createNoteSchema), createNote);
 router.get("/notes/:patientId", getNotes);
 router.put("/notes/:noteId", validateRequest(updateNoteSchema), updateNote);
 router.delete("/notes/:noteId", deleteNote);
-router.get("/me/ratings", getMyRatings);
 router.get("/shared-records", listSharedRecords);
 router.get("/shared-records/:id", getSharedRecord);
 router.get("/profile", getStaffProfile);

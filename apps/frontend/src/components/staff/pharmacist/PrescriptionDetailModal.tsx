@@ -1,17 +1,12 @@
 import { X } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { getStatusVariant } from '@/lib/statusBadge';
 import type { PharmaPrescription } from '@/types';
 
 interface Props {
   prescription: PharmaPrescription | null;
   onClose: () => void;
 }
-
-const statusChip: Record<string, string> = {
-  active: 'chip chip-pos',
-  dispensed: 'chip chip-neut',
-  expired: 'chip chip-crit',
-  cancelled: 'chip chip-crit',
-};
 
 export function PrescriptionDetailModal({ prescription, onClose }: Props) {
   if (!prescription) return null;
@@ -28,7 +23,7 @@ export function PrescriptionDetailModal({ prescription, onClose }: Props) {
           <div>
             <div className="flex items-center gap-2">
               <p className="text-[16px] font-semibold text-[var(--fg-1)]">Prescription detail</p>
-              <span className={statusChip[prescription.status] ?? 'chip chip-neut'}>{prescription.status}</span>
+              <Badge variant={getStatusVariant(prescription.status)}>{prescription.status}</Badge>
             </div>
             <p className="text-[13px] text-[var(--fg-3)] mt-[2px]">
               {prescription.patient_name ?? 'Unknown patient'} · Dr. {prescription.doctor_name ?? 'Unknown'}
