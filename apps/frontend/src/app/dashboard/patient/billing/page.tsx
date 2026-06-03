@@ -79,11 +79,11 @@ export default function BillingPage() {
           <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[var(--fg-1)] mt-1">Invoices & payments</h1>
         </div>
         <div className="flex gap-2 shrink-0">
-          <button className="btn-ghost flex items-center gap-2 text-[13px]">
+          <button className="btn btn-ghost flex items-center gap-2 text-[13px]" disabled title="Coming soon">
             <ShieldCheck size={14} />
             Insurance details
           </button>
-          <button className="btn-primary flex items-center gap-2 text-[13px]">
+          <button className="btn btn-primary flex items-center gap-2 text-[13px]" disabled title="Coming soon">
             <CreditCard size={14} />
             Pay outstanding
           </button>

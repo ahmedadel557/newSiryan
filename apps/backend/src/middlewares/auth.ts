@@ -21,6 +21,7 @@ export interface AuthRequest extends Request {
     id: string;
     role: string;
     is_profile_complete?: boolean;
+    is_email_verified?: boolean;
   };
 }
 
@@ -29,8 +30,14 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   if (!token) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string; ipc?: boolean };
-    req.user = { id: decoded.id, role: decoded.role, is_profile_complete: decoded.ipc ?? true };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string; ipc?: boolean; ive?: boolean };
+    req.user = {
+      id:                 decoded.id,
+      role:               decoded.role,
+      is_profile_complete: decoded.ipc ?? true,
+      // Default true for backward-compat with existing tokens that lack the ive claim
+      is_email_verified:  decoded.ive ?? true,
+    };
     next();
   } catch {
     return res.status(401).json({ success: false, message: 'Invalid token' });

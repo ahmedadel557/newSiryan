@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ShieldCheck, ShieldOff, Trash2, AlertTriangle, Pencil } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, ShieldOff, Trash2, Pencil } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { adminService } from '@/services/admin.service';
 import { useAuth } from '@/hooks/shared';
 import { useToast } from '@/hooks/shared';
@@ -434,39 +435,28 @@ export default function AdminUserDetailPage() {
             )}
           </button>
 
-          {!showDeleteConfirm ? (
-            <button
-              className="btn text-[13px] flex items-center gap-1.5 w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: 'var(--critical-soft-bg)', color: 'var(--critical)' }}
-              onClick={() => !isSelf && setShowDeleteConfirm(true)}
-              disabled={isSelf}
-              title={isSelf ? 'Cannot delete your own account' : undefined}
-            >
-              <Trash2 size={14} /> Delete account
-            </button>
-          ) : (
-            <div
-              className="flex flex-wrap items-center gap-3 px-4 py-2.5 rounded-[var(--radius-md)] border w-full"
-              style={{ borderColor: 'var(--critical)', background: 'var(--critical-soft-bg)' }}
-            >
-              <AlertTriangle size={14} style={{ color: 'var(--critical)' }} />
-              <span className="text-[12px] font-medium" style={{ color: 'var(--critical)' }}>
-                Permanently delete this account?
-              </span>
-              <button
-                className="btn btn-danger text-[12px] px-3 py-1.5"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting…' : 'Confirm delete'}
-              </button>
-              <button className="btn btn-ghost text-[12px] px-3 py-1.5" onClick={() => setShowDeleteConfirm(false)}>
-                Cancel
-              </button>
-            </div>
-          )}
+          <button
+            className="btn text-[13px] flex items-center gap-1.5 w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: 'var(--critical-soft-bg)', color: 'var(--critical)' }}
+            onClick={() => !isSelf && setShowDeleteConfirm(true)}
+            disabled={isSelf}
+            title={isSelf ? 'Cannot delete your own account' : undefined}
+          >
+            <Trash2 size={14} /> Delete account
+          </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete account"
+        description="Permanently deletes this account and all associated data. This cannot be undone."
+        confirmLabel="Delete account"
+        danger
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        onClose={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }

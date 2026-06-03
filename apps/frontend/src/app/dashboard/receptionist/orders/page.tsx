@@ -116,6 +116,7 @@ export default function ReceptionistOrdersPage() {
               description="Lab orders for today's patients will appear here."
             />
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--border-1)]">
@@ -150,6 +151,7 @@ export default function ReceptionistOrdersPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}
@@ -174,6 +176,7 @@ export default function ReceptionistOrdersPage() {
               description="Radiology orders for today's patients will appear here."
             />
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--border-1)]">
@@ -208,6 +211,7 @@ export default function ReceptionistOrdersPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

@@ -1,16 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Mail, AlertCircle, CheckCircle2, Sparkles, CalendarCheck, Pill, HeartPulse, Video, ShieldCheck, Lock } from 'lucide-react';
+import { Mail, RefreshCw, KeyRound, Sparkles, CalendarCheck, Pill, HeartPulse, Video, ShieldCheck, Lock } from 'lucide-react';
 import { authService } from '@/services/auth.service';
+import { forgotPasswordEmailSchema, type ForgotPasswordEmailValues } from '@/validations/auth';
+import FormError from '@/components/auth/FormError';
 
-const schema = yup.object({
-  email: yup.string().email('Enter a valid email address').required('Email is required'),
-});
-type FormValues = yup.InferType<typeof schema>;
+const RESEND_COOLDOWN = 60;
 
 const scenes = [
   { gradient: 'linear-gradient(135deg, #051F20 0%, #235347 40%, #8EB69B 100%)' },
@@ -28,25 +27,50 @@ const features = [
 ];
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [bgIndex] = useState(0);
-  const [sent, setSent] = useState(false);
+  const [step, setStep] = useState<'email' | 'sent'>('email');
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [apiError, setApiError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: yupResolver(schema),
+  } = useForm<ForgotPasswordEmailValues>({
+    resolver: yupResolver(forgotPasswordEmailSchema),
   });
 
-  async function onSubmit(data: FormValues) {
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
+  async function onSubmit(data: ForgotPasswordEmailValues) {
     setApiError('');
     try {
       await authService.forgotPassword(data.email);
-      setSent(true);
+      setSubmittedEmail(data.email);
+      setResendCooldown(RESEND_COOLDOWN);
+      setStep('sent');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setApiError(msg || 'Something went wrong. Please try again.');
+    }
+  }
+
+  async function handleResend() {
+    setResending(true);
+    try {
+      await authService.forgotPassword(submittedEmail);
+      setResendCooldown(RESEND_COOLDOWN);
     } catch {
-      setApiError('Something went wrong. Please try again.');
+      // silent
+    } finally {
+      setResending(false);
     }
   }
 
@@ -86,39 +110,90 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="auth-form-content">
-            <h1 className="auth-title">Reset password</h1>
-            <p className="auth-lede">Enter your email and we'll send a reset link.</p>
+            {step === 'email' ? (
+              <>
+                <h1 className="auth-title">Forgot password?</h1>
+                <p className="auth-lede">Enter your email and we&apos;ll send you a reset code.</p>
 
-            {sent ? (
-              <div
-                className="flex items-center gap-3 rounded-[var(--radius-md)] px-4 py-3"
-                style={{ background: 'var(--positive-soft-bg)', color: 'var(--positive-soft-fg)' }}
-              >
-                <CheckCircle2 size={18} strokeWidth={1.75} className="shrink-0" />
-                <span className="text-[14px]">If that address is registered, a reset link is on its way.</span>
-              </div>
+                <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div className="field">
+                    <label className="field-label">Email</label>
+                    <div className="auth-input-wrap">
+                      <Mail size={16} strokeWidth={1.75} />
+                      <input
+                        className="input"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        {...register('email')}
+                      />
+                    </div>
+                    {errors.email && <p className="auth-field-error">{errors.email.message}</p>}
+                  </div>
+
+                  <FormError message={apiError} />
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg auth-submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Sending…' : 'Send reset code'}
+                  </button>
+                </form>
+              </>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div className="field">
-                  <label className="field-label">Email</label>
-                  <div className="auth-input-wrap">
-                    <Mail size={16} strokeWidth={1.75} />
-                    <input className="input" type="email" autoComplete="email" placeholder="you@example.com" {...register('email')} />
+              <>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: '50%',
+                    background: 'var(--positive-soft-bg)', color: 'var(--positive)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <KeyRound size={22} strokeWidth={1.75} />
                   </div>
-                  {errors.email && <p className="auth-field-error">{errors.email.message}</p>}
                 </div>
+                <h1 className="auth-title">Check your email</h1>
+                <p className="auth-lede">
+                  We sent a reset code to{' '}
+                  <strong style={{ color: 'var(--fg-1)' }}>{submittedEmail}</strong>
+                </p>
 
-                {apiError && (
-                  <div className="auth-err">
-                    <AlertCircle size={16} strokeWidth={1.75} />
-                    <span>{apiError}</span>
-                  </div>
-                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-lg auth-submit"
+                    onClick={() => router.push(`/auth/reset-password?email=${encodeURIComponent(submittedEmail)}`)}
+                  >
+                    Enter reset code
+                  </button>
 
-                <button type="submit" className="btn btn-primary btn-lg auth-submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending…' : 'Send reset link'}
-                </button>
-              </form>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendCooldown > 0 || resending}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: resendCooldown > 0 ? 'var(--fg-3)' : 'var(--brand)',
+                      cursor: resendCooldown > 0 ? 'default' : 'pointer',
+                      fontSize: 13,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 5,
+                      padding: '8px 0',
+                    }}
+                  >
+                    <RefreshCw size={13} strokeWidth={1.75} />
+                    {resendCooldown > 0
+                      ? `Resend code (${resendCooldown}s)`
+                      : resending
+                      ? 'Sending…'
+                      : 'Resend code'}
+                  </button>
+                </div>
+              </>
             )}
 
             <p className="auth-switch">
@@ -128,12 +203,8 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="auth-trust">
-          <span>
-            <Lock size={13} strokeWidth={1.75} /> 256-bit encryption
-          </span>
-          <span>
-            <ShieldCheck size={13} strokeWidth={1.75} /> HIPAA compliant
-          </span>
+          <span><Lock size={13} strokeWidth={1.75} /> 256-bit encryption</span>
+          <span><ShieldCheck size={13} strokeWidth={1.75} /> HIPAA compliant</span>
         </div>
       </div>
     </div>

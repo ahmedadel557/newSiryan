@@ -25,3 +25,4 @@ export { default as Budget } from './Budget';
 export { default as InventoryReport } from './InventoryReport';
 export { default as ItemBatch } from './ItemBatch';
 export { default as EmergencyFlag } from './EmergencyFlag';
+export { default as OTP } from './OTP';

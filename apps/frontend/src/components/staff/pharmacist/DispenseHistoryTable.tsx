@@ -15,7 +15,7 @@ interface DispenseHistoryTableProps {
 export function DispenseHistoryTable({ history, isLoading }: DispenseHistoryTableProps) {
   if (isLoading) {
     return (
-      <div className="card">
+      <div className="card overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -52,7 +52,7 @@ export function DispenseHistoryTable({ history, isLoading }: DispenseHistoryTabl
   }
 
   return (
-    <div className="card">
+    <div className="card overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
           <tr>

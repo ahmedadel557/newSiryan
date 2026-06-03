@@ -10,6 +10,7 @@ import { useNotifications } from '@/hooks/shared';
 import { useIsMobile, useIsTablet } from '@/hooks/shared';
 import { useSocketEvent } from '@/hooks/shared';
 import { adminService } from '@/services/admin.service';
+import EmailVerificationBanner from '@/components/shared/EmailVerificationBanner';
 import { NotificationBell } from '@/components/shared/NotificationBell';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { MaintenanceOverlay } from '@/components/shared/MaintenanceOverlay';
@@ -284,6 +285,9 @@ export function PatientShell({ children, navItems = patientNav }: PatientShellPr
             </div>
           </header>
         )}
+
+        {/* Email verification banner */}
+        {user && user.is_email_verified === false && <EmailVerificationBanner />}
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">

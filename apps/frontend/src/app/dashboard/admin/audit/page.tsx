@@ -75,6 +75,7 @@ export default function AdminAuditPage() {
             description={searchQuery ? 'Try a different search term.' : 'System activity will appear here.'}
           />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)]">
@@ -113,6 +114,7 @@ export default function AdminAuditPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

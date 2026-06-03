@@ -102,7 +102,7 @@ badges/modals/buttons cause visual inconsistency; (3) at least one page (`nurse/
 - **Should be:** Pick one destructive treatment (the solid `--critical` is the de-facto winner)
   and make `.btn-danger` / `<Button variant="danger">` match it, then use the class everywhere.
 
-### I4 — Inconsistent confirmation for destructive actions (3 modal patterns)
+### I4 — Inconsistent confirmation for destructive actions (3 modal patterns)  — ✅ FIXED (2026-06-04)
 - **What's wrong:** A shared `ConfirmDialog` exists and is good (disabled+"Processing…" state,
   danger styling) but is used in only **2** pages (`admin/departments`, `admin/users`). Other
   destructive flows roll **bespoke inline modals** (`admin/announcements`, `admin/shifts`,
@@ -120,7 +120,7 @@ badges/modals/buttons cause visual inconsistency; (3) at least one page (`nurse/
   password-strength meter — its colors bypass the token system and won't adapt to dark mode.
 - **Should be:** Use `var(--critical)`, `var(--caution)`, `var(--positive)`, `var(--brand)`.
 
-### I6 — Dead / non-functional buttons (confirmed)
+### I6 — Dead / non-functional buttons (confirmed)  — ✅ FIXED (2026-06-04)
 - **Files (verified by reading):**
   - `nurse/medications/page.tsx:35–41` — "Print MAR" and "Bulk mark given" (no onClick)
   - `patient/billing/page.tsx:82–89` — "Insurance details" and "Pay outstanding" (no onClick)
@@ -130,12 +130,12 @@ badges/modals/buttons cause visual inconsistency; (3) at least one page (`nurse/
 - **Should be:** Wire or remove; if "coming soon," show a `disabled` state (as `patient/billing`
   correctly does for the payment methods).
 
-### I7 — Duplicate settings page
+### I7 — Duplicate settings page  — ✅ FIXED (2026-06-04)
 - **Files:** `app/dashboard/settings/page.tsx` and `app/dashboard/patient/settings/page.tsx`
 - **What's wrong:** Near-identical (same `colors` array, same structure). Two copies will drift.
 - **Should be:** One shared settings component; role pages render it.
 
-### I8 — Tables without horizontal-overflow handling (mobile)
+### I8 — Tables without horizontal-overflow handling (mobile)  — ✅ FIXED (2026-06-04)
 - **What's wrong:** 28 table-bearing files have no `overflow-x` wrapper, so wide tables clip /
   force body scroll on phones. Verified examples (the table component itself has no wrapper):
   `components/staff/receptionist/AppointmentQueueTable.tsx`,

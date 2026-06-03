@@ -61,8 +61,24 @@ export const authService = {
     await apiClient.post('/auth/complete-profile', data);
   },
 
+  async sendEmailVerification(): Promise<void> {
+    await apiClient.post('/auth/send-verification');
+  },
+
+  async verifyEmail(data: { email: string; code: string }): Promise<void> {
+    await apiClient.post('/auth/verify-email', data);
+  },
+
   async forgotPassword(email: string): Promise<void> {
     await apiClient.post('/auth/forgot-password', { email });
+  },
+
+  async verifyResetOTP(data: { email: string; code: string }): Promise<void> {
+    await apiClient.post('/auth/verify-reset-otp', data);
+  },
+
+  async resetPassword(data: { email: string; code: string; new_password: string }): Promise<void> {
+    await apiClient.post('/auth/reset-password', data);
   },
 
   async changePassword(newPassword: string): Promise<void> {

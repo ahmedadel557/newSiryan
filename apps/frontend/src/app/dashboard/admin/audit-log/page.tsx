@@ -201,6 +201,7 @@ export default function AdminAuditLogPage() {
             description={hasFilters ? 'Try adjusting your filters.' : 'System activity will appear here.'}
           />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)]">
@@ -234,6 +235,7 @@ export default function AdminAuditLogPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

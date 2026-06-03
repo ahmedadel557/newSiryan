@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package, Plus, Trash2, Pencil } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { inventoryService } from '@/services/inventory.service';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
@@ -222,6 +223,7 @@ export default function RoomDetailPage() {
             <Plus size={13} /> Add item
           </button>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -264,6 +266,7 @@ export default function RoomDetailPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Add item to room modal */}
@@ -328,57 +331,31 @@ export default function RoomDetailPage() {
       </Dialog.Root>
 
       {/* Remove item confirm */}
-      {removeConfirmItemId && (
-        <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-          <div className="bg-[var(--bg-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] w-full max-w-[380px] p-6 flex flex-col gap-4">
-            <p className="text-[15px] font-semibold text-[var(--fg-1)]">Remove item</p>
-            <p className="text-[13px] text-[var(--fg-2)]">
-              Remove <strong>{removeItem?.name}</strong> from this room?
-            </p>
-            <div className="flex gap-2 pt-1">
-              <button onClick={() => setRemoveConfirmItemId(null)} className="btn btn-ghost flex-1">
-                Cancel
-              </button>
-              <button
-                onClick={handleRemoveItem}
-                disabled={removingItem}
-                className="btn btn-primary flex-1"
-                style={{ background: 'var(--critical-soft-fg)', borderColor: 'var(--critical-soft-fg)' }}
-              >
-                {removingItem ? 'Removing…' : 'Remove'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!removeConfirmItemId}
+        title="Remove item"
+        description={`Remove ${removeItem?.name ?? 'this item'} from this room?`}
+        confirmLabel="Remove"
+        danger
+        isLoading={removingItem}
+        onConfirm={handleRemoveItem}
+        onClose={() => setRemoveConfirmItemId(null)}
+      />
 
       {/* Edit room modal */}
       <AddRoomModal open={editOpen} room={roomDetail as any} onClose={() => setEditOpen(false)} onSubmit={handleUpdateRoom} />
 
       {/* Delete room confirm */}
-      {deleteConfirmOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
-          <div className="bg-[var(--bg-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] w-full max-w-[380px] p-6 flex flex-col gap-4">
-            <p className="text-[15px] font-semibold text-[var(--fg-1)]">Delete room</p>
-            <p className="text-[13px] text-[var(--fg-2)]">
-              Are you sure you want to delete <strong>{roomDetail.name}</strong>? This cannot be undone.
-            </p>
-            <div className="flex gap-2 pt-1">
-              <button onClick={() => setDeleteConfirmOpen(false)} className="btn btn-ghost flex-1">
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteRoom}
-                disabled={deletingRoom}
-                className="btn btn-primary flex-1"
-                style={{ background: 'var(--critical-soft-fg)', borderColor: 'var(--critical-soft-fg)' }}
-              >
-                {deletingRoom ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="Delete room"
+        description={`Are you sure you want to delete ${roomDetail.name}? This cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        isLoading={deletingRoom}
+        onConfirm={handleDeleteRoom}
+        onClose={() => setDeleteConfirmOpen(false)}
+      />
     </div>
   );
 }

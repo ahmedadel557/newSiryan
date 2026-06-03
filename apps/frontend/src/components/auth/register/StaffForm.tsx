@@ -39,6 +39,7 @@ export default function StaffForm({ onSuccess }: StaffFormProps) {
   const usernameVal = watch('username') ?? '';
   const role = watch('role') ?? '';
   const selectedDepartment = watch('department') ?? '';
+  const nationalIdVal = watch('national_id') ?? '';
   const availableSpecializations = DEPARTMENT_SPECIALIZATIONS[selectedDepartment] || [];
   const usernameStatus = useUsernameCheck(usernameVal);
 
@@ -107,6 +108,7 @@ export default function StaffForm({ onSuccess }: StaffFormProps) {
           role={role}
           selectedDepartment={selectedDepartment}
           availableSpecializations={availableSpecializations}
+          nationalId={nationalIdVal}
           onNext={goNext}
         />
       )}

@@ -1,9 +1,11 @@
-﻿'use client';
+'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useAuth } from '@/hooks/shared';
 import { useUsernameCheck } from '@/hooks/shared';
+import { authService } from '@/services/auth.service';
+import { extractDOBFromNationalId } from '@/lib/validateNationalId';
 import StepIndicator from '@/components/auth/shared/StepIndicator';
 import PersonalInfoStep from '@/components/auth/register/steps/PersonalInfoStep';
 import MedicalInfoStep from '@/components/auth/register/steps/MedicalInfoStep';
@@ -16,15 +18,17 @@ import {
 } from '@/components/auth/register/registerTypes';
 
 export default function PatientForm() {
-  const { register: authRegister } = useAuth();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [apiError, setApiError] = useState('');
+  const [dobHint, setDobHint] = useState('');
 
   const {
     register,
     handleSubmit,
     trigger,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PatientFields>({
     resolver: yupResolver(patientSchema),
@@ -33,7 +37,16 @@ export default function PatientForm() {
 
   const pw = watch('password') ?? '';
   const usernameVal = watch('username') ?? '';
+  const nationalIdVal = watch('national_id') ?? '';
   const usernameStatus = useUsernameCheck(usernameVal);
+
+  const handleNationalIdBlur = (value: string) => {
+    const dob = extractDOBFromNationalId(value);
+    if (dob) {
+      setValue('date_of_birth', dob.toISOString().split('T')[0]);
+      setDobHint('auto-filled');
+    }
+  };
 
   async function goNext() {
     const fieldsByStep: Record<number, (keyof PatientFields)[]> = {
@@ -42,13 +55,16 @@ export default function PatientForm() {
     };
     if (step === 1 && usernameStatus === 'taken') return;
     const valid = await trigger(fieldsByStep[step]);
-    if (valid) setStep((s) => s + 1);
+    if (valid) {
+      setDobHint('');
+      setStep((s) => s + 1);
+    }
   }
 
   async function onSubmit(data: PatientFields) {
     setApiError('');
     try {
-      await authRegister({
+      await authService.register({
         username: data.username,
         email: data.email,
         password: data.password,
@@ -65,6 +81,7 @@ export default function PatientForm() {
           allergies: data.allergies,
         },
       });
+      router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message;
@@ -93,6 +110,9 @@ export default function PatientForm() {
           errors={errors}
           onNext={goNext}
           onBack={() => setStep(1)}
+          onNidBlur={handleNationalIdBlur}
+          nationalId={nationalIdVal}
+          dobHint={dobHint}
         />
       )}
 

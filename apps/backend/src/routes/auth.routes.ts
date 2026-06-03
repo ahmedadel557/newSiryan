@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { createRedisRateLimiter } from '../middlewares/redisRateLimiter';
 import mongoose from 'mongoose';
-import { register, registerStaff, login, logout, refreshToken, forgotPassword, getMe, changePassword } from '../controllers/auth';
+import {
+  register, registerStaff, login, logout, refreshToken,
+  forgotPassword, getMe, changePassword,
+  sendEmailVerification, verifyEmail,
+  verifyForgotPasswordOTP, resetPassword,
+} from '../controllers/auth';
 import { authenticate } from '../middlewares/auth';
 import { validateRequest } from '../middlewares/validateRequest';
-import { registerSchema, loginSchema, forgotPasswordSchema } from '../validations/auth.validation';
+import { registerSchema, loginSchema, forgotPasswordSchema, verifyEmailSchema, verifyForgotPasswordOTPSchema, resetPasswordSchema } from '../validations/auth.validation';
 import { setAuthCookies } from '../utils/cookies';
 import { sendSuccess, sendError } from '../utils/response';
 import User from '../models/User';
@@ -40,6 +45,11 @@ router.post('/forgot-password', validateRequest(forgotPasswordSchema), forgotPas
 router.get('/me', authenticate, getMe);
 router.patch('/change-password', authenticate, changePassword);
 
+router.post('/send-verification', authenticate, sendEmailVerification);
+router.post('/verify-email', validateRequest(verifyEmailSchema), verifyEmail);
+router.post('/verify-reset-otp', validateRequest(verifyForgotPasswordOTPSchema), verifyForgotPasswordOTP);
+router.post('/reset-password', validateRequest(resetPasswordSchema), resetPassword);
+
 router.get('/check-username', async (req, res, next) => {
   try {
     const { username } = req.query as { username?: string };
@@ -63,7 +73,7 @@ router.get('/google/callback',
     const expiresIn = user.is_profile_complete === false
       ? '30m'
       : (process.env.JWT_EXPIRES_IN || '15m');
-    const accessToken  = signToken({ id: user.id, role: user.role, ipc: user.is_profile_complete ?? true }, process.env.JWT_SECRET!, expiresIn);
+    const accessToken  = signToken({ id: user.id, role: user.role, ipc: user.is_profile_complete ?? true, ive: true }, process.env.JWT_SECRET!, expiresIn);
     const refreshToken = signToken({ id: user.id, role: user.role }, process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d');
     setAuthCookies(res, accessToken, user.is_profile_complete === false ? null : refreshToken);
     const params = new URLSearchParams({
@@ -130,8 +140,8 @@ router.post('/complete-profile', authenticate, async (req, res, next) => {
       }
     } catch { /* non-fatal */ }
 
-    const accessToken  = signToken({ id: user._id, role: user.role, ipc: true }, process.env.JWT_SECRET!,         process.env.JWT_EXPIRES_IN         || '15m');
-    const refreshToken = signToken({ id: user._id, role: user.role },            process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d');
+    const accessToken  = signToken({ id: user._id, role: user.role, ipc: true, ive: true }, process.env.JWT_SECRET!,         process.env.JWT_EXPIRES_IN         || '15m');
+    const refreshToken = signToken({ id: user._id, role: user.role },                      process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d');
     setAuthCookies(res, accessToken, refreshToken);
 
     return sendSuccess(res, null, 'Profile completed');

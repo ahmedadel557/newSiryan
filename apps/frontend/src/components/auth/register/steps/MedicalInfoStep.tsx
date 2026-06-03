@@ -3,11 +3,16 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { UseFormRegister, FieldErrors } from 'react-hook-form';
 import type { PatientFields } from '@/components/auth/register/registerTypes';
 
+const today = new Date().toISOString().split('T')[0];
+
 interface MedicalInfoStepProps {
   register: UseFormRegister<PatientFields>;
   errors: FieldErrors<PatientFields>;
   onNext: () => void;
   onBack: () => void;
+  onNidBlur?: (value: string) => void;
+  nationalId?: string;
+  dobHint?: string;
 }
 
 export default function MedicalInfoStep({
@@ -15,13 +20,27 @@ export default function MedicalInfoStep({
   errors,
   onNext,
   onBack,
+  onNidBlur,
+  nationalId = '',
+  dobHint,
 }: MedicalInfoStepProps) {
+  const { onBlur: rhfNidBlur, ...nidReg } = pReg('national_id');
+
   return (
     <div className="reg-fields">
       <div className="reg-grid-2">
         <div className="field">
           <label className="field-label">Date of birth</label>
-          <input className="input" type="date" {...pReg('date_of_birth')} />
+          <input
+            className="input"
+            type="date"
+            min="1900-01-01"
+            max={today}
+            {...pReg('date_of_birth')}
+          />
+          {dobHint && !errors.date_of_birth && (
+            <p style={{ fontSize: 12, color: 'var(--positive)', marginTop: 4 }}>Date of birth extracted from national ID</p>
+          )}
           {errors.date_of_birth && (
             <p className="auth-field-error">{errors.date_of_birth.message}</p>
           )}
@@ -88,14 +107,23 @@ export default function MedicalInfoStep({
         />
       </div>
       <div className="field">
-        <label className="field-label">National ID</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <label className="field-label" style={{ marginBottom: 0 }}>National ID</label>
+          <span style={{ fontSize: 11, color: nationalId.length === 14 ? 'var(--positive)' : 'var(--fg-3)' }}>
+            {nationalId.length}/14
+          </span>
+        </div>
         <input
           className="input"
           type="text"
           inputMode="numeric"
           maxLength={14}
           placeholder="Enter your 14-digit national ID"
-          {...pReg('national_id')}
+          {...nidReg}
+          onBlur={(e) => {
+            rhfNidBlur(e);
+            onNidBlur?.(e.target.value);
+          }}
         />
         {errors.national_id ? (
           <p className="auth-field-error">{errors.national_id.message}</p>

@@ -68,6 +68,7 @@ export function AppointmentQueueTable({
       </div>
 
       {isLoading ? (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -91,11 +92,13 @@ export function AppointmentQueueTable({
             ))}
           </tbody>
         </table>
+        </div>
       ) : appointments.length === 0 ? (
         <div className="p-6">
           <EmptyState icon={<UserCheck />} title="No appointments" description="No appointments match the current filter." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -154,6 +157,7 @@ export function AppointmentQueueTable({
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import type { Announcement, Role, CreateAnnouncementDto } from '@/types';
 import { useToast } from '@/hooks/shared';
 import { useSocketEvent } from '@/hooks/shared';
 import { Plus, Trash2, X, AlertTriangle, Megaphone } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 const ALL_ROLES: Role[] = ['doctor', 'nurse', 'pharmacist', 'receptionist', 'cashier', 'lab_technician', 'radiology_technician', 'inventory_manager', 'patient', 'admin'];
 
@@ -230,21 +231,16 @@ export default function AnnouncementsPage() {
         </div>
       )}
 
-      {/* Confirm Delete */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="card p-6 space-y-4" style={{ width: 320 }}>
-            <h3 className="t-h3">Delete Announcement</h3>
-            <p className="t-body" style={{ color: 'var(--fg-2)' }}>This will permanently remove the announcement.</p>
-            <div className="flex gap-2 justify-end">
-              <button className="btn btn-ghost" onClick={() => setConfirmDelete(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Delete Announcement"
+        description="This will permanently remove the announcement."
+        confirmLabel="Delete"
+        danger
+        isLoading={deleting}
+        onConfirm={handleDelete}
+        onClose={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

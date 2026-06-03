@@ -71,6 +71,7 @@ export default function ReceptionistLabPage() {
             description="Lab orders for today's patients will appear here."
           />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)]">
@@ -99,6 +100,7 @@ export default function ReceptionistLabPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

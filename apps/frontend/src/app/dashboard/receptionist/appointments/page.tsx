@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Search, UserCheck, CheckCircle, XCircle, CalendarClock } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { receptionistService } from '@/services/receptionist.service';
 import { useToast } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
@@ -35,6 +36,7 @@ export default function ReceptionistAppointmentsPage() {
   const [search, setSearch] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
 
   const fetchAppointments = useCallback(async () => {
     setIsLoading(true);
@@ -168,6 +170,7 @@ export default function ReceptionistAppointmentsPage() {
             description="Try a different filter or date."
           />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)]">
@@ -228,7 +231,7 @@ export default function ReceptionistAppointmentsPage() {
                           <button
                             className="btn btn-ghost text-[11px] px-2.5 py-1 flex items-center gap-1 text-[var(--critical)]"
                             disabled={loadingId === apt.id + '_cancel'}
-                            onClick={() => handleCancel(apt.id)}
+                            onClick={() => setCancelConfirmId(apt.id)}
                           >
                             <XCircle size={12} /> Cancel
                           </button>
@@ -240,8 +243,20 @@ export default function ReceptionistAppointmentsPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!cancelConfirmId}
+        title="Cancel appointment"
+        description="This appointment will be marked as cancelled. This action cannot be undone."
+        confirmLabel="Cancel appointment"
+        danger
+        isLoading={loadingId === cancelConfirmId + '_cancel'}
+        onConfirm={() => { handleCancel(cancelConfirmId!); setCancelConfirmId(null); }}
+        onClose={() => setCancelConfirmId(null)}
+      />
     </div>
   );
 }

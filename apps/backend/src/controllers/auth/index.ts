@@ -1,15 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../../services/auth.service';
+import * as otpService from '../../services/otp.service';
 import { blacklistToken } from '../../services/auth.service';
 import { sendSuccess, sendError } from '../../utils/response';
 import { setAuthCookies, clearAuthCookies } from '../../utils/cookies';
 import { logAudit } from '../../utils/audit';
+import { sendEmailVerificationOTP, sendForgotPasswordOTP } from '../../utils/mailer';
+import User from '../../models/User';
+import Profile from '../../models/Profile';
 import {
   registerSchema,
   registerStaffSchema,
   loginSchema,
   forgotPasswordSchema,
   changePasswordSchema,
+  verifyEmailSchema,
+  verifyForgotPasswordOTPSchema,
+  resetPasswordSchema,
 } from '../../validations/auth.validation';
 import { AuthRequest } from '../../middlewares/auth';
 
@@ -19,6 +26,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
     const { accessToken, refreshToken, user, profile } = await authService.registerPatient(parsed.data.body);
+
+    // Fire-and-forget: generate OTP and send verification email
+    otpService.generateOTP(user.email, 'email_verification')
+      .then(code => sendEmailVerificationOTP(user.email, code, (profile as any)?.first_name || '').catch(() => {}))
+      .catch(() => {});
+
     setAuthCookies(res, accessToken, refreshToken);
     sendSuccess(res, { user, profile }, 'Registration successful', 201);
   } catch (err: any) {
@@ -91,14 +104,106 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+export const sendEmailVerification = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.id;
+    const user = await User.findById(userId);
+    if (!user) return sendError(res, 'User not found', 404);
+
+    if (user.is_email_verified) return sendError(res, 'Email already verified', 400);
+
+    const profile = await Profile.findOne({ user: userId });
+    const firstName = (profile?.first_name as string) || '';
+
+    const code = await otpService.generateOTP(user.email, 'email_verification');
+    sendEmailVerificationOTP(user.email, code, firstName).catch(() => {});
+
+    return sendSuccess(res, {}, 'Verification code sent');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const parsed = verifyEmailSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const { email, code } = parsed.data.body;
+
+    await otpService.verifyOTP(email, 'email_verification', code);
+    await User.findOneAndUpdate({ email: email.toLowerCase() }, { is_email_verified: true });
+
+    return sendSuccess(res, {}, 'Email verified successfully');
+  } catch (err: any) {
+    if (err.status === 400) return sendError(res, err.message, 400);
+    next(err);
+  }
+};
+
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const parsed = forgotPasswordSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
-    await authService.forgotPassword(parsed.data.body.email);
-    sendSuccess(res, null, 'If an account with that email exists, a password reset link has been sent');
+    const { email } = parsed.data.body;
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Always return the same message — do not reveal whether the email exists
+    if (!user) {
+      return sendSuccess(res, {}, 'If this email exists, a reset code has been sent');
+    }
+
+    const profile = await Profile.findOne({ user: user._id });
+    const firstName = (profile?.first_name as string) || '';
+
+    const code = await otpService.generateOTP(email, 'forgot_password');
+    sendForgotPasswordOTP(email, code, firstName).catch(() => {});
+
+    return sendSuccess(res, {}, 'If this email exists, a reset code has been sent');
   } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyForgotPasswordOTP = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const parsed = verifyForgotPasswordOTPSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const { email, code } = parsed.data.body;
+
+    // Verify but do NOT mark as used — resetPassword will do that
+    await otpService.verifyOTP(email, 'forgot_password', code, false);
+
+    return sendSuccess(res, {}, 'OTP verified');
+  } catch (err: any) {
+    if (err.status === 400) return sendError(res, err.message, 400);
+    next(err);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const parsed = resetPasswordSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const { email, code, new_password } = parsed.data.body;
+
+    // Verify and mark as used — prevents replay
+    await otpService.verifyOTP(email, 'forgot_password', code);
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return sendError(res, 'User not found', 404);
+
+    user.password           = new_password; // pre-save hook hashes it
+    user.reset_token        = undefined;
+    user.reset_token_expires = undefined;
+    await user.save();
+
+    return sendSuccess(res, {}, 'Password reset successfully');
+  } catch (err: any) {
+    if (err.status === 400) return sendError(res, err.message, 400);
     next(err);
   }
 };

@@ -1,5 +1,67 @@
 # Changelog
 
+## [2026-06-04] Auth Improvements — Part 2: Frontend + Resend Migration
+
+### Goal
+Migrate email provider to Resend, improve all auth forms validation + UX, wire up frontend to backend OTP flows.
+
+### Created
+- `apps/frontend/src/lib/validateNationalId.ts`
+- `apps/frontend/src/validations/auth.ts` — OTP/reset schemas
+- `apps/frontend/src/components/auth/FormError.tsx`
+- `apps/frontend/src/components/shared/EmailVerificationBanner.tsx`
+- `apps/frontend/src/app/auth/verify-email/page.tsx`
+- `apps/frontend/src/app/auth/reset-password/page.tsx`
+
+### Modified
+- `apps/backend/src/utils/mailer.ts` — Resend client, all functions fire-and-forget
+- `apps/backend/.env.example` — RESEND_API_KEY, FROM_EMAIL updated
+- `apps/frontend/src/components/auth/register/registerTypes.ts` — real NID validator, DOB cross-validation
+- `apps/frontend/src/services/auth.service.ts` — sendEmailVerification, verifyEmail, verifyResetOTP, resetPassword
+- `apps/frontend/src/types/index.ts` — User.is_email_verified
+- `apps/frontend/src/components/auth/register/steps/MedicalInfoStep.tsx` — NID blur + counter + dobHint
+- `apps/frontend/src/components/auth/register/steps/StaffProfessionalStep.tsx` — NID counter
+- `apps/frontend/src/components/auth/register/PatientForm.tsx` — NID auto-fill, redirect to verify-email
+- `apps/frontend/src/components/auth/register/StaffForm.tsx` — pass nationalId to step
+- `apps/frontend/src/app/auth/forgot-password/page.tsx` — 2-step flow, Arabic UI, 60s resend
+- `apps/frontend/src/app/auth/change-password/page.tsx` — 4-level strength meter, show/hide
+- `apps/frontend/src/components/layouts/PatientShell.tsx` — EmailVerificationBanner
+
+### Verification
+- `npx tsc --noEmit` → 0 errors (both apps)
+
+---
+
+## [2026-06-04] Auth Improvements — Part 1: Backend OTP Infrastructure
+
+### Goal
+Add OTP-based email verification (on register) and forgot-password via OTP (replacing token link),
+national_id/phone unique constraints, stronger validation, and `is_email_verified` gating.
+
+### Created
+- `apps/backend/src/models/OTP.ts` — OTP model with TTL + compound index
+- `apps/backend/src/services/otp.service.ts` — `generateOTP` + `verifyOTP` (markUsed param)
+- `apps/backend/src/middlewares/requireEmailVerified.ts` — 403 gate for unverified patients
+
+### Modified
+- `apps/backend/src/models/User.ts` — added `is_email_verified` field (default false)
+- `apps/backend/src/models/Profile.ts` — partial unique indexes on `phone` + `national_id`
+- `apps/backend/src/models/index.ts` — added OTP export
+- `apps/backend/src/utils/mailer.ts` — added `sendEmailVerificationOTP` + `sendForgotPasswordOTP`
+- `apps/backend/src/validations/auth.validation.ts` — Egyptian NID validator, updated register/staff schemas, 4 new schemas
+- `apps/backend/src/middlewares/auth.ts` — `AuthRequest.user` gains `is_email_verified`; decode `ive` from JWT
+- `apps/backend/src/services/auth.service.ts` — `makeTokens` gains `ive` param; all callers updated; refresh includes ive
+- `apps/backend/src/controllers/auth/index.ts` — new: sendEmailVerification, verifyEmail, verifyForgotPasswordOTP, resetPassword; updated: register (OTP fire-and-forget), forgotPassword (OTP-based)
+- `apps/backend/src/config/passport.ts` — Google users get `is_email_verified: true`
+- `apps/backend/src/routes/auth.routes.ts` — 4 new routes + ive in Google/complete-profile tokens
+- `apps/backend/src/routes/patient.routes.ts` — `requireEmailVerified` on POST /appointments, /pharmacy/order, /rooms/book, /chatbot
+
+### Verification
+- `npx tsc --noEmit` → 0 errors
+- `npm run audit:routes` → 0 FE calls with no BE route
+
+---
+
 ## [2026-06-03] UI Polish — Part 1 (design-system unification I1/I2/I3/I5)
 
 ### Goal

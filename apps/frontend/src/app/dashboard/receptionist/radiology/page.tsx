@@ -72,6 +72,7 @@ export default function ReceptionistRadiologyPage() {
             description="Radiology orders for today's patients will appear here."
           />
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)]">
@@ -102,6 +103,7 @@ export default function ReceptionistRadiologyPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

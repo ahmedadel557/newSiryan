@@ -32,10 +32,10 @@ export default function NurseMedicationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-secondary text-[13px] flex items-center gap-1">
+          <button className="btn btn-secondary text-[13px] flex items-center gap-1" disabled title="Coming soon">
             <Printer size={14} /> Print MAR
           </button>
-          <button className="btn-primary text-[13px] flex items-center gap-1">
+          <button className="btn btn-primary text-[13px] flex items-center gap-1" disabled title="Coming soon">
             <CheckSquare size={14} /> Bulk mark given
           </button>
         </div>

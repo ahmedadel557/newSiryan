@@ -24,6 +24,10 @@ passport.use(new GoogleStrategy({
           avatar_url: profile.photos?.[0]?.value || '',
         });
       }
+      // Google already verified the email
+      if (!existingUser.is_email_verified) {
+        await User.findByIdAndUpdate(existingUser._id, { is_email_verified: true });
+      }
       return done(null, {
         id:                  existingUser._id.toString(),
         role:                existingUser.role,
@@ -40,6 +44,7 @@ passport.use(new GoogleStrategy({
       is_active:           true,
       google_id:           profile.id,
       is_profile_complete: false,
+      is_email_verified:   true, // Google verifies the email
     });
 
     return done(null, {

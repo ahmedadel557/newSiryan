@@ -79,6 +79,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
         </div>
       </div>
 
+      <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
           <tr>
@@ -160,6 +161,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

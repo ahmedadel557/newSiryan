@@ -33,7 +33,7 @@ export default function LabCompletedPage() {
 
       <DoctorKPIStrip cards={kpiCards} />
 
-      <div className="card">
+      <div className="card overflow-x-auto">
         {isLoading ? (
           <table className="w-full border-collapse">
             <thead>
@@ -62,6 +62,7 @@ export default function LabCompletedPage() {
             <EmptyState icon={<FlaskConical />} title="No completed orders" description="No completed lab orders in the last 30 days." />
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -94,6 +95,7 @@ export default function LabCompletedPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { InventoryTable } from '@/components/staff/inventory/InventoryTable';
@@ -112,34 +113,15 @@ export default function InventoryItemsPage() {
 
       <InventoryTable items={filtered} isLoading={isLoading} onEdit={setEditItem} onDelete={setDeleteConfirmId} onTransfer={setTransferItem} linkToDetail />
 
-      {deleteConfirmId && deleteTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setDeleteConfirmId(null);
-          }}
-        >
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] w-full max-w-[380px] p-6 flex flex-col gap-4">
-            <p className="text-[16px] font-semibold text-[var(--fg-1)]">Delete item</p>
-            <p className="text-[14px] text-[var(--fg-2)]">
-              Delete <span className="font-semibold">{deleteTarget.name}</span>? This cannot be undone.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button className="btn btn-ghost" onClick={() => setDeleteConfirmId(null)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{ background: 'var(--critical-soft-fg)' }}
-                onClick={() => handleDeleteConfirm(deleteConfirmId!)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!deleteConfirmId}
+        title="Delete item"
+        description="This action cannot be undone."
+        confirmLabel="Delete"
+        danger
+        onConfirm={() => handleDeleteConfirm(deleteConfirmId!)}
+        onClose={() => setDeleteConfirmId(null)}
+      />
 
       <AddItemModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onSubmit={addItem} rooms={rooms} />
       <EditItemModal item={editItem} onClose={() => setEditItem(null)} onSubmit={updateItem} rooms={rooms} />

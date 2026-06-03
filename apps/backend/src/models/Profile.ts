@@ -56,4 +56,14 @@ const ProfileSchema = new Schema<IProfile>(
 ProfileSchema.index({ specialization: 1 });
 ProfileSchema.index({ department: 1 });
 
+// Partial unique indexes — only index non-empty values so the '' default doesn't conflict
+ProfileSchema.index(
+  { phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: 'string', $gt: '' } } },
+);
+ProfileSchema.index(
+  { national_id: 1 },
+  { unique: true, partialFilterExpression: { national_id: { $type: 'string', $gt: '' } } },
+);
+
 export default mongoose.model<IProfile>('Profile', ProfileSchema);

@@ -9,11 +9,34 @@ NewSiryan — hospital management platform. Full-stack monorepo.
 10 roles: `patient`, `doctor`, `nurse`, `receptionist`, `pharmacist`, `inventory_manager`, `lab_technician`, `radiology_technician`, `cashier`, `admin`
 
 ## Auth
-JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Payload: `{ id, role, ipc, pwc }`. Google OAuth via Passport. Incomplete profiles → short-lived token only.
-- `ipc` = is_profile_complete; `pwc` = password_changed (false on admin-created accounts)
-- `makeTokens(id, role, ipc=true, pwc=true)` in `auth.service.ts`
+JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Payload: `{ id, role, ipc, pwc, ive }`. Google OAuth via Passport. Incomplete profiles → short-lived token only.
+- `ipc` = is_profile_complete; `pwc` = password_changed (false on admin-created accounts); `ive` = is_email_verified
+- `makeTokens(id, role, ipc=true, pwc=true, ive=true)` in `auth.service.ts`
+- `authenticate` middleware decodes `ive` → `req.user.is_email_verified` (defaults `true` for old tokens without the claim)
 - Middleware redirects `!pwc` users to `/auth/change-password` before any other page
 - `POST /auth/change-password` — `{ newPassword }`, sets `password_changed=true`, re-issues tokens
+
+**Email verification (2026-06-04):**
+- `User.is_email_verified` (Boolean, default false). Google OAuth users get `true` automatically.
+- `POST /auth/send-verification` (authenticated) — generates OTP, sends email
+- `POST /auth/verify-email` — `{ email, code }` — marks `is_email_verified: true`
+- Patient register fires OTP + email automatically (fire-and-forget)
+- `requireEmailVerified` middleware: 403 `{ code: 'EMAIL_NOT_VERIFIED' }` on patient routes: POST /appointments, /pharmacy/order, /rooms/book, /chatbot
+
+**Forgot password (2026-06-04) — OTP flow (replaces token-link):**
+- `POST /auth/forgot-password` — `{ email }` — generates OTP + emails it (always returns same message)
+- `POST /auth/verify-reset-otp` — `{ email, code }` — verifies OTP, does NOT mark used
+- `POST /auth/reset-password` — `{ email, code, new_password }` — re-verifies + marks OTP used + saves new password
+
+**OTP system (`models/OTP.ts`, `services/otp.service.ts`):**
+- `generateOTP(email, type)` — deletes existing, creates 6-digit bcrypt-hashed OTP (30-min TTL)
+- `verifyOTP(email, type, code, markUsed=true)` — max 5 attempts; `markUsed=false` for peek-verify step
+- MongoDB TTL index auto-deletes expired documents
+- Types: `'email_verification'` | `'forgot_password'`
+
+**Profile unique indexes (partial, non-empty values only):**
+- `phone` — partial unique index (`$gt: ''`) so `''` default doesn't conflict
+- `national_id` — partial unique index (`$gt: ''`)
 
 **Two staff registration flows (both coexist):**
 1. Self-registration `POST /auth/register`: status=pending, password_changed=true, emits `staff_request:new` to admin

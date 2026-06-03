@@ -56,6 +56,7 @@ export function PrescriptionQueueTable({ prescriptions, filter, onFilterChange, 
       </div>
 
       {isLoading ? (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -78,11 +79,13 @@ export function PrescriptionQueueTable({ prescriptions, filter, onFilterChange, 
             ))}
           </tbody>
         </table>
+        </div>
       ) : prescriptions.length === 0 ? (
         <div className="p-6">
           <EmptyState icon={<Pill />} title="No prescriptions" description="No prescriptions match the current filter." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -144,6 +147,7 @@ export function PrescriptionQueueTable({ prescriptions, filter, onFilterChange, 
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

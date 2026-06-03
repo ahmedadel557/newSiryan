@@ -374,6 +374,7 @@ export default function AdminInvoicesPage() {
               />
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="border-b border-[var(--border-1)] text-left text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)]">
@@ -405,6 +406,7 @@ export default function AdminInvoicesPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 

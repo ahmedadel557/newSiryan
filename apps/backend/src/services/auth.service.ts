@@ -20,9 +20,9 @@ const fetchProfile = async (userId: string) => {
 const sign = (payload: object, secret: string, expiresIn: string) =>
   jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 
-const makeTokens = (id: string, role: string, ipc = true, pwc = true) => ({
-  accessToken:  sign({ id, role, ipc, pwc }, process.env.JWT_SECRET!,         process.env.JWT_EXPIRES_IN         || '15m'),
-  refreshToken: sign({ id, role },           process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
+const makeTokens = (id: string, role: string, ipc = true, pwc = true, ive = true) => ({
+  accessToken:  sign({ id, role, ipc, pwc, ive }, process.env.JWT_SECRET!,         process.env.JWT_EXPIRES_IN         || '15m'),
+  refreshToken: sign({ id, role },               process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
 });
 
 export const registerPatient = async (data: {
@@ -74,7 +74,8 @@ export const registerPatient = async (data: {
     }
   } catch { /* non-fatal */ }
 
-  const { accessToken, refreshToken } = makeTokens(user._id.toString(), user.role);
+  // ive=false — patient must verify email before accessing gated features
+  const { accessToken, refreshToken } = makeTokens(user._id.toString(), user.role, true, true, false);
   const profile = await Profile.findOne({ user: user._id });
   return {
     accessToken,
@@ -164,7 +165,8 @@ export const login = async (data: { email: string; password: string }, req?: Req
   }
 
   const pwc = user.password_changed !== false;
-  const { accessToken, refreshToken } = makeTokens(user._id.toString(), user.role, true, pwc);
+  const ive = user.is_email_verified ?? false;
+  const { accessToken, refreshToken } = makeTokens(user._id.toString(), user.role, true, pwc, ive);
   const profile = await fetchProfile(user._id.toString());
 
   logAudit({ performedBy: user._id.toString(), action: 'login', resource: 'user', resourceId: user._id.toString(), req });
@@ -191,7 +193,7 @@ export const refreshAccessToken = async (token: string) => {
   if (!user) throw new Error('Invalid refresh token');
 
   const accessToken = sign(
-    { id: decoded.id, role: decoded.role, ipc: user.is_profile_complete, pwc: user.password_changed !== false },
+    { id: decoded.id, role: decoded.role, ipc: user.is_profile_complete, pwc: user.password_changed !== false, ive: user.is_email_verified ?? false },
     process.env.JWT_SECRET!,
     process.env.JWT_EXPIRES_IN || '15m'
   );
@@ -204,7 +206,7 @@ export const changePassword = async (userId: string, newPassword: string) => {
   user.password = newPassword;
   user.password_changed = true;
   await user.save();
-  const tokens = makeTokens(user._id.toString(), user.role, user.is_profile_complete, true);
+  const tokens = makeTokens(user._id.toString(), user.role, user.is_profile_complete, true, user.is_email_verified ?? false);
   return { tokens, user };
 };
 

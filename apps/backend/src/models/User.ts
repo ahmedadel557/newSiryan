@@ -28,6 +28,7 @@ export interface IUser extends Document {
   is_profile_complete: boolean;
   reset_token?: string;
   reset_token_expires?: Date;
+  is_email_verified?: boolean;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -46,6 +47,7 @@ const UserSchema = new Schema<IUser>(
     is_profile_complete:  { type: Boolean, default: true },
     reset_token:          { type: String },
     reset_token_expires:  { type: Date },
+    is_email_verified:    { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Building2, Star } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { inventoryService } from '@/services/inventory.service';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { Badge } from '@/components/ui/Badge';
@@ -293,22 +294,15 @@ export default function SuppliersPage() {
         </table>
       </div>
 
-      {deleteId && (() => {
-        const target = suppliers.find((s) => s.id === deleteId);
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
-            onClick={(e) => { if (e.target === e.currentTarget) setDeleteId(null); }}>
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] w-full max-w-[380px] p-6 flex flex-col gap-4">
-              <p className="text-[16px] font-semibold text-[var(--fg-1)]">Remove supplier</p>
-              <p className="text-[14px] text-[var(--fg-2)]">Remove <span className="font-semibold">{target?.name}</span>? Active purchase orders will block deletion.</p>
-              <div className="flex gap-2 justify-end">
-                <button className="btn btn-ghost" onClick={() => setDeleteId(null)}>Cancel</button>
-                <button className="btn btn-primary" style={{ background: 'var(--critical-soft-fg)' }} onClick={() => handleDelete(deleteId)}>Remove</button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Remove supplier"
+        description="Active purchase orders will block deletion."
+        confirmLabel="Remove"
+        danger
+        onConfirm={() => handleDelete(deleteId!)}
+        onClose={() => setDeleteId(null)}
+      />
 
       <SupplierModal supplier={addOpen ? null : editSupplier} onClose={() => { setAddOpen(false); setEditSupplier(null); }} onSubmit={addOpen ? handleAdd : handleEdit} />
       {addOpen && <SupplierModal supplier={null} onClose={() => setAddOpen(false)} onSubmit={handleAdd} />}

@@ -33,7 +33,7 @@ export default function RadiologyCompletedPage() {
 
       <DoctorKPIStrip cards={kpiCards} />
 
-      <div className="card">
+      <div className="card overflow-x-auto">
         {isLoading ? (
           <table className="w-full border-collapse">
             <thead>
@@ -62,6 +62,7 @@ export default function RadiologyCompletedPage() {
             <EmptyState icon={<Scan />} title="No completed scans" description="No completed radiology orders in the last 30 days." />
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -96,6 +97,7 @@ export default function RadiologyCompletedPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

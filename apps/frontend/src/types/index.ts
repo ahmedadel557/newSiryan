@@ -48,6 +48,7 @@ export interface User {
   email: string;
   role: Role;
   is_active: boolean;
+  is_email_verified?: boolean;
   password_changed?: boolean;
   approval_status?: 'pending' | 'approved' | 'rejected';
   rejection_reason?: string;

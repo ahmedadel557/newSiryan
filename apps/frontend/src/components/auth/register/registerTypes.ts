@@ -1,4 +1,23 @@
 import * as yup from 'yup';
+import { validateEgyptianNationalId, extractDOBFromNationalId } from '@/lib/validateNationalId';
+
+/* ── Shared field definitions ──────────────────────────────── */
+const egyptianPhone = yup
+  .string()
+  .matches(/^(010|011|012|015)\d{8}$/, 'Enter a valid Egyptian phone number (010, 011, 012, or 015)')
+  .required('Phone number is required');
+
+const nationalIdField = yup
+  .string()
+  .required('National ID is required')
+  .test('egyptian-nid', 'Enter a valid Egyptian national ID', (v) => !v || validateEgyptianNationalId(v));
+
+const passwordField = yup
+  .string()
+  .min(8, 'At least 8 characters')
+  .matches(/[A-Z]/, 'Must include an uppercase letter')
+  .matches(/[0-9]/, 'Must include a number')
+  .required('Password is required');
 
 /* ── Patient schema ────────────────────────────────────────── */
 export const patientSchema = yup.object({
@@ -8,38 +27,43 @@ export const patientSchema = yup.object({
     .string()
     .email('Enter a valid email')
     .required('Email is required'),
-  phone: yup
-    .string()
-    .required('Phone number is required')
-    .matches(
-      /^(010|011|012|015)\d{8}$/,
-      'Must be a valid Egyptian number (010, 011, 012, or 015)',
-    ),
+  phone: egyptianPhone,
   username: yup
     .string()
     .min(3, 'At least 3 characters')
     .max(30, 'Max 30 characters')
     .matches(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores')
     .required('Username is required'),
-  date_of_birth: yup.string().required('Date of birth is required'),
+  national_id: nationalIdField,
+  date_of_birth: yup
+    .string()
+    .required('Date of birth is required')
+    .test('valid-date', 'Enter a valid date of birth', (val) => {
+      if (!val) return false;
+      const d = new Date(val);
+      return !isNaN(d.getTime()) && d.getFullYear() >= 1900 && d.getFullYear() < new Date().getFullYear();
+    })
+    .test('matches-nid', 'Date of birth does not match the national ID', function (val) {
+      const { national_id } = this.parent as { national_id?: string };
+      if (!national_id || !val) return true;
+      const dobFromNid = extractDOBFromNationalId(national_id);
+      if (!dobFromNid) return true;
+      const inputDob = new Date(val);
+      return (
+        dobFromNid.getFullYear() === inputDob.getFullYear() &&
+        dobFromNid.getMonth() === inputDob.getMonth() &&
+        dobFromNid.getDate() === inputDob.getDate()
+      );
+    }),
   gender: yup
     .string()
     .oneOf(['male', 'female'], 'Select a gender')
     .required('Gender is required'),
   blood_type: yup.string().required('Blood type is required'),
-  national_id: yup
-    .string()
-    .matches(/^\d{14}$/, 'Must be exactly 14 digits')
-    .required('National ID is required'),
   insurance_provider: yup.string().default(''),
   insurance_number: yup.string().default(''),
   allergies: yup.string().default(''),
-  password: yup
-    .string()
-    .min(8, 'At least 8 characters')
-    .matches(/[0-9]/, 'Must include a number')
-    .matches(/[A-Z]/, 'Must include an uppercase letter')
-    .required('Password is required'),
+  password: passwordField,
   confirm_password: yup
     .string()
     .oneOf([yup.ref('password')], 'Passwords do not match')
@@ -60,13 +84,7 @@ export const staffSchema = yup.object({
     .string()
     .email('Enter a valid email')
     .required('Email is required'),
-  phone: yup
-    .string()
-    .required('Phone number is required')
-    .matches(
-      /^(010|011|012|015)\d{8}$/,
-      'Must be a valid Egyptian number',
-    ),
+  phone: egyptianPhone,
   role: yup
     .string()
     .oneOf(
@@ -87,22 +105,14 @@ export const staffSchema = yup.object({
     is: 'doctor',
     then: (schema) => schema.required('Specialization is required'),
   }),
-  national_id: yup
-    .string()
-    .matches(/^\d{14}$/, 'Must be exactly 14 digits')
-    .required('National ID is required'),
+  national_id: nationalIdField,
   username: yup
     .string()
     .min(3, 'At least 3 characters')
     .max(30, 'Max 30 characters')
     .matches(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores')
     .required('Username is required'),
-  password: yup
-    .string()
-    .min(8, 'At least 8 characters')
-    .matches(/[0-9]/, 'Must include a number')
-    .matches(/[A-Z]/, 'Must include an uppercase letter')
-    .required('Password is required'),
+  password: passwordField,
   confirm_password: yup
     .string()
     .oneOf([yup.ref('password')], 'Passwords do not match')

@@ -10,6 +10,7 @@ interface StaffProfessionalStepProps {
   role: string;
   selectedDepartment: string;
   availableSpecializations: string[];
+  nationalId?: string;
   onNext: () => void;
 }
 
@@ -19,6 +20,7 @@ export default function StaffProfessionalStep({
   role,
   selectedDepartment,
   availableSpecializations,
+  nationalId = '',
   onNext,
 }: StaffProfessionalStepProps) {
   return (
@@ -140,7 +142,12 @@ export default function StaffProfessionalStep({
         </div>
       )}
       <div className="field">
-        <label className="field-label">National ID</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <label className="field-label" style={{ marginBottom: 0 }}>National ID</label>
+          <span style={{ fontSize: 11, color: nationalId.length === 14 ? 'var(--positive)' : 'var(--fg-3)' }}>
+            {nationalId.length}/14
+          </span>
+        </div>
         <input
           className="input"
           type="text"

@@ -1,11 +1,11 @@
-Route-Diff Report — 2026-06-03T11:16:16.179Z
+Route-Diff Report — 2026-06-03T21:30:47.597Z
 ────────────────────────────────────────────────────────────────
-Backend routes:  293
+Backend routes:  297
 Frontend calls:  276 parsed, 5 unparseable
 
 ❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
 
-⚠️   BACKEND ROUTES NOTHING CALLS  (40)
+⚠️   BACKEND ROUTES NOTHING CALLS  (44)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/insurance/:param  [admin.routes.ts]
   DELETE  /api/upload/avatar  [upload.routes.ts]
@@ -34,6 +34,10 @@ Frontend calls:  276 parsed, 5 unparseable
   POST    /api/admin/insurance  [admin.routes.ts]
   POST    /api/auth/refresh-token  [auth.routes.ts]
   POST    /api/auth/register/staff  [auth.routes.ts]
+  POST    /api/auth/reset-password  [auth.routes.ts]
+  POST    /api/auth/send-verification  [auth.routes.ts]
+  POST    /api/auth/verify-email  [auth.routes.ts]
+  POST    /api/auth/verify-reset-otp  [auth.routes.ts]
   POST    /api/pharmacy/refill-request  [pharmacist.routes.ts]
   POST    /api/upload/avatar  [upload.routes.ts]
   PUT     /api/admin/insurance/:param  [admin.routes.ts]

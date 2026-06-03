@@ -5,6 +5,7 @@ import { adminService } from '@/services/admin.service';
 import type { User, DeletionRequest } from '@/types';
 import { useToast } from '@/hooks/shared';
 import { Download, Search, X, Check, Ban } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 
 export default function CompliancePage() {
   const { showToast } = useToast();
@@ -227,30 +228,20 @@ export default function CompliancePage() {
         )}
       </section>
 
-      {/* Confirm dialog */}
-      {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="card p-6 space-y-4" style={{ width: 340 }}>
-            <h3 className="t-h3 capitalize">{confirmAction.action} Deletion Request</h3>
-            <p className="t-body" style={{ color: 'var(--fg-2)' }}>
-              {confirmAction.action === 'approve'
-                ? 'Approving this request will permanently delete the patient account and all associated data.'
-                : 'The deletion request will be rejected and the patient account will remain active.'}
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button className="btn btn-ghost" onClick={() => setConfirmAction(null)}>Cancel</button>
-              <button
-                className="btn"
-                style={{ background: confirmAction.action === 'approve' ? 'var(--critical)' : 'var(--brand)', color: '#fff' }}
-                onClick={handleProcess}
-                disabled={processing}
-              >
-                {processing ? 'Processing...' : confirmAction.action === 'approve' ? 'Approve & Delete' : 'Reject'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!confirmAction}
+        title={confirmAction?.action === 'approve' ? 'Approve deletion request' : 'Reject deletion request'}
+        description={
+          confirmAction?.action === 'approve'
+            ? 'Approving this request will permanently delete the patient account and all associated data.'
+            : 'The deletion request will be rejected and the patient account will remain active.'
+        }
+        confirmLabel={confirmAction?.action === 'approve' ? 'Approve & Delete' : 'Reject'}
+        danger={confirmAction?.action === 'approve'}
+        isLoading={processing}
+        onConfirm={handleProcess}
+        onClose={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

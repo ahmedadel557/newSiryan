@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Pencil, Trash2, X, Check, ShieldPlus } from 'lucide-react';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { adminService } from '@/services/admin.service';
 import { useToast } from '@/hooks/shared';
 import { Badge } from '@/components/ui/Badge';
@@ -238,7 +239,7 @@ export default function AdminInsurancePage() {
         </button>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-x-auto">
         {isLoading ? (
           <div className="flex flex-col divide-y divide-[var(--border-1)]">
             {[1, 2, 3].map((i) => (
@@ -322,29 +323,15 @@ export default function AdminInsurancePage() {
         />
       )}
 
-      {deleteId && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setDeleteId(null); }}
-        >
-          <div className="card p-6 w-full max-w-[400px] flex flex-col gap-4">
-            <h2 className="text-[16px] font-semibold text-[var(--fg-1)]">Delete insurance company?</h2>
-            <p className="text-[13px] text-[var(--fg-3)]">
-              Patients with this provider will no longer receive discounts on new orders.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setDeleteId(null)} className="btn btn-ghost">Cancel</button>
-              <button
-                onClick={handleDelete}
-                className="btn btn-primary bg-[var(--critical)] hover:bg-[var(--critical)] border-[var(--critical)]"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete insurance company?"
+        description="Patients with this provider will no longer receive discounts on new orders."
+        confirmLabel="Delete"
+        danger
+        onConfirm={handleDelete}
+        onClose={() => setDeleteId(null)}
+      />
     </div>
   );
 }

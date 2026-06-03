@@ -40,6 +40,7 @@ export function NursePatientTable({ patients, isLoading, onRecordVitals, onEmerg
       </div>
 
       {isLoading ? (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -72,11 +73,13 @@ export function NursePatientTable({ patients, isLoading, onRecordVitals, onEmerg
             ))}
           </tbody>
         </table>
+        </div>
       ) : patients.length === 0 ? (
         <div className="p-6">
           <EmptyState icon={<HeartPulse />} title="No patients assigned" description="No patients are currently assigned to you." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -141,6 +144,7 @@ export function NursePatientTable({ patients, isLoading, onRecordVitals, onEmerg
             })}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
