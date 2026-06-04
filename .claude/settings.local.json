@@ -34,7 +34,8 @@
       "Bash(grep -v \"//.*<table\")",
       "Bash(npx next *)",
       "Bash(Select-String -Pattern \"kB|First Load|shared\")",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git add *)"
     ]
   }
 }

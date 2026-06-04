@@ -173,7 +173,7 @@ export function UsersTable({
                           {/* Expand */}
                           <button
                             onClick={() => toggleRow(user.id)}
-                            className="btn md:hidden flex items-center justify-center p-2"
+                            className="md:hidden rounded-md flex items-center justify-center p-2 "
                             aria-label={isExpanded ? "Collapse" : "Expand"}
                           >
                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -206,7 +206,7 @@ export function UsersTable({
                                 onClick={() => !isSelf && onDelete(user.id)}
                                 disabled={isSelf}
                                 title={isSelf ? 'Cannot delete your own account' : undefined}
-                                className="btn btn-ghost text-[12px] disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="btn outline text-red-500 hover:bg-red-500 hover:text-white transition-colors  text-[12px] disabled:opacity-40 disabled:cursor-not-allowed"
                               >
                                 Delete
                               </button>

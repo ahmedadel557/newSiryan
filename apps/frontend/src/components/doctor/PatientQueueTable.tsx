@@ -150,7 +150,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
                         e.stopPropagation();
                         onOpenPatient(patient.id);
                       }}
-                      className="btn-ghost text-[12px] py-[4px] inline-flex items-center gap-1"
+                      className="btn btn-ghost text-[12px] py-[4px] inline-flex items-center gap-1"
                     >
                       Open <ArrowRight size={14} />
                     </button>
