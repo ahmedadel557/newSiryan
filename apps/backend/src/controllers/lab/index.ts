@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { uploadResultsSchema, updateStatusSchema } from '../../validations/lab.validation';
 import LabOrder from '../../models/LabOrder';
 import Notification from '../../models/Notification';
@@ -31,10 +32,17 @@ export const getLabOrders = async (req: AuthRequest, res: Response, next: NextFu
       baseQuery.status = status;
     }
 
-    const orders = await LabOrder.find(baseQuery)
-      .populate('patient', '_id username')
-      .populate('doctor', '_id username')
-      .sort({ ordered_at: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      LabOrder.find(baseQuery)
+        .populate('patient', '_id username')
+        .populate('doctor', '_id username')
+        .sort({ ordered_at: -1 })
+        .skip(skip)
+        .limit(limit),
+      LabOrder.countDocuments(baseQuery),
+    ]);
 
     const patientIds = orders.map((o) => (o.patient as any)?._id?.toString() ?? o.patient.toString());
     const doctorIds  = orders.map((o) => (o.doctor as any)?._id?.toString()  ?? o.doctor.toString());
@@ -51,7 +59,7 @@ export const getLabOrders = async (req: AuthRequest, res: Response, next: NextFu
       };
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(result, total, { page, limit }));
   } catch (err) {
     next(err);
   }

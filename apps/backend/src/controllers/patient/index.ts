@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { AuthRequest } from "../../middlewares/auth";
 import { sendSuccess, sendError } from "../../utils/response";
+import { getPaginationParams, paginatedResult } from "../../utils/paginate";
 import {
   updateProfileSchema,
   bookAppointmentSchema,
@@ -119,9 +120,16 @@ export const getAppointments = async (req: AuthRequest, res: Response, next: Nex
     const query: Record<string, any> = { patient: req.user!.id };
     if (status) query.status = status;
 
-    const appointments = await Appointment.find(query)
-      .sort({ scheduled_at: -1 })
-      .lean();
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [appointments, total] = await Promise.all([
+      Appointment.find(query)
+        .sort({ scheduled_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Appointment.countDocuments(query),
+    ]);
 
     const doctorIds = [...new Set(appointments.map((a) => a.doctor?.toString()).filter(Boolean))];
     const invoiceIds = [...new Set(appointments.map((a: any) => a.invoice?.toString()).filter(Boolean))];
@@ -165,7 +173,7 @@ export const getAppointments = async (req: AuthRequest, res: Response, next: Nex
       };
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(result, total, { page, limit }));
   } catch (err) {
     next(err);
   }

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/context/AuthContext';
 import { authService } from '@/services/auth.service';
 import type { LoginDto, RegisterDto, Role } from '@/types';
+import { usePathname } from 'next/navigation'
 
 const roleRoutes: Record<Role, string> = {
   patient: '/dashboard/patient',
@@ -26,19 +27,26 @@ export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  const pathname = usePathname()
+
+useEffect(() => {
+  if (pathname?.startsWith('/auth')) {
+    setIsLoading(false)
+    return
+  }
+  
   authService
     .getMe()
     .then(({ user: me, profile: prof }) => {
-      setUser(me);
-      setProfile(prof);
+      setUser(me)
+      setProfile(prof)
     })
     .catch(() => {
-      setUser(null);
-      setProfile(null);
+      setUser(null)
+      setProfile(null)
     })
-    .finally(() => setIsLoading(false));
-}, []);
+    .finally(() => setIsLoading(false))
+}, [pathname])
 
   async function login(data: LoginDto) {
     const res = await authService.login(data);
@@ -52,6 +60,8 @@ export function useAuth() {
     setProfile(res.profile);
     if (res.user.password_changed === false) {
       router.push('/auth/change-password');
+    } else if (res.user.role === 'patient' && res.user.is_email_verified === false) {
+      router.push(`/auth/verify-email?email=${encodeURIComponent(res.user.email)}`);
     } else {
       router.push(roleRoutes[res.user.role]);
     }

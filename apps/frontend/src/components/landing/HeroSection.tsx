@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -25,18 +25,33 @@ export function HeroSection() {
   const [mouseX, setMouseX] = useState(0);
   const [mouseY, setMouseY] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastEventRef = useRef<MouseEvent | null>(null);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    lastEventRef.current = e;
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      const evt = lastEventRef.current;
+      const el = heroRef.current;
+      if (evt && el) {
+        const rect = el.getBoundingClientRect();
+        setMouseX(((evt.clientX - rect.left) / rect.width - 0.5) * 2);
+        setMouseY(((evt.clientY - rect.top) / rect.height - 0.5) * 2);
+      }
+      rafRef.current = null;
+    });
+  }, []);
 
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect();
-      setMouseX(((e.clientX - rect.left) / rect.width - 0.5) * 2);
-      setMouseY(((e.clientY - rect.top) / rect.height - 0.5) * 2);
+    el.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-    el.addEventListener('mousemove', onMove);
-    return () => el.removeEventListener('mousemove', onMove);
-  }, []);
+  }, [handleMouseMove]);
 
   return (
     <section className="hero" ref={heroRef}>

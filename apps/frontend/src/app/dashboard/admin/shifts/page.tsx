@@ -135,7 +135,7 @@ export default function ShiftsPage() {
 
   // Group today's shifts by department
   const todayByDept = todayShifts.reduce<Record<string, Shift[]>>((acc, s) => {
-    const dept = s.staff.department || 'Unassigned';
+    const dept = s.staff?.department || 'Unassigned';
     if (!acc[dept]) acc[dept] = [];
     acc[dept].push(s);
     return acc;
@@ -172,8 +172,8 @@ export default function ShiftsPage() {
                 <div className="flex flex-wrap gap-3">
                   {shifts.map((s) => (
                     <div key={s.id} className="card p-3 space-y-1" style={{ minWidth: 160 }}>
-                      <p className="t-small font-medium">{s.staff.name}</p>
-                      <span className="badge" style={{ fontSize: 11, textTransform: 'capitalize', background: 'var(--bg-surface-2)', color: 'var(--fg-2)' }}>{s.staff.role.replace('_', ' ')}</span>
+                      <p className="t-small font-medium">{s.staff?.name ?? '—'}</p>
+                      <span className="badge" style={{ fontSize: 11, textTransform: 'capitalize', background: 'var(--bg-surface-2)', color: 'var(--fg-2)' }}>{s.staff?.role?.replace('_', ' ') ?? '—'}</span>
                       <ShiftBadge type={s.shift_type} />
                     </div>
                   ))}
@@ -216,9 +216,9 @@ export default function ShiftsPage() {
               <tbody>
                 {allShifts.map((s) => (
                   <tr key={s.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
-                    <td className="t-body" style={{ padding: '10px 12px' }}>{s.staff.name}</td>
-                    <td className="t-small" style={{ padding: '10px 12px', textTransform: 'capitalize', color: 'var(--fg-2)' }}>{s.staff.role.replace('_', ' ')}</td>
-                    <td className="t-small" style={{ padding: '10px 12px', color: 'var(--fg-2)' }}>{s.staff.department || '—'}</td>
+                    <td className="t-body" style={{ padding: '10px 12px' }}>{s.staff?.name ?? '—'}</td>
+                    <td className="t-small" style={{ padding: '10px 12px', textTransform: 'capitalize', color: 'var(--fg-2)' }}>{s.staff?.role?.replace('_', ' ') ?? '—'}</td>
+                    <td className="t-small" style={{ padding: '10px 12px', color: 'var(--fg-2)' }}>{s.staff?.department || '—'}</td>
                     <td style={{ padding: '10px 12px' }}><ShiftBadge type={s.shift_type} /></td>
                     <td className="t-small" style={{ padding: '10px 12px', color: 'var(--fg-2)' }}>{new Date(s.start_date).toLocaleDateString()}</td>
                     <td className="t-small" style={{ padding: '10px 12px', color: 'var(--fg-2)' }}>{new Date(s.end_date).toLocaleDateString()}</td>

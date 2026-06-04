@@ -25,6 +25,7 @@ import DeletionRequest from '../../models/DeletionRequest';
 import MedicalRecord from '../../models/MedicalRecord';
 import Prescription from '../../models/Prescription';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { sendEmail } from '../../utils/mailer';
 import { logAudit } from '../../utils/audit';
 import { emitToRole, emitToUser, getIO } from '../../config/socket';
@@ -212,22 +213,35 @@ export const getAuditLog = async (req: AuthRequest, res: Response, next: NextFun
         { details:  { $regex: search, $options: 'i' } },
       ];
     }
-    const logs = await AuditLog.find(filter)
-      .populate('performed_by', 'username email role')
-      .sort({ createdAt: -1 })
-      .limit(200);
-    sendSuccess(res, logs);
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [logs, total] = await Promise.all([
+      AuditLog.find(filter)
+        .populate('performed_by', 'username email role')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      AuditLog.countDocuments(filter),
+    ]);
+    sendSuccess(res, paginatedResult(logs, total, { page, limit }));
   } catch (err) {
     next(err);
   }
 };
 
-export const getAdminInvoices = async (_req: AuthRequest, res: Response, next: NextFunction) => {
+export const getAdminInvoices = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const invoices = await Invoice.find({})
-      .populate('patient', 'username email')
-      .sort({ createdAt: -1 });
-    sendSuccess(res, invoices);
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [invoices, total] = await Promise.all([
+      Invoice.find({})
+        .populate('patient', 'username email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Invoice.countDocuments({}),
+    ]);
+    sendSuccess(res, paginatedResult(invoices, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -778,10 +792,16 @@ export const getAdminAppointments = async (req: AuthRequest, res: Response, next
       filter.scheduled_at = { $gte: start, $lte: end };
     }
 
-    const appointments = await Appointment.find(filter)
-      .sort({ scheduled_at: -1 })
-      .limit(200)
-      .lean();
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [appointments, total] = await Promise.all([
+      Appointment.find(filter)
+        .sort({ scheduled_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Appointment.countDocuments(filter),
+    ]);
 
     const userIds = [
       ...appointments.map((a) => a.patient.toString()),
@@ -818,7 +838,7 @@ export const getAdminAppointments = async (req: AuthRequest, res: Response, next
       );
     }
 
-    sendSuccess(res, results);
+    sendSuccess(res, paginatedResult(results, total, { page, limit }));
   } catch (err) {
     next(err);
   }

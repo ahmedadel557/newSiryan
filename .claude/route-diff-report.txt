@@ -1,11 +1,11 @@
-Route-Diff Report — 2026-06-03T21:30:47.597Z
+Route-Diff Report — 2026-06-04T09:58:42.445Z
 ────────────────────────────────────────────────────────────────
 Backend routes:  297
-Frontend calls:  276 parsed, 5 unparseable
+Frontend calls:  280 parsed, 5 unparseable
 
 ❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
 
-⚠️   BACKEND ROUTES NOTHING CALLS  (44)
+⚠️   BACKEND ROUTES NOTHING CALLS  (40)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/insurance/:param  [admin.routes.ts]
   DELETE  /api/upload/avatar  [upload.routes.ts]
@@ -34,10 +34,6 @@ Frontend calls:  276 parsed, 5 unparseable
   POST    /api/admin/insurance  [admin.routes.ts]
   POST    /api/auth/refresh-token  [auth.routes.ts]
   POST    /api/auth/register/staff  [auth.routes.ts]
-  POST    /api/auth/reset-password  [auth.routes.ts]
-  POST    /api/auth/send-verification  [auth.routes.ts]
-  POST    /api/auth/verify-email  [auth.routes.ts]
-  POST    /api/auth/verify-reset-otp  [auth.routes.ts]
   POST    /api/pharmacy/refill-request  [pharmacist.routes.ts]
   POST    /api/upload/avatar  [upload.routes.ts]
   PUT     /api/admin/insurance/:param  [admin.routes.ts]
@@ -52,7 +48,7 @@ Frontend calls:  276 parsed, 5 unparseable
   PUT     /api/radiology/profile  [radiology.routes.ts]
   PUT     /api/receptionist/profile  [receptionist.routes.ts]
 
-✅  MATCHED  (253)
+✅  MATCHED  (257)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/announcements/:param
   DELETE  /api/admin/appointments/:param
@@ -245,6 +241,10 @@ Frontend calls:  276 parsed, 5 unparseable
   POST    /api/auth/login
   POST    /api/auth/logout
   POST    /api/auth/register
+  POST    /api/auth/reset-password
+  POST    /api/auth/send-verification
+  POST    /api/auth/verify-email
+  POST    /api/auth/verify-reset-otp
   POST    /api/cashier/invoices
   POST    /api/cashier/patients/:param/generate-invoice
   POST    /api/doctor/appointments/:param/cancel-request

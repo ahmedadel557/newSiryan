@@ -25,7 +25,7 @@ const roleRoutes: Record<Role, string> = {
   admin: '/dashboard/admin',
 };
 
-const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/callback', '/auth/complete-profile'];
+const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/callback', '/auth/complete-profile', '/auth/verify-email'];
 
 function getToken(req: NextRequest): string | null {
   return req.cookies.get('access_token')?.value ?? null;

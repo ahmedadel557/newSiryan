@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { logAudit } from '../../utils/audit';
 import { emitToUser, emitToRole } from '../../config/socket';
 import { createItemSchema, updateItemSchema, updateRoomStatusSchema, addRoomSchema, updateRoomSchema, addItemToRoomSchema } from '../../validations/inventory.validation';
@@ -33,8 +34,17 @@ export const getItems = async (req: AuthRequest, res: Response, next: NextFuncti
     if (req.query.search) {
       filter.name = { $regex: req.query.search as string, $options: 'i' };
     }
-    const items = await InventoryItem.find(filter).populate('room', 'name type floor status').sort({ name: 1 });
-    sendSuccess(res, items);
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [items, total] = await Promise.all([
+      InventoryItem.find(filter)
+        .populate('room', 'name type floor status')
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(limit),
+      InventoryItem.countDocuments(filter),
+    ]);
+    sendSuccess(res, paginatedResult(items, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -276,25 +286,43 @@ export const transferStock = async (req: AuthRequest, res: Response, next: NextF
 
 export const getSupplyRequests = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const requests = await SupplyRequest.find({})
-      .populate('requested_by', 'username email role')
-      .sort({ createdAt: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
 
-    const withItemNames = await Promise.all(
-      requests.map(async (r) => {
-        const obj = r.toObject({ virtuals: false });
-        if (r.item_type === 'medication') {
-          const med = await Medication.findById(r.item_id).select('name').lean();
-          (obj as any).item_name = med?.name ?? 'Unknown';
-        } else {
-          const inv = await InventoryItem.findById(r.item_id).select('name').lean();
-          (obj as any).item_name = inv?.name ?? 'Unknown';
-        }
-        return obj;
-      })
-    );
+    const [requests, total] = await Promise.all([
+      SupplyRequest.find({})
+        .populate('requested_by', 'username email role')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      SupplyRequest.countDocuments({}),
+    ]);
 
-    sendSuccess(res, withItemNames);
+    // Batch resolve item names — fix N+1 serial loop
+    const legacyRequests = requests.filter((r) => r.item_id);
+    const medIds = legacyRequests.filter((r) => r.item_type === 'medication').map((r) => r.item_id);
+    const invIds = legacyRequests.filter((r) => r.item_type !== 'medication').map((r) => r.item_id);
+
+    const [meds, invItems] = await Promise.all([
+      medIds.length ? Medication.find({ _id: { $in: medIds } }).select('name').lean() : Promise.resolve([]),
+      invIds.length ? InventoryItem.find({ _id: { $in: invIds } }).select('name').lean() : Promise.resolve([]),
+    ]);
+
+    const medNameMap = new Map((meds as any[]).map((m) => [(m._id as any).toString(), m.name as string]));
+    const invNameMap = new Map((invItems as any[]).map((i) => [(i._id as any).toString(), i.name as string]));
+
+    const withItemNames = requests.map((r) => {
+      const obj = r.toObject({ virtuals: false }) as any;
+      if (r.item_id) {
+        const idStr = (r.item_id as any).toString();
+        obj.item_name = r.item_type === 'medication'
+          ? (medNameMap.get(idStr) ?? 'Unknown')
+          : (invNameMap.get(idStr) ?? 'Unknown');
+      }
+      return obj;
+    });
+
+    sendSuccess(res, paginatedResult(withItemNames, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -847,11 +875,18 @@ export const getPurchaseOrders = async (req: AuthRequest, res: Response, next: N
   try {
     const filter: Record<string, unknown> = {};
     if (req.query.status) filter.status = req.query.status;
-    const orders = await PurchaseOrder.find(filter)
-      .populate('supplier', 'name email phone')
-      .populate('created_by', 'username email')
-      .sort({ createdAt: -1 });
-    sendSuccess(res, orders);
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      PurchaseOrder.find(filter)
+        .populate('supplier', 'name email phone')
+        .populate('created_by', 'username email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      PurchaseOrder.countDocuments(filter),
+    ]);
+    sendSuccess(res, paginatedResult(orders, total, { page, limit }));
   } catch (err) {
     next(err);
   }

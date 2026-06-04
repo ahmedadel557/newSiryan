@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { logAudit } from '../../utils/audit';
 import { createInvoiceSchema, payInvoiceSchema, partialPaySchema } from '../../validations/cashier.validation';
 import { calculateTotals } from '../../services/billing.service';
@@ -318,9 +319,16 @@ export const getInvoices = async (req: AuthRequest, res: Response, next: NextFun
       }
     }
 
-    const invoices = await Invoice.find(filter)
-      .populate('patient', 'username email')
-      .sort({ createdAt: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [invoices, total] = await Promise.all([
+      Invoice.find(filter)
+        .populate('patient', 'username email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Invoice.countDocuments(filter),
+    ]);
 
     // Enrich with patient full names
     const patientIds = invoices.map((inv) => (inv.patient as any)?._id ?? inv.patient);
@@ -336,7 +344,7 @@ export const getInvoices = async (req: AuthRequest, res: Response, next: NextFun
       return obj;
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(result, total, { page, limit }));
   } catch (err) {
     next(err);
   }

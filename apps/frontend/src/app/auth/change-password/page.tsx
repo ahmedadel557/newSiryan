@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Lock, KeyRound, AlertCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Lock, KeyRound, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/hooks/shared';
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter';
+import FormError from '@/components/auth/FormError';
 
 const schema = yup.object({
   newPassword: yup
@@ -35,17 +37,6 @@ const roleRoutes: Record<string, string> = {
   admin: '/dashboard/admin',
 };
 
-function getStrengthLevel(pw: string): { level: number; label: string; color: string } {
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  if (score <= 1) return { level: score, label: 'Weak', color: 'var(--critical)' };
-  if (score === 2) return { level: score, label: 'Fair', color: 'var(--caution)' };
-  if (score === 3) return { level: score, label: 'Good', color: 'var(--positive)' };
-  return { level: score, label: 'Strong', color: 'var(--brand)' };
-}
 
 const scenes = [
   { gradient: 'linear-gradient(135deg, #051F20 0%, #235347 40%, #8EB69B 100%)' },
@@ -69,7 +60,6 @@ export default function ChangePasswordPage() {
   } = useForm<FormValues>({ resolver: yupResolver(schema) });
 
   const pw = watch('newPassword') ?? '';
-  const strength = getStrengthLevel(pw);
 
   async function onSubmit(data: FormValues) {
     setApiError('');
@@ -137,26 +127,7 @@ export default function ChangePasswordPage() {
                   </button>
                 </div>
 
-                {/* Strength meter */}
-                {pw.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                      {[1, 2, 3, 4].map((bar) => (
-                        <div
-                          key={bar}
-                          style={{
-                            flex: 1,
-                            height: 4,
-                            borderRadius: 2,
-                            background: bar <= strength.level ? strength.color : 'var(--border-1)',
-                            transition: 'background 0.2s',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <p style={{ fontSize: 12, color: strength.color }}>{strength.label}</p>
-                  </div>
-                )}
+                <PasswordStrengthMeter password={pw} />
                 {errors.newPassword && <p className="auth-field-error">{errors.newPassword.message}</p>}
               </div>
 
@@ -183,12 +154,7 @@ export default function ChangePasswordPage() {
                 {errors.confirmPassword && <p className="auth-field-error">{errors.confirmPassword.message}</p>}
               </div>
 
-              {apiError && (
-                <div className="auth-err">
-                  <AlertCircle size={16} strokeWidth={1.75} />
-                  <span>{apiError}</span>
-                </div>
-              )}
+              <FormError message={apiError} />
 
               <button type="submit" className="btn btn-primary btn-lg auth-submit auth-submit-dark" disabled={isSubmitting}>
                 <Lock size={16} strokeWidth={1.75} />

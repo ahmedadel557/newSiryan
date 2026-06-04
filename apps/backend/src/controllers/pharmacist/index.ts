@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import PDFDocument from 'pdfkit';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { logAudit } from '../../utils/audit';
 import {
   supplyRequestSchema,
@@ -242,13 +243,20 @@ export const getPrescriptions = async (req: AuthRequest, res: Response, next: Ne
       filter.doctor = { $in: doctorIds };
     }
 
-    const prescriptions = await Prescription.find(filter)
-      .populate('patient', 'username email')
-      .populate('doctor', 'username email')
-      .populate('items.medication', 'name unit')
-      .sort({ createdAt: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [prescriptions, total] = await Promise.all([
+      Prescription.find(filter)
+        .populate('patient', 'username email')
+        .populate('doctor', 'username email')
+        .populate('items.medication', 'name unit')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Prescription.countDocuments(filter),
+    ]);
 
-    sendSuccess(res, prescriptions);
+    sendSuccess(res, paginatedResult(prescriptions, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -347,11 +355,18 @@ export const listPharmacyOrders = async (req: AuthRequest, res: Response, next: 
     if (type === 'prescription') filter.prescription = { $ne: null };
     else if (type === 'otc') filter.prescription = null;
 
-    const orders = await PharmacyOrder.find(filter)
-      .populate('patient', 'username email')
-      .populate('items.medication', 'name unit requires_prescription')
-      .populate('prescription')
-      .sort({ createdAt: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+      PharmacyOrder.find(filter)
+        .populate('patient', 'username email')
+        .populate('items.medication', 'name unit requires_prescription')
+        .populate('prescription')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      PharmacyOrder.countDocuments(filter),
+    ]);
 
     const patientIds = [...new Set(orders.map((o: any) => o.patient?._id?.toString()).filter(Boolean))];
     const profiles = await Profile.find({ user: { $in: patientIds } })
@@ -367,7 +382,7 @@ export const listPharmacyOrders = async (req: AuthRequest, res: Response, next: 
       return obj;
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(result, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -697,12 +712,19 @@ export const getDispensingHistory = async (req: AuthRequest, res: Response, next
       filter.patient = { $in: profiles };
     }
 
-    const records = await DispensingRecord.find(filter)
-      .populate('patient', 'username')
-      .populate('pharmacist', 'username')
-      .sort({ dispensed_at: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [records, total] = await Promise.all([
+      DispensingRecord.find(filter)
+        .populate('patient', 'username')
+        .populate('pharmacist', 'username')
+        .sort({ dispensed_at: -1 })
+        .skip(skip)
+        .limit(limit),
+      DispensingRecord.countDocuments(filter),
+    ]);
 
-    sendSuccess(res, records);
+    sendSuccess(res, paginatedResult(records, total, { page, limit }));
   } catch (err) {
     next(err);
   }

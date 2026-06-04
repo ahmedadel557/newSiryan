@@ -1,14 +1,12 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { MailCheck, KeyRound, RefreshCw, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { MailCheck, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
 import { authService } from '@/services/auth.service';
-import { otpSchema, type OtpValues } from '@/validations/auth';
+import OTPInput from '@/components/auth/OTPInput';
+import ResendOTPButton from '@/components/auth/ResendOTPButton';
 import FormError from '@/components/auth/FormError';
-
-const RESEND_COOLDOWN = 60;
 
 function VerifyEmailInner() {
   const router = useRouter();
@@ -16,45 +14,31 @@ function VerifyEmailInner() {
   const email = searchParams.get('email') ?? '';
 
   const [apiError, setApiError] = useState('');
+  const [verifying, setVerifying] = useState(false);
   const [verified, setVerified] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN);
-  const [resending, setResending] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<OtpValues>({ resolver: yupResolver(otpSchema) });
+  const [otpKey, setOtpKey] = useState(0);
 
   useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendCooldown]);
+    if (!email) router.replace('/auth/register');
+  }, [email, router]);
 
-  async function onSubmit(data: OtpValues) {
+  async function handleVerify(code: string) {
     setApiError('');
+    setVerifying(true);
     try {
-      await authService.verifyEmail({ email, code: data.code });
+      await authService.verifyEmail({ email, code });
       setVerified(true);
-      setTimeout(() => router.push('/auth/login?message=Email+verified!+Sign+in+to+continue.'), 2000);
+      setTimeout(() => router.push('/dashboard/patient'), 1500);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       setApiError(msg || 'Invalid or expired code. Please try again.');
+      setOtpKey((k) => k + 1);
+    } finally {
+      setVerifying(false);
     }
   }
 
-  async function handleResend() {
-    setResending(true);
-    try {
-      await authService.sendEmailVerification();
-      setResendCooldown(RESEND_COOLDOWN);
-    } catch {
-      // silent
-    } finally {
-      setResending(false);
-    }
-  }
+  if (!email) return null;
 
   return (
     <div className="auth-page">
@@ -71,11 +55,7 @@ function VerifyEmailInner() {
 
           <div className="auth-form-content">
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: '50%',
-                background: 'var(--brand-soft-bg)', color: 'var(--brand)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--brand-soft-bg)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MailCheck size={22} strokeWidth={1.75} />
               </div>
             </div>
@@ -84,68 +64,34 @@ function VerifyEmailInner() {
               <div style={{ textAlign: 'center' }}>
                 <CheckCircle2 size={40} style={{ color: 'var(--positive)', margin: '0 auto 12px' }} />
                 <h1 className="auth-title">Email verified!</h1>
-                <p className="auth-lede">Redirecting you to sign in…</p>
+                <p className="auth-lede">Taking you to your dashboard…</p>
               </div>
             ) : (
               <>
                 <h1 className="auth-title">Verify your email</h1>
-                <p className="auth-lede">
-                  We sent a verification code to{' '}
+                <p className="auth-lede" style={{ textAlign: 'center' }}>
+                  We sent a 6-digit code to{' '}
                   <strong style={{ color: 'var(--fg-1)' }}>{email}</strong>
                 </p>
 
-                <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div className="field">
-                    <label className="field-label">Verification code</label>
-                    <div className="auth-input-wrap">
-                      <KeyRound size={16} strokeWidth={1.75} />
-                      <input
-                        className="input"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        placeholder="000000"
-                        style={{ letterSpacing: '0.2em', textAlign: 'center' }}
-                        {...register('code')}
-                      />
-                    </div>
-                    {errors.code && <p className="auth-field-error">{errors.code.message}</p>}
-                  </div>
+                <div style={{ margin: '20px 0' }}>
+                  <OTPInput key={otpKey} onComplete={handleVerify} disabled={verifying} error={!!apiError} />
+                </div>
 
-                  <FormError message={apiError} />
+                {verifying && (
+                  <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--fg-3)' }}>Verifying…</p>
+                )}
 
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-lg auth-submit"
-                    disabled={isSubmitting}
+                <FormError message={apiError} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 14 }}>
+                  <ResendOTPButton onResend={() => authService.sendEmailVerification()} />
+                  <Link
+                    href="/auth/register"
+                    style={{ fontSize: 13, color: 'var(--fg-3)', textDecoration: 'none' }}
                   >
-                    {isSubmitting ? 'Verifying…' : 'Verify email'}
-                  </button>
-                </form>
-
-                <div style={{ marginTop: 16, textAlign: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={resendCooldown > 0 || resending}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: resendCooldown > 0 ? 'var(--fg-3)' : 'var(--brand)',
-                      cursor: resendCooldown > 0 ? 'default' : 'pointer',
-                      fontSize: 13,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                    }}
-                  >
-                    <RefreshCw size={13} strokeWidth={1.75} />
-                    {resendCooldown > 0
-                      ? `Resend code (${resendCooldown}s)`
-                      : resending
-                      ? 'Sending…'
-                      : 'Resend code'}
-                  </button>
+                    Wrong email? Register again →
+                  </Link>
                 </div>
               </>
             )}

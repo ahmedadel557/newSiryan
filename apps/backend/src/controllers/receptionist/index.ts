@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../middlewares/auth';
 import { sendSuccess, sendError } from '../../utils/response';
+import { getPaginationParams, paginatedResult } from '../../utils/paginate';
 import { logAudit } from '../../utils/audit';
 import { cancelAppointmentSchema, rescheduleSchema, checkinSchema, createAppointmentSchema, registerPatientSchema } from '../../validations/receptionist.validation';
 import { emitToUser } from '../../config/socket';
@@ -38,33 +39,39 @@ function formatDate(d: Date): string {
 
 export const getPatients = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { search } = req.query;
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
 
-    // Build profile query: patient role via user join
-    const matchQuery: Record<string, unknown> = {};
-    if (search && typeof search === 'string') {
-      const regex = new RegExp(search, 'i');
-      matchQuery.$or = [{ first_name: regex }, { last_name: regex }, { phone: regex }];
+    // Fix: filter by role in the DB query, not in JS
+    const patientUserIds = await User.find({ role: 'patient' }).distinct('_id');
+
+    const filter: Record<string, unknown> = { user: { $in: patientUserIds } };
+    if (req.query.search && typeof req.query.search === 'string') {
+      const regex = new RegExp(req.query.search, 'i');
+      filter.$or = [{ first_name: regex }, { last_name: regex }, { phone: regex }];
     }
 
-    const allProfiles = await Profile.find(matchQuery)
-      .populate('user', 'username email role is_active')
-      .sort({ createdAt: -1 });
+    const [patients, total] = await Promise.all([
+      Profile.find(filter)
+        .populate('user', 'username email role is_active')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Profile.countDocuments(filter),
+    ]);
 
-    const patients = allProfiles.filter((p) => (p.user as any)?.role === 'patient');
-
-    const patientUserIds = patients.map((p) => (p.user as any)?._id?.toString() ?? p.user.toString());
-
-    // Fetch last + next appointments for each patient in one query
+    // Fetch last + next appointments only for this page's patients
     const now = new Date();
+    const pageUserIds = patients.map((p) => (p.user as any)?._id ?? p.user);
+
     const [lastAppts, nextAppts] = await Promise.all([
       Appointment.aggregate([
-        { $match: { patient: { $in: patientUserIds.map((id) => require('mongoose').Types.ObjectId.createFromHexString(id)) }, scheduled_at: { $lt: now } } },
+        { $match: { patient: { $in: pageUserIds }, scheduled_at: { $lt: now } } },
         { $sort: { scheduled_at: -1 } },
         { $group: { _id: '$patient', last_appointment: { $first: '$scheduled_at' } } },
       ]),
       Appointment.aggregate([
-        { $match: { patient: { $in: patientUserIds.map((id) => require('mongoose').Types.ObjectId.createFromHexString(id)) }, scheduled_at: { $gte: now }, status: { $nin: ['cancelled'] } } },
+        { $match: { patient: { $in: pageUserIds }, scheduled_at: { $gte: now }, status: { $nin: ['cancelled'] } } },
         { $sort: { scheduled_at: 1 } },
         { $group: { _id: '$patient', next_appointment: { $first: '$scheduled_at' } } },
       ]),
@@ -73,7 +80,7 @@ export const getPatients = async (req: AuthRequest, res: Response, next: NextFun
     const lastMap = new Map(lastAppts.map((a) => [a._id.toString(), a.last_appointment]));
     const nextMap = new Map(nextAppts.map((a) => [a._id.toString(), a.next_appointment]));
 
-    const result = patients.map((p) => {
+    const items = patients.map((p) => {
       const uid = (p.user as any)?._id?.toString() ?? p.user.toString();
       const obj = p.toJSON() as any;
       obj.last_appointment = lastMap.get(uid) ?? null;
@@ -81,7 +88,7 @@ export const getPatients = async (req: AuthRequest, res: Response, next: NextFun
       return obj;
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(items, total, { page, limit }));
   } catch (err) {
     next(err);
   }
@@ -116,10 +123,17 @@ export const getAllAppointments = async (req: AuthRequest, res: Response, next: 
       query.scheduled_at = { $gte: start, $lt: end };
     }
 
-    const appointments = await Appointment.find(query)
-      .populate('patient', '_id username')
-      .populate('doctor', '_id username')
-      .sort({ scheduled_at: -1 });
+    const { page, limit } = getPaginationParams(req.query as Record<string, unknown>);
+    const skip = (page - 1) * limit;
+    const [appointments, total] = await Promise.all([
+      Appointment.find(query)
+        .populate('patient', '_id username')
+        .populate('doctor', '_id username')
+        .sort({ scheduled_at: -1 })
+        .skip(skip)
+        .limit(limit),
+      Appointment.countDocuments(query),
+    ]);
 
     // Null-safe: a populated ref resolves to null when the referenced user was deleted (orphaned appointment)
     const refId = (ref: any): string | null => (ref as any)?._id?.toString() ?? (ref ? ref.toString() : null);
@@ -138,7 +152,7 @@ export const getAllAppointments = async (req: AuthRequest, res: Response, next: 
       };
     });
 
-    sendSuccess(res, result);
+    sendSuccess(res, paginatedResult(result, total, { page, limit }));
   } catch (err) {
     next(err);
   }
