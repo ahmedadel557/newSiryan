@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { useLab } from '@/hooks/lab';
 import { LabOrdersTable } from '@/components/staff/lab/LabOrdersTable';
 import { UploadResultsModal } from '@/components/staff/lab/UploadResultsModal';
+import { Pagination } from '@/components/ui/Pagination';
 import type { OrderStatus } from '@/types';
 
 type FilterTab = 'all' | 'pending' | 'in_progress' | 'completed';
@@ -17,7 +18,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function LabOrdersPage() {
-  const { allOrders, isLoading, uploadOrderId, setUploadOrderId, submitResults, updateStatus } = useLab();
+  const { allOrders, isLoading, uploadOrderId, setUploadOrderId, submitResults, updateStatus, page, totalPages, goToPage } = useLab();
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
 
@@ -84,6 +85,8 @@ export default function LabOrdersPage() {
         onUpload={setUploadOrderId}
         onUpdateStatus={updateStatus}
       />
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       {/* Upload modal */}
       <UploadResultsModal

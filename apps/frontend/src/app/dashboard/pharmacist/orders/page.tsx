@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { usePharmacistOrders } from '@/hooks/pharmacist';
+import { Pagination } from '@/components/ui/Pagination';
 import { OrderCard } from '@/components/staff/pharmacist/OrderCard';
 import { DrugInteractionModal } from '@/components/staff/pharmacist/DrugInteractionModal';
 import { SubstitutionModal } from '@/components/staff/pharmacist/SubstitutionModal';
@@ -27,6 +28,9 @@ const tabInactive = `${tabBase} text-[var(--fg-2)] hover:bg-[var(--bg-page)]`;
 export default function PharmacistOrdersPage() {
   const {
     orders,
+    page,
+    totalPages,
+    goToPage,
     loading,
     actionLoading,
     statusFilter,
@@ -118,6 +122,8 @@ export default function PharmacistOrdersPage() {
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       {/* Modals */}
       <DrugInteractionModal

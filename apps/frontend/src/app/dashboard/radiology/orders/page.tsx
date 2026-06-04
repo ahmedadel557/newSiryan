@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { useRadiology } from '@/hooks/radiology';
 import { RadiologyOrdersTable } from '@/components/staff/radiology/RadiologyOrdersTable';
 import { UploadScanModal } from '@/components/staff/radiology/UploadScanModal';
+import { Pagination } from '@/components/ui/Pagination';
 import type { OrderStatus } from '@/types';
 
 type FilterTab = 'all' | 'pending' | 'in_progress' | 'completed';
@@ -17,7 +18,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function RadiologyOrdersPage() {
-  const { allOrders, isLoading, uploadOrderId, setUploadOrderId, submitFindings, updateStatus } = useRadiology();
+  const { allOrders, isLoading, uploadOrderId, setUploadOrderId, submitFindings, updateStatus, page, totalPages, goToPage } = useRadiology();
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [search, setSearch] = useState('');
 
@@ -84,6 +85,8 @@ export default function RadiologyOrdersPage() {
         onUpload={setUploadOrderId}
         onUpdateStatus={updateStatus}
       />
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       {/* Upload modal */}
       <UploadScanModal

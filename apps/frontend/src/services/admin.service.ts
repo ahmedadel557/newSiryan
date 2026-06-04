@@ -1,5 +1,5 @@
 import apiClient from './api.client';
-import type { ApiResponse, User, Profile, CreateUserDto, DashboardStats, SystemLog, Role, DoctorReportItem, StaffRequest, InsuranceCompany, Department, AdminInvoice, OccupancyReport, PharmacyReport, AdminAppointment, CreateAdminInvoiceDto, DoctorSchedule, Shift, AssignShiftDto, Announcement, CreateAnnouncementDto, PricingSettings, PricingTestItem, RadiologyScanItem, MaintenanceStatus, EmailTemplate, DeletionRequest, SystemHealth, ErrorLog } from '@/types';
+import type { ApiResponse, PaginatedResponse, User, Profile, CreateUserDto, DashboardStats, SystemLog, Role, DoctorReportItem, StaffRequest, InsuranceCompany, Department, AdminInvoice, OccupancyReport, PharmacyReport, AdminAppointment, CreateAdminInvoiceDto, DoctorSchedule, Shift, AssignShiftDto, Announcement, CreateAnnouncementDto, PricingSettings, PricingTestItem, RadiologyScanItem, MaintenanceStatus, EmailTemplate, DeletionRequest, SystemHealth, ErrorLog } from '@/types';
 
 const normalize = <T>(data: any): T => ({ ...data, id: data._id ?? data.id });
 const normalizeList = <T>(list: any[]): T[] => list.map((item) => normalize<T>(item));
@@ -43,9 +43,11 @@ export const adminService = {
     return res.data.data;
   },
 
-  async getAuditLog(): Promise<SystemLog[]> {
-    const res = await apiClient.get<ApiResponse<SystemLog[]>>('/admin/audit-log');
-    return normalizeList<SystemLog>(res.data.data);
+  async getAuditLog(params?: { page?: number; limit?: number }): Promise<PaginatedResponse<SystemLog>> {
+    const res = await apiClient.get<ApiResponse<any>>('/admin/audit-log', { params });
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: normalizeList<SystemLog>(d), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: normalizeList<SystemLog>(d.items ?? []) };
   },
 
   async getRevenueReport(params?: { from?: string; to?: string }): Promise<{
@@ -123,10 +125,11 @@ export const adminService = {
     await apiClient.delete(`/admin/departments/${id}`);
   },
 
-  async getAdminInvoices(): Promise<AdminInvoice[]> {
-    const res = await apiClient.get<ApiResponse<any[]>>('/admin/invoices');
-    const list = Array.isArray(res.data.data) ? res.data.data : [];
-    return list.map((inv: any) => normalize<AdminInvoice>(inv));
+  async getAdminInvoices(params?: { page?: number; limit?: number }): Promise<PaginatedResponse<AdminInvoice>> {
+    const res = await apiClient.get<ApiResponse<any>>('/admin/invoices', { params });
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: d.map((inv: any) => normalize<AdminInvoice>(inv)), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map((inv: any) => normalize<AdminInvoice>(inv)) };
   },
 
   async createAdminInvoice(data: CreateAdminInvoiceDto): Promise<AdminInvoice> {
@@ -139,15 +142,18 @@ export const adminService = {
     return normalizeList<User>(res.data.data.users ?? []);
   },
 
-  async getAppointments(filters?: { status?: string; date?: string; search?: string }): Promise<AdminAppointment[]> {
+  async getAppointments(filters?: { status?: string; date?: string; search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AdminAppointment>> {
     const query = new URLSearchParams();
     if (filters?.status) query.set('status', filters.status);
     if (filters?.date)   query.set('date', filters.date);
     if (filters?.search) query.set('search', filters.search);
+    if (filters?.page)   query.set('page', String(filters.page));
+    if (filters?.limit)  query.set('limit', String(filters.limit));
     const qs = query.toString();
-    const res = await apiClient.get<ApiResponse<AdminAppointment[]>>(`/admin/appointments${qs ? `?${qs}` : ''}`);
-    const list = Array.isArray(res.data.data) ? res.data.data : [];
-    return list.map((a: any) => normalize<AdminAppointment>(a));
+    const res = await apiClient.get<ApiResponse<any>>(`/admin/appointments${qs ? `?${qs}` : ''}`);
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: d.map((a: any) => normalize<AdminAppointment>(a)), total: d.length, page: 1, limit: filters?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map((a: any) => normalize<AdminAppointment>(a)) };
   },
 
   async cancelAppointment(id: string, reason: string): Promise<void> {

@@ -1,34 +1,35 @@
-﻿'use client';
+'use client';
 
 import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { queryClient } from '@/lib/queryClient';
 import { cashierService } from '@/services/cashier.service';
-import { useToast } from '@/hooks/shared';
+import { useToast, usePagination } from '@/hooks/shared';
 import { useSocketEvent } from '@/hooks/shared';
-import type { CashierInvoice, CashierPaymentInput } from '@/types';
+import type { CashierInvoice, CashierPaymentInput, PaginatedResponse } from '@/types';
 
 export function useCashierInvoices() {
   const qc = useQueryClient();
   const { showToast } = useToast();
+  const { page, limit, goToPage } = usePagination();
 
   const query = useQuery({
-    queryKey: queryKeys.cashierInvoices(),
-    queryFn: () => cashierService.getCashierInvoices(),
+    queryKey: queryKeys.cashierInvoices({ page, limit }),
+    queryFn: () => cashierService.getCashierInvoices({ page, limit }),
     staleTime: 1000 * 15,
   });
 
   useSocketEvent(
     'pharmacy:order:created',
     useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cashierInvoices() });
+      queryClient.invalidateQueries({ queryKey: ['cashier', 'invoices'] });
     }, []),
   );
   useSocketEvent(
     'pharmacy:order:status',
     useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cashierInvoices() });
+      queryClient.invalidateQueries({ queryKey: ['cashier', 'invoices'] });
     }, []),
   );
 
@@ -46,8 +47,9 @@ export function useCashierInvoices() {
             notes: input.notes,
           }),
     onSuccess: (updated, vars) => {
-      qc.setQueryData<CashierInvoice[] | undefined>(queryKeys.cashierInvoices(), (prev) =>
-        prev ? prev.map((inv) => (inv.id === updated.id ? updated : inv)) : prev,
+      qc.setQueryData<PaginatedResponse<CashierInvoice> | undefined>(
+        queryKeys.cashierInvoices({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((inv) => (inv.id === updated.id ? updated : inv)) } : prev,
       );
       qc.invalidateQueries({ queryKey: queryKeys.cashierInvoice(updated.id) });
       qc.invalidateQueries({ queryKey: ['cashier', 'report'] });
@@ -60,8 +62,9 @@ export function useCashierInvoices() {
   const cancel = useMutation({
     mutationFn: (id: string) => cashierService.cancelInvoice(id),
     onSuccess: (updated) => {
-      qc.setQueryData<CashierInvoice[] | undefined>(queryKeys.cashierInvoices(), (prev) =>
-        prev ? prev.map((inv) => (inv.id === updated.id ? updated : inv)) : prev,
+      qc.setQueryData<PaginatedResponse<CashierInvoice> | undefined>(
+        queryKeys.cashierInvoices({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((inv) => (inv.id === updated.id ? updated : inv)) } : prev,
       );
       qc.invalidateQueries({ queryKey: queryKeys.cashierInvoice(updated.id) });
       showToast('Invoice cancelled', 'info');
@@ -70,7 +73,10 @@ export function useCashierInvoices() {
   });
 
   return {
-    allInvoices: query.data ?? [],
+    allInvoices: query.data?.items ?? [],
+    page,
+    totalPages: query.data?.totalPages ?? 1,
+    goToPage,
     loading: query.isLoading,
     error: query.error ? 'Failed to load invoices' : null,
     processPayment,

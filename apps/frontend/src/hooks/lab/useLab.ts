@@ -3,24 +3,28 @@ import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { labService } from '@/services/lab.service';
-import { useToast } from '@/hooks/shared';
-import type { LabOrder, LabResultsDto, OrderStatus } from '@/types';
+import { useToast, usePagination } from '@/hooks/shared';
+import type { LabOrder, LabResultsDto, OrderStatus, PaginatedResponse } from '@/types';
 
 export function useLab() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page, limit, goToPage } = usePagination();
   const [uploadOrderId, setUploadOrderId] = useState<string | null>(null);
 
-  const { data: allOrders = [], isPending: isLoading } = useQuery({
-    queryKey: queryKeys.labOrders(),
-    queryFn: () => labService.getOrders(),
+  const { data: ordersData, isPending: isLoading } = useQuery({
+    queryKey: queryKeys.labOrders({ page, limit }),
+    queryFn: () => labService.getOrders({ page, limit }),
   });
+
+  const allOrders = ordersData?.items ?? [];
 
   const submitResultsMutation = useMutation({
     mutationFn: (vars: { id: string; data: LabResultsDto }) => labService.submitResults(vars.id, vars.data),
     onSuccess: (updated) => {
-      queryClient.setQueryData<LabOrder[]>(queryKeys.labOrders(), (prev) =>
-        (prev ?? []).map((o) => (o.id === updated.id ? updated : o)),
+      queryClient.setQueryData<PaginatedResponse<LabOrder> | undefined>(
+        queryKeys.labOrders({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === updated.id ? updated : o)) } : prev,
       );
       showToast('Results submitted', 'success');
       setUploadOrderId(null);
@@ -31,8 +35,9 @@ export function useLab() {
   const updateStatusMutation = useMutation({
     mutationFn: (vars: { id: string; status: OrderStatus }) => labService.updateOrderStatus(vars.id, vars.status),
     onSuccess: (updated) => {
-      queryClient.setQueryData<LabOrder[]>(queryKeys.labOrders(), (prev) =>
-        (prev ?? []).map((o) => (o.id === updated.id ? updated : o)),
+      queryClient.setQueryData<PaginatedResponse<LabOrder> | undefined>(
+        queryKeys.labOrders({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === updated.id ? updated : o)) } : prev,
       );
       showToast('Order updated', 'success');
     },
@@ -76,6 +81,9 @@ export function useLab() {
 
   return {
     allOrders,
+    page,
+    totalPages: ordersData?.totalPages ?? 1,
+    goToPage,
     pending,
     completed,
     recentOrders,

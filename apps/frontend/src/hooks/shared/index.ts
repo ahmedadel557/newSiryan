@@ -12,3 +12,4 @@ export { useRooms } from './useRooms';
 export { useSettings } from './useSettings';
 export { useUsernameCheck } from './useUsernameCheck';
 export { useWaitingEstimate, type WaitingEstimate } from './useWaitingEstimate';
+export { usePagination } from './usePagination';

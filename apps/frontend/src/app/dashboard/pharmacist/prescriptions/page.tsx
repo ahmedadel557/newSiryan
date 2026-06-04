@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 
 import { usePharmacistPrescriptions } from '@/hooks/pharmacist';
+import { Pagination } from '@/components/ui/Pagination';
 import { PrescriptionCard } from '@/components/staff/pharmacist/PrescriptionCard';
 import { PrescriptionDetailModal } from '@/components/staff/pharmacist/PrescriptionDetailModal';
 
@@ -15,6 +16,9 @@ const STATUS_OPTIONS = [
 export default function PharmacistPrescriptionsPage() {
   const {
     prescriptions,
+    page,
+    totalPages,
+    goToPage,
     loading,
     detailItem,
     filters,
@@ -78,6 +82,8 @@ export default function PharmacistPrescriptionsPage() {
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       <PrescriptionDetailModal prescription={detailItem} onClose={closeDetail} />
     </div>

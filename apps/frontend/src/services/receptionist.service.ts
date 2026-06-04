@@ -1,6 +1,7 @@
 import apiClient from './api.client';
 import type {
   ApiResponse,
+  PaginatedResponse,
   Appointment,
   Profile,
   BookAppointmentDto,
@@ -41,10 +42,16 @@ export const receptionistService = {
     await apiClient.patch(`/receptionist/appointments/${id}/reschedule`, { new_date, new_time });
   },
 
-  async getPatients(search?: string): Promise<Profile[]> {
-    const qs = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await apiClient.get<ApiResponse<Profile[]>>(`/receptionist/patients${qs}`);
-    return normalizeList<Profile>(res.data.data);
+  async getPatients(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<Profile>> {
+    const query = new URLSearchParams();
+    if (params?.search) query.set('search', params.search);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    const qs = query.toString();
+    const res = await apiClient.get<ApiResponse<any>>(`/receptionist/patients${qs ? `?${qs}` : ''}`);
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: normalizeList<Profile>(d), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: normalizeList<Profile>(d.items ?? []) };
   },
 
   async getPatientAppointments(patientId: string): Promise<Appointment[]> {
@@ -104,7 +111,7 @@ export const receptionistService = {
   },
 
   async searchPatients(query: string): Promise<Profile[]> {
-    const res = await apiClient.get<ApiResponse<Profile[]>>(`/receptionist/patients?search=${encodeURIComponent(query)}`);
-    return normalizeList<Profile>(res.data.data);
+    const result = await receptionistService.getPatients({ search: query, limit: 200 });
+    return result.items;
   },
 };

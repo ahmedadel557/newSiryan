@@ -33,7 +33,8 @@
       "Bash(xargs grep -rL \"overflow-x-auto\")",
       "Bash(grep -v \"//.*<table\")",
       "Bash(npx next *)",
-      "Bash(Select-String -Pattern \"kB|First Load|shared\")"
+      "Bash(Select-String -Pattern \"kB|First Load|shared\")",
+      "Bash(git commit *)"
     ]
   }
 }

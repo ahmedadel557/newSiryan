@@ -3,28 +3,31 @@ import { useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { pharmacyService } from '@/services/pharmacy.service';
-import { useToast } from '@/hooks/shared';
-import type { PharmaDispensingRecord } from '@/types';
+import { useToast, usePagination } from '@/hooks/shared';
 
 export function usePharmacistHistory() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page, limit, goToPage } = usePagination();
   const [filters, setFilters] = useState({ date: '', medication_name: '', patient_name: '' });
 
-  const { data: allRecords = [], isLoading: loading } = useQuery({
-    queryKey: queryKeys.pharmacistHistory(filters as Record<string, unknown>),
-    queryFn: async () => {
-      const data = await pharmacyService.getDispensingHistory({
+  const { data: historyData, isLoading: loading } = useQuery({
+    queryKey: queryKeys.pharmacistHistory({ ...filters, page, limit } as Record<string, unknown>),
+    queryFn: () =>
+      pharmacyService.getDispensingHistory({
         date: filters.date || undefined,
+        medication_id: undefined,
         patient_name: filters.patient_name || undefined,
-      });
-      return filters.medication_name
-        ? data.filter((r) => r.medication_name.toLowerCase().includes(filters.medication_name.toLowerCase()))
-        : data;
-    },
+        page,
+        limit,
+      }),
   });
 
-  const records = allRecords;
+  const records = (historyData?.items ?? []).filter((r) =>
+    filters.medication_name
+      ? r.medication_name.toLowerCase().includes(filters.medication_name.toLowerCase())
+      : true,
+  );
 
   const exportCsv = useCallback(() => {
     const header = 'Patient,Medication,Quantity,Dispensed At,Pharmacist';
@@ -50,8 +53,18 @@ export function usePharmacistHistory() {
   }, [records]);
 
   const refresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.pharmacistHistory() });
+    queryClient.invalidateQueries({ queryKey: ['pharmacist', 'history'] });
   }, [queryClient]);
 
-  return { records, loading, filters, setFilters, exportCsv, refresh };
+  return {
+    records,
+    page,
+    totalPages: historyData?.totalPages ?? 1,
+    goToPage,
+    loading,
+    filters,
+    setFilters,
+    exportCsv,
+    refresh,
+  };
 }

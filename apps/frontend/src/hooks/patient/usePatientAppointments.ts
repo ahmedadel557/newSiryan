@@ -3,9 +3,9 @@ import { useCallback, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { patientService } from '@/services/patient.service';
-import { useToast } from '@/hooks/shared';
+import { useToast, usePagination } from '@/hooks/shared';
 import { useSocketEvent } from '@/hooks/shared';
-import type { Appointment, AppointmentStatus } from '@/types';
+import type { Appointment, AppointmentStatus, PaginatedResponse } from '@/types';
 
 export type AppointmentTab = 'upcoming' | 'past' | 'cancelled';
 
@@ -30,19 +30,22 @@ function classifyAppointments(all: Appointment[]) {
 export function usePatientAppointments() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page, limit, goToPage } = usePagination();
   const [activeTab, setActiveTab] = useState<AppointmentTab>('upcoming');
-  const key = queryKeys.patientAppointments();
+  const key = queryKeys.patientAppointments({ page, limit });
 
-  const { data: appointments = [], isPending, isError, refetch } = useQuery({
+  const { data: apptData, isPending, isError, refetch } = useQuery({
     queryKey: key,
-    queryFn: () => patientService.getAppointments(),
+    queryFn: () => patientService.getAppointments({ page, limit }),
   });
+
+  const appointments = apptData?.items ?? [];
 
   useSocketEvent<{ id: string; status: AppointmentStatus }>(
     'appointment:status',
     useCallback((payload) => {
-      queryClient.setQueryData<Appointment[]>(key, (prev) =>
-        (prev ?? []).map((a) => (a.id === payload.id ? { ...a, status: payload.status } : a)),
+      queryClient.setQueryData<PaginatedResponse<Appointment> | undefined>(key, (prev) =>
+        prev ? { ...prev, items: prev.items.map((a) => (a.id === payload.id ? { ...a, status: payload.status } : a)) } : prev,
       );
     }, [queryClient, key]),
   );
@@ -50,9 +53,9 @@ export function usePatientAppointments() {
   const cancelMutation = useMutation({
     mutationFn: (id: string) => patientService.cancelAppointment(id),
     onMutate: (id) => {
-      const previous = queryClient.getQueryData<Appointment[]>(key);
-      queryClient.setQueryData<Appointment[]>(key, (prev) =>
-        (prev ?? []).map((a) => (a.id === id ? { ...a, status: 'cancelled' as const } : a)),
+      const previous = queryClient.getQueryData<PaginatedResponse<Appointment>>(key);
+      queryClient.setQueryData<PaginatedResponse<Appointment> | undefined>(key, (prev) =>
+        prev ? { ...prev, items: prev.items.map((a) => (a.id === id ? { ...a, status: 'cancelled' as const } : a)) } : prev,
       );
       return { previous };
     },
@@ -67,8 +70,8 @@ export function usePatientAppointments() {
     mutationFn: (vars: { id: string; stars: number; feedback?: string }) =>
       patientService.rateAppointment(vars.id, { stars: vars.stars, feedback: vars.feedback }),
     onSuccess: (_data, vars) => {
-      queryClient.setQueryData<Appointment[]>(key, (prev) =>
-        (prev ?? []).map((a) => (a.id === vars.id ? { ...a, my_rating: vars.stars } : a)),
+      queryClient.setQueryData<PaginatedResponse<Appointment> | undefined>(key, (prev) =>
+        prev ? { ...prev, items: prev.items.map((a) => (a.id === vars.id ? { ...a, my_rating: vars.stars } : a)) } : prev,
       );
       showToast('Thanks for your feedback', 'success');
     },
@@ -94,6 +97,9 @@ export function usePatientAppointments() {
     upcoming,
     past,
     cancelled,
+    page,
+    totalPages: apptData?.totalPages ?? 1,
+    goToPage,
     isLoading: isPending,
     error: isError,
     retry: () => { refetch(); },

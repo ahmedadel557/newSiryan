@@ -6,7 +6,7 @@ import { inventoryService } from '@/services/inventory.service';
 import { useToast } from '@/hooks/shared';
 import type { InventoryItem, CreateInventoryItemDto, UpdateInventoryItemDto } from '@/types';
 
-export function useInventoryItems(filters?: { category?: string; search?: string }) {
+export function useInventoryItems(filters?: { category?: string; search?: string; page?: number; limit?: number }) {
   return useQuery({
     queryKey: queryKeys.inventoryItems(filters as Record<string, unknown>),
     queryFn: () => inventoryService.getItems(filters),
@@ -19,7 +19,7 @@ export function useAddItem() {
   return useMutation({
     mutationFn: (data: CreateInventoryItemDto) => inventoryService.addItem(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventoryItems() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] });
       showToast('Item added', 'success');
     },
     onError: () => showToast('Failed to add item', 'error'),
@@ -32,7 +32,7 @@ export function useUpdateItem() {
   return useMutation({
     mutationFn: (vars: { id: string; data: UpdateInventoryItemDto }) => inventoryService.updateItem(vars.id, vars.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventoryItems() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] });
       showToast('Item updated', 'success');
     },
     onError: () => showToast('Failed to update item', 'error'),
@@ -45,7 +45,7 @@ export function useDeleteItem() {
   return useMutation({
     mutationFn: (id: string) => inventoryService.deleteItem(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventoryItems() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'items'] });
       showToast('Item removed', 'success');
     },
     onError: () => showToast('Failed to remove item', 'error'),

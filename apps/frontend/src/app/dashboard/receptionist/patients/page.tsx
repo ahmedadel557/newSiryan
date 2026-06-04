@@ -31,8 +31,8 @@ export default function ReceptionistPatientsPage() {
     async (q?: string) => {
       setIsLoading(true);
       try {
-        const data = await receptionistService.getPatients(q);
-        setPatients(data);
+        const data = await receptionistService.getPatients({ search: q });
+        setPatients(data.items);
       } catch {
         showToast('Failed to load patients', 'error');
       } finally {

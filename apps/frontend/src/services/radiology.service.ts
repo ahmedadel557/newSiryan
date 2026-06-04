@@ -1,18 +1,25 @@
 import apiClient from './api.client';
-import type { ApiResponse, RadiologyOrder, RadiologyFindingsDto, RadiologyScheduleGroup, OrderStatus } from '@/types';
+import type { ApiResponse, PaginatedResponse, RadiologyOrder, RadiologyFindingsDto, RadiologyScheduleGroup, OrderStatus } from '@/types';
 
 const normalize = <T>(data: any): T => ({ ...data, id: data._id ?? data.id });
 const normalizeList = <T>(list: any[]): T[] => list.map((item) => normalize<T>(item));
 
 export const radiologyService = {
-  async getOrders(status?: string): Promise<RadiologyOrder[]> {
-    const url = status ? `/radiology/orders?status=${status}` : '/radiology/orders';
-    const res = await apiClient.get<ApiResponse<RadiologyOrder[]>>(url);
-    return normalizeList<RadiologyOrder>(res.data.data);
+  async getOrders(params?: { status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<RadiologyOrder>> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    const qs = query.toString();
+    const res = await apiClient.get<ApiResponse<any>>(`/radiology/orders${qs ? `?${qs}` : ''}`);
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: normalizeList<RadiologyOrder>(d), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: normalizeList<RadiologyOrder>(d.items ?? []) };
   },
 
   async getPendingOrders(): Promise<RadiologyOrder[]> {
-    return radiologyService.getOrders('pending');
+    const result = await radiologyService.getOrders({ status: 'pending', limit: 200 });
+    return result.items;
   },
 
   async getOrder(id: string): Promise<RadiologyOrder> {

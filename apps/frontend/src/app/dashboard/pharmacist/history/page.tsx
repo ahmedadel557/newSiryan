@@ -1,10 +1,11 @@
 ﻿'use client';
 
 import { usePharmacistHistory } from '@/hooks/pharmacist';
+import { Pagination } from '@/components/ui/Pagination';
 import { Download } from 'lucide-react';
 
 export default function PharmacistHistoryPage() {
-  const { records, loading, filters, setFilters, exportCsv } = usePharmacistHistory();
+  const { records, loading, filters, setFilters, exportCsv, page, totalPages, goToPage } = usePharmacistHistory();
 
   return (
     <div className="flex flex-col gap-5">
@@ -95,6 +96,7 @@ export default function PharmacistHistoryPage() {
           </table>
         )}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatEGP } from '@/lib/pricing';
 import { getStatusVariant } from '@/lib/statusBadge';
+import { Pagination } from '@/components/ui/Pagination';
 import type { AdminInvoice, CashierInvoiceStatus, User, CreateAdminInvoiceDto } from '@/types';
 
 const ITEM_CATEGORIES = ['appointment', 'pharmacy', 'lab', 'radiology', 'room', 'other'] as const;
@@ -266,7 +267,7 @@ function InvoiceDetail({ invoice }: InvoiceDetailPanel) {
 }
 
 export default function AdminInvoicesPage() {
-  const { invoices, loading: isLoading, create } = useAdminInvoices();
+  const { invoices, loading: isLoading, create, page, totalPages, goToPage } = useAdminInvoices();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFilter, setDateFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -422,6 +423,8 @@ export default function AdminInvoicesPage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       {createOpen && (
         <CreateInvoiceModal

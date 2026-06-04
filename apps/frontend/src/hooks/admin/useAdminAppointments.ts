@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/admin.service';
-import { useToast } from '@/hooks/shared';
+import { useToast, usePagination } from '@/hooks/shared';
 
 interface AppointmentFilters {
   status?: string;
@@ -14,10 +14,11 @@ interface AppointmentFilters {
 export function useAdminAppointments(filters: AppointmentFilters = {}) {
   const qc = useQueryClient();
   const { showToast } = useToast();
+  const { page, limit, goToPage } = usePagination();
 
   const query = useQuery({
-    queryKey: queryKeys.adminAppointments({ ...filters }),
-    queryFn: () => adminService.getAppointments(filters),
+    queryKey: queryKeys.adminAppointments({ ...filters, page, limit }),
+    queryFn: () => adminService.getAppointments({ ...filters, page, limit }),
     staleTime: 1000 * 15,
   });
 
@@ -32,7 +33,10 @@ export function useAdminAppointments(filters: AppointmentFilters = {}) {
   });
 
   return {
-    appointments: query.data ?? [],
+    appointments: query.data?.items ?? [],
+    page,
+    totalPages: query.data?.totalPages ?? 1,
+    goToPage,
     loading: query.isLoading,
     error: query.error,
     cancel,

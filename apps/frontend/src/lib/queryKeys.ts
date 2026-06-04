@@ -7,7 +7,8 @@ export const queryKeys = {
 
   // Admin — Dashboard fan-out
   adminDashboardStats: () => ['admin', 'dashboard', 'stats'] as const,
-  adminAuditLog: () => ['admin', 'audit-log'] as const,
+  adminAuditLog: (params?: Record<string, unknown>) =>
+    (params ? ['admin', 'audit-log', params] : ['admin', 'audit-log']) as readonly unknown[],
   adminLowStock: () => ['admin', 'low-stock'] as const,
 
   // Admin — Appointments
@@ -15,7 +16,8 @@ export const queryKeys = {
     (filters ? ['admin', 'appointments', filters] : ['admin', 'appointments']) as readonly unknown[],
 
   // Admin — Invoices
-  adminInvoices: () => ['admin', 'invoices'] as const,
+  adminInvoices: (params?: Record<string, unknown>) =>
+    (params ? ['admin', 'invoices', params] : ['admin', 'invoices']) as readonly unknown[],
 
   // Admin — Reports
   adminRevenueReport: (params?: Record<string, unknown>) =>
@@ -54,7 +56,8 @@ export const queryKeys = {
 
   // Patient
   patientProfile: () => ['patient', 'profile'] as const,
-  patientAppointments: () => ['patient', 'appointments'] as const,
+  patientAppointments: (params?: Record<string, unknown>) =>
+    (params ? ['patient', 'appointments', params] : ['patient', 'appointments']) as readonly unknown[],
   patientAppointment: (id: string) => ['patient', 'appointments', id] as const,
   patientMedicalRecords: () => ['patient', 'medical-records'] as const,
   patientLabResults: () => ['patient', 'lab-results'] as const,
@@ -75,6 +78,8 @@ export const queryKeys = {
     (status ? ['nurse', 'emergency-flags', status] : ['nurse', 'emergency-flags']) as readonly unknown[],
 
   // Receptionist
+  receptionistPatients: (params?: Record<string, unknown>) =>
+    (params ? ['receptionist', 'patients', params] : ['receptionist', 'patients']) as readonly unknown[],
   receptionistAppointments: (filters?: Record<string, unknown>) =>
     (filters ? ['receptionist', 'appointments', filters] : ['receptionist', 'appointments']) as readonly unknown[],
   receptionistRequests: () => ['receptionist', 'requests'] as const,
@@ -96,16 +101,19 @@ export const queryKeys = {
   pharmacistDashboard: () => ['pharmacist', 'dashboard'] as const,
 
   // Lab
-  labOrders: () => ['lab', 'orders'] as const,
+  labOrders: (params?: Record<string, unknown>) =>
+    (params ? ['lab', 'orders', params] : ['lab', 'orders']) as readonly unknown[],
 
   // Radiology
-  radiologyOrders: () => ['radiology', 'orders'] as const,
+  radiologyOrders: (params?: Record<string, unknown>) =>
+    (params ? ['radiology', 'orders', params] : ['radiology', 'orders']) as readonly unknown[],
 
   // Inventory
   inventoryItems: (filters?: Record<string, unknown>) =>
     (filters ? ['inventory', 'items', filters] : ['inventory', 'items']) as readonly unknown[],
   inventoryLowStock: () => ['inventory', 'low-stock'] as const,
-  inventorySupplyRequests: () => ['inventory', 'supply-requests'] as const,
+  inventorySupplyRequests: (params?: Record<string, unknown>) =>
+    (params ? ['inventory', 'supply-requests', params] : ['inventory', 'supply-requests']) as readonly unknown[],
   inventoryRooms: (filters?: Record<string, unknown>) =>
     (filters ? ['inventory', 'rooms', filters] : ['inventory', 'rooms']) as readonly unknown[],
   inventorySuppliers: () => ['inventory', 'suppliers'] as const,

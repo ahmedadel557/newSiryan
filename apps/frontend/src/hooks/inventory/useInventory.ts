@@ -3,8 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { inventoryService } from '@/services/inventory.service';
-import { useToast } from '@/hooks/shared';
-import { useSocketEvent } from '@/hooks/shared';
+import { useToast, useSocketEvent, usePagination } from '@/hooks/shared';
 import { useInventoryItems, useAddItem, useUpdateItem, useDeleteItem } from './useInventoryItems';
 import { useInventoryLowStock } from './useInventoryLowStock';
 import { useInventorySupplyRequests, useFulfillRequest, useCreateSupplyRequest, useReceiveShipment } from './useInventorySupplyRequests';
@@ -36,6 +35,7 @@ const EMPTY_LOW_STOCK = { inventory: [] as InventoryItem[], medications: [] as M
 export function useInventory() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page: itemsPage, limit: itemsLimit, goToPage: goToItemsPage } = usePagination();
 
   // UI state
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -50,8 +50,10 @@ export function useInventory() {
   const [deleteSupplierConfirmId, setDeleteSupplierConfirmId] = useState<string | null>(null);
 
   // Queries
-  const { data: items = [], isPending: itemsPending } = useInventoryItems();
-  const { data: supplyRequests = [], isPending: requestsPending } = useInventorySupplyRequests();
+  const { data: itemsData, isPending: itemsPending } = useInventoryItems({ page: itemsPage, limit: itemsLimit });
+  const { data: supplyRequestsData, isPending: requestsPending } = useInventorySupplyRequests();
+  const items = itemsData?.items ?? [];
+  const supplyRequests = supplyRequestsData?.items ?? [];
   const { data: lowStock = EMPTY_LOW_STOCK } = useInventoryLowStock();
   const { data: rooms = [] } = useInventoryRooms();
   const { data: suppliers = [] } = useInventorySuppliers();
@@ -269,6 +271,9 @@ export function useInventory() {
 
   return {
     items,
+    itemsPage,
+    itemsTotalPages: itemsData?.totalPages ?? 1,
+    goToItemsPage,
     supplyRequests,
     lowStock,
     rooms,

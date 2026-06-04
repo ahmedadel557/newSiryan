@@ -1,6 +1,7 @@
 import apiClient from './api.client';
 import type {
   ApiResponse,
+  PaginatedResponse,
   CashierInvoice,
   CashierInvoiceStatus,
   CashierPaymentMethod,
@@ -67,9 +68,12 @@ export const cashierService = {
   },
 
   // Raw cashier invoices — NOT routed through normalizeInvoice (keeps patient_name, amount_paid, mixed).
-  async getCashierInvoices(params?: { status?: CashierInvoiceStatus; date?: string }): Promise<CashierInvoice[]> {
-    const res = await apiClient.get<ApiResponse<CashierInvoice[]>>('/cashier/invoices', { params });
-    return (res.data.data ?? []).map((inv) => ({ ...inv, id: (inv as { _id?: string })._id ?? inv.id }));
+  async getCashierInvoices(params?: { status?: CashierInvoiceStatus; date?: string; page?: number; limit?: number }): Promise<PaginatedResponse<CashierInvoice>> {
+    const res = await apiClient.get<ApiResponse<any>>('/cashier/invoices', { params });
+    const d = res.data.data;
+    const normalize = (inv: any): CashierInvoice => ({ ...inv, id: (inv as { _id?: string })._id ?? inv.id });
+    if (Array.isArray(d)) return { items: d.map(normalize), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map(normalize) };
   },
 
   // Single raw cashier invoice. getInvoiceById doesn't enrich patient_name, so fall back to username.

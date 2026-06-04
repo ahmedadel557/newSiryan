@@ -24,11 +24,12 @@ export function usePharmacistDashboard() {
     queryKey: queryKeys.pharmacistDashboard(),
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
-      const [orders, lowStock, expiring] = await Promise.all([
-        pharmacyService.listOrders(),
+      const [ordersData, lowStock, expiring] = await Promise.all([
+        pharmacyService.listOrders({ limit: 200 }),
         pharmacyService.getMedications({ low_stock: true }),
         pharmacyService.getMedications({ expiring_soon: true }),
       ]);
+      const orders = ordersData.items;
       const stats: PharmacistDashboardStats = {
         pendingOrders: orders.filter((o) => o.status === 'pending').length,
         approvedToday: orders.filter((o) => o.status === 'approved' && o.createdAt.slice(0, 10) === today).length,

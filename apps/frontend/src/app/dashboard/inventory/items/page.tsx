@@ -11,6 +11,7 @@ import { EditItemModal } from '@/components/staff/inventory/EditItemModal';
 import { TransferStockModal } from '@/components/staff/inventory/TransferStockModal';
 import { inventoryService } from '@/services/inventory.service';
 import { useToast } from '@/hooks/shared';
+import { Pagination } from '@/components/ui/Pagination';
 import type { InventoryItem, TransferStockDto } from '@/types';
 
 const CATEGORIES: (InventoryItem['category'] | 'all')[] = ['all', 'equipment', 'supply', 'bed', 'oxygen', 'other'];
@@ -19,6 +20,9 @@ export default function InventoryItemsPage() {
   const { showToast } = useToast();
   const {
     items,
+    itemsPage,
+    itemsTotalPages,
+    goToItemsPage,
     rooms,
     isLoading,
     addModalOpen,
@@ -112,6 +116,8 @@ export default function InventoryItemsPage() {
       </div>
 
       <InventoryTable items={filtered} isLoading={isLoading} onEdit={setEditItem} onDelete={setDeleteConfirmId} onTransfer={setTransferItem} linkToDetail />
+
+      <Pagination page={itemsPage} totalPages={itemsTotalPages} onPageChange={goToItemsPage} />
 
       <ConfirmDialog
         open={!!deleteConfirmId}

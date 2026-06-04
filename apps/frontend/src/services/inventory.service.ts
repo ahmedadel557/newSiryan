@@ -1,6 +1,7 @@
 import apiClient from './api.client';
 import type {
   ApiResponse,
+  PaginatedResponse,
   InventoryItem,
   InventoryItemDetail,
   ItemLocation,
@@ -37,9 +38,11 @@ const normalizeList = <T>(list: any[]): T[] => list.map((item) => normalize<T>(i
 export const inventoryService = {
   // ── Items ───────────────────────────────────────────────────────────────────
 
-  async getItems(params?: { category?: string; search?: string }): Promise<InventoryItem[]> {
-    const res = await apiClient.get<ApiResponse<InventoryItem[]>>('/inventory/items', { params });
-    return normalizeList<InventoryItem>(res.data.data);
+  async getItems(params?: { category?: string; search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<InventoryItem>> {
+    const res = await apiClient.get<ApiResponse<any>>('/inventory/items', { params });
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: normalizeList<InventoryItem>(d), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: normalizeList<InventoryItem>(d.items ?? []) };
   },
 
   async getItemById(id: string): Promise<InventoryItemDetail> {
@@ -122,9 +125,11 @@ export const inventoryService = {
 
   // ── Supply Requests ─────────────────────────────────────────────────────────
 
-  async getSupplyRequests(): Promise<SupplyRequest[]> {
-    const res = await apiClient.get<ApiResponse<SupplyRequest[]>>('/inventory/supply-requests');
-    return normalizeList<SupplyRequest>(res.data.data);
+  async getSupplyRequests(params?: { page?: number; limit?: number }): Promise<PaginatedResponse<SupplyRequest>> {
+    const res = await apiClient.get<ApiResponse<any>>('/inventory/supply-requests', { params });
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: normalizeList<SupplyRequest>(d), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: normalizeList<SupplyRequest>(d.items ?? []) };
   },
 
   async fulfillSupplyRequest(id: string): Promise<SupplyRequest> {

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ShieldCheck, Search, X } from 'lucide-react';
 import { useAdminAuditLog, useAdminUsers } from '@/hooks/admin';
+import { Pagination } from '@/components/ui/Pagination';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
@@ -44,7 +45,7 @@ function actionColor(action: string): string {
 }
 
 export default function AdminAuditLogPage() {
-  const { logs, loading: isLoading } = useAdminAuditLog();
+  const { logs, loading: isLoading, page, totalPages, goToPage } = useAdminAuditLog();
   const { allUsers } = useAdminUsers();
   const [searchQuery, setSearchQuery] = useState('');
   const [userFilter, setUserFilter] = useState('');
@@ -238,6 +239,7 @@ export default function AdminAuditLogPage() {
           </div>
         )}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
     </div>
   );
 }

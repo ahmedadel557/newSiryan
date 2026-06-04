@@ -7,6 +7,7 @@ import { InvoiceCard } from '@/components/staff/cashier/InvoiceCard';
 import { PaymentModal } from '@/components/staff/cashier/PaymentModal';
 import { Spinner } from '@/components/ui/Spinner';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Pagination } from '@/components/ui/Pagination';
 import type { CashierInvoice } from '@/types';
 
 type InvoiceTab = 'all' | 'unpaid' | 'paid' | 'partial';
@@ -25,7 +26,7 @@ const TAB_STATUS: Record<Exclude<InvoiceTab, 'all'>, CashierInvoice['status']> =
 };
 
 export default function CashierInvoicesPage() {
-  const { allInvoices, loading, error, processPayment } = useCashierInvoices();
+  const { allInvoices, loading, error, processPayment, page, totalPages, goToPage } = useCashierInvoices();
 
   const [tab, setTab] = useState<InvoiceTab>('all');
   const [search, setSearch] = useState('');
@@ -119,6 +120,8 @@ export default function CashierInvoicesPage() {
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       <PaymentModal
         key={paymentInvoice?.id ?? 'none'}

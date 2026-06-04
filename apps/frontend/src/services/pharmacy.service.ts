@@ -1,6 +1,7 @@
 import apiClient from './api.client';
 import type {
   ApiResponse,
+  PaginatedResponse,
   PharmacyOrder,
   Medication,
   PharmacistRx,
@@ -160,14 +161,18 @@ export const pharmacyService = {
 
   // ── Orders ────────────────────────────────────────────────────────────────
 
-  async listOrders(filters?: { status?: string; type?: string }): Promise<PharmacyOrderFull[]> {
+  async listOrders(filters?: { status?: string; type?: string; page?: number; limit?: number }): Promise<PaginatedResponse<PharmacyOrderFull>> {
     const params = new URLSearchParams();
     if (filters?.status) params.set('status', filters.status);
     if (filters?.type) params.set('type', filters.type);
+    if (filters?.page) params.set('page', String(filters.page));
+    if (filters?.limit) params.set('limit', String(filters.limit));
     const qs = params.toString() ? `?${params.toString()}` : '';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await apiClient.get<ApiResponse<any[]>>(`/pharmacy/orders${qs}`);
-    return (res.data.data ?? []).map(normalizeOrderFull);
+    const res = await apiClient.get<ApiResponse<any>>(`/pharmacy/orders${qs}`);
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: d.map(normalizeOrderFull), total: d.length, page: 1, limit: filters?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map(normalizeOrderFull) };
   },
 
   async getOrderById(id: string): Promise<PharmacyOrderFull> {
@@ -217,15 +222,19 @@ export const pharmacyService = {
 
   // ── Prescriptions ─────────────────────────────────────────────────────────
 
-  async getPrescriptions(filters?: { status?: string; doctor?: string; specialization?: string }): Promise<PharmaPrescription[]> {
+  async getPrescriptions(filters?: { status?: string; doctor?: string; specialization?: string; page?: number; limit?: number }): Promise<PaginatedResponse<PharmaPrescription>> {
     const params = new URLSearchParams();
     if (filters?.status) params.set('status', filters.status);
     if (filters?.doctor) params.set('doctor', filters.doctor);
     if (filters?.specialization) params.set('specialization', filters.specialization);
+    if (filters?.page) params.set('page', String(filters.page));
+    if (filters?.limit) params.set('limit', String(filters.limit));
     const qs = params.toString() ? `?${params.toString()}` : '';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await apiClient.get<ApiResponse<any[]>>(`/pharmacy/prescriptions${qs}`);
-    return (res.data.data ?? []).map(normalizePrescription);
+    const res = await apiClient.get<ApiResponse<any>>(`/pharmacy/prescriptions${qs}`);
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: d.map(normalizePrescription), total: d.length, page: 1, limit: filters?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map(normalizePrescription) };
   },
 
   async getPrescriptionById(id: string): Promise<PharmaPrescription> {
@@ -268,23 +277,28 @@ export const pharmacyService = {
 
   // ── Dispensing History ────────────────────────────────────────────────────
 
-  async getDispensingHistory(filters?: { date?: string; medication_id?: string; patient_name?: string }): Promise<PharmaDispensingRecord[]> {
+  async getDispensingHistory(filters?: { date?: string; medication_id?: string; patient_name?: string; page?: number; limit?: number }): Promise<PaginatedResponse<PharmaDispensingRecord>> {
     const params = new URLSearchParams();
     if (filters?.date) params.set('date', filters.date);
     if (filters?.medication_id) params.set('medication_id', filters.medication_id);
     if (filters?.patient_name) params.set('patient_name', filters.patient_name);
+    if (filters?.page) params.set('page', String(filters.page));
+    if (filters?.limit) params.set('limit', String(filters.limit));
     const qs = params.toString() ? `?${params.toString()}` : '';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await apiClient.get<ApiResponse<any[]>>(`/pharmacy/history${qs}`);
+    const res = await apiClient.get<ApiResponse<any>>(`/pharmacy/history${qs}`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (res.data.data ?? []).map((r: any) => ({
+    const normalizeRecord = (r: any): PharmaDispensingRecord => ({
       ...r,
       id: r._id ?? r.id,
       patient_name: r.patient?.username ?? r.patient?.name ?? r.patient_name,
       pharmacist_name: r.pharmacist?.username ?? r.pharmacist?.name ?? r.pharmacist_name,
       medication_name: r.medication?.name ?? r.medication_name ?? '',
       dispensed_at: r.dispensed_at ?? r.createdAt ?? '',
-    }));
+    });
+    const d = res.data.data;
+    if (Array.isArray(d)) return { items: d.map(normalizeRecord), total: d.length, page: 1, limit: filters?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map(normalizeRecord) };
   },
 
   // ── Daily Report ──────────────────────────────────────────────────────────

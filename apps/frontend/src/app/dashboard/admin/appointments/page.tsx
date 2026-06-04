@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { getStatusVariant } from '@/lib/statusBadge';
+import { Pagination } from '@/components/ui/Pagination';
 import type { AdminAppointment } from '@/types';
 
 type StatusFilter = 'all' | AdminAppointment['status'];
@@ -106,7 +107,7 @@ export default function AdminAppointmentsPage() {
   );
   const [cancelTarget, setCancelTarget] = useState<AdminAppointment | null>(null);
 
-  const { appointments, loading: isLoading, cancel } = useAdminAppointments();
+  const { appointments, loading: isLoading, cancel, page, totalPages, goToPage } = useAdminAppointments();
 
   const filtered = useMemo(() => {
     let list = appointments;
@@ -262,6 +263,8 @@ export default function AdminAppointmentsPage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       {cancelTarget && (
         <CancelModal

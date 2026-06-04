@@ -5,10 +5,10 @@ import { inventoryService } from '@/services/inventory.service';
 import { useToast } from '@/hooks/shared';
 import type { CreateSupplyRequestDto, ReceiveShipmentDto, Shipment } from '@/types';
 
-export function useInventorySupplyRequests() {
+export function useInventorySupplyRequests(params?: { page?: number; limit?: number }) {
   return useQuery({
-    queryKey: queryKeys.inventorySupplyRequests(),
-    queryFn: () => inventoryService.getSupplyRequests(),
+    queryKey: queryKeys.inventorySupplyRequests(params as Record<string, unknown>),
+    queryFn: () => inventoryService.getSupplyRequests(params),
   });
 }
 
@@ -18,7 +18,7 @@ export function useFulfillRequest() {
   return useMutation({
     mutationFn: (id: string) => inventoryService.fulfillSupplyRequest(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventorySupplyRequests() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'supply-requests'] });
       showToast('Request fulfilled', 'success');
     },
     onError: () => showToast('Failed to fulfill request', 'error'),
@@ -31,7 +31,7 @@ export function useCreateSupplyRequest() {
   return useMutation({
     mutationFn: (data: CreateSupplyRequestDto) => inventoryService.createSupplyRequest(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventorySupplyRequests() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'supply-requests'] });
       showToast('Supply request created', 'success');
     },
     onError: () => showToast('Failed to create supply request', 'error'),
@@ -45,7 +45,7 @@ export function useReceiveShipment() {
     mutationFn: (vars: { requestId: string; data: ReceiveShipmentDto }) =>
       inventoryService.receiveShipment(vars.requestId, vars.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventorySupplyRequests() });
+      queryClient.invalidateQueries({ queryKey: ['inventory', 'supply-requests'] });
       showToast('Shipment received — items added to warehouse', 'success');
     },
     onError: () => showToast('Failed to receive shipment', 'error'),

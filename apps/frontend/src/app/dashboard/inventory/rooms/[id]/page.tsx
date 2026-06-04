@@ -67,10 +67,10 @@ export default function RoomDetailPage() {
 
   useEffect(() => {
     setLoadingRoom(true);
-    Promise.all([inventoryService.getRoomById(id), inventoryService.getItems()])
-      .then(([room, items]) => {
+    Promise.all([inventoryService.getRoomById(id), inventoryService.getItems({ limit: 200 })])
+      .then(([room, itemsData]) => {
         setRoomDetail(room);
-        setAllItems(items);
+        setAllItems(itemsData.items);
       })
       .catch(() => showToast('Failed to load room data', 'error'))
       .finally(() => setLoadingRoom(false));

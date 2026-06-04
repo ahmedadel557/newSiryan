@@ -18,6 +18,7 @@ import {
 import { RateVisitModal } from '@/components/patient/RateVisitModal';
 import { WaitingEstimateBadge } from '@/components/patient/WaitingEstimateBadge';
 import { usePatientAppointments, type AppointmentTab } from '@/hooks/patient';
+import { Pagination } from '@/components/ui/Pagination';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -234,6 +235,9 @@ export default function AppointmentsPage() {
     upcoming,
     past,
     cancelled,
+    page,
+    totalPages,
+    goToPage,
     isLoading,
     error,
     retry,
@@ -399,6 +403,8 @@ export default function AppointmentsPage() {
           </ul>
         )}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
 
       <RateVisitModal
         open={!!rateTarget}

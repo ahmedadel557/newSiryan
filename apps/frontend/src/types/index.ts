@@ -30,11 +30,18 @@ export interface ApiResponse<T> {
 }
 
 export interface PaginatedResponse<T> {
-  success: boolean;
-  data: T[];
+  items: T[];
   total: number;
   page: number;
-  page_size: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface PaginationState {
+  page: number;
+  limit: number;
 }
 
 /* ----------------------------------------------------------------

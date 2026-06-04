@@ -1,11 +1,11 @@
 'use client';
 import { useCallback, useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { pharmacyService } from '@/services/pharmacy.service';
-import { useToast } from '@/hooks/shared';
+import { useToast, usePagination } from '@/hooks/shared';
 import { useSocketEvent } from '@/hooks/shared';
-import type { PharmacyOrderFull, PharmaMedication, PharmaDrugInteraction } from '@/types';
+import type { PharmacyOrderFull, PharmaMedication, PharmaDrugInteraction, PaginatedResponse } from '@/types';
 
 export type OrderStatusFilter = 'all' | 'pending' | 'approved' | 'rejected';
 export type OrderTypeFilter = 'all' | 'otc' | 'prescription';
@@ -19,6 +19,7 @@ export interface InteractionCheck {
 export function usePharmacistOrders() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page, limit, goToPage } = usePagination();
   const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<OrderTypeFilter>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -27,33 +28,45 @@ export function usePharmacistOrders() {
   const [substitutes, setSubstitutes] = useState<{ orderId: string; substitutes: PharmaMedication[] } | null>(null);
   const pendingRejectIdRef = useRef<string | null>(null);
 
-  const filters: Record<string, unknown> = {};
+  const filters: Record<string, unknown> = { page, limit };
   if (statusFilter !== 'all') filters.status = statusFilter;
   if (typeFilter !== 'all') filters.type = typeFilter;
 
-  const { data: orders = [], isLoading: loading } = useQuery({
+  const { data: ordersData, isLoading: loading } = useQuery({
     queryKey: queryKeys.pharmacistOrders(filters),
-    queryFn: () => pharmacyService.listOrders(Object.keys(filters).length ? { status: filters.status as string, type: filters.type as string } : undefined),
+    queryFn: () => pharmacyService.listOrders({
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      type: typeFilter !== 'all' ? typeFilter : undefined,
+      page,
+      limit,
+    }),
   });
 
+  const orders = ordersData?.items ?? [];
+
   useSocketEvent<Record<string, unknown>>('pharmacy:order:created', () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.pharmacistOrders() });
+    queryClient.invalidateQueries({ queryKey: ['pharmacist', 'orders'] });
   });
+
+  const updateOrderInCache = useCallback((id: string, updated: PharmacyOrderFull) => {
+    queryClient.setQueryData<PaginatedResponse<PharmacyOrderFull> | undefined>(
+      queryKeys.pharmacistOrders(filters),
+      (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === id ? updated : o)) } : prev,
+    );
+  }, [queryClient, filters]);
 
   const handleApproveOtc = useCallback(async (id: string) => {
     setActionLoading(id);
     try {
       const updated = await pharmacyService.approveOtcOrder(id);
-      queryClient.setQueryData<PharmacyOrderFull[]>(queryKeys.pharmacistOrders(filters), (prev) =>
-        (prev ?? []).map((o) => (o.id === id ? updated : o)),
-      );
+      updateOrderInCache(id, updated);
       showToast('Order approved', 'success');
     } catch (err: any) {
       showToast(err?.response?.data?.message ?? 'Failed to approve order', 'error');
     } finally {
       setActionLoading(null);
     }
-  }, [showToast, queryClient, filters]);
+  }, [showToast, updateOrderInCache]);
 
   const handleApprovePrescription = useCallback(async (order: PharmacyOrderFull) => {
     setActionLoading(order.id);
@@ -68,16 +81,14 @@ export function usePharmacistOrders() {
         }
       }
       const updated = await pharmacyService.approvePrescriptionOrder(order.id);
-      queryClient.setQueryData<PharmacyOrderFull[]>(queryKeys.pharmacistOrders(filters), (prev) =>
-        (prev ?? []).map((o) => (o.id === order.id ? updated : o)),
-      );
+      updateOrderInCache(order.id, updated);
       showToast('Prescription order approved', 'success');
     } catch (err: any) {
       showToast(err?.response?.data?.message ?? 'Failed to approve order', 'error');
     } finally {
       setActionLoading(null);
     }
-  }, [showToast, queryClient, filters]);
+  }, [showToast, updateOrderInCache]);
 
   const confirmApprovePrescription = useCallback(async () => {
     if (!interactionCheck) return;
@@ -86,16 +97,14 @@ export function usePharmacistOrders() {
     setActionLoading(orderId);
     try {
       const updated = await pharmacyService.approvePrescriptionOrder(orderId);
-      queryClient.setQueryData<PharmacyOrderFull[]>(queryKeys.pharmacistOrders(filters), (prev) =>
-        (prev ?? []).map((o) => (o.id === orderId ? updated : o)),
-      );
+      updateOrderInCache(orderId, updated);
       showToast('Prescription order approved', 'success');
     } catch (err: any) {
       showToast(err?.response?.data?.message ?? 'Failed to approve order', 'error');
     } finally {
       setActionLoading(null);
     }
-  }, [interactionCheck, showToast, queryClient, filters]);
+  }, [interactionCheck, showToast, updateOrderInCache]);
 
   const handleRejectClick = useCallback(async (order: PharmacyOrderFull) => {
     const oosItems = order.items.filter((i) => i.medication);
@@ -109,7 +118,7 @@ export function usePharmacistOrders() {
           return;
         }
       } catch {
-        // ignore — fall through to reject modal
+        // fall through to reject modal
       }
     }
     setRejectModalId(order.id);
@@ -126,8 +135,9 @@ export function usePharmacistOrders() {
     setActionLoading(id);
     try {
       await pharmacyService.rejectOrder(id, reason);
-      queryClient.setQueryData<PharmacyOrderFull[]>(queryKeys.pharmacistOrders(filters), (prev) =>
-        (prev ?? []).map((o) => (o.id === id ? { ...o, status: 'rejected' as const, rejection_reason: reason } : o)),
+      queryClient.setQueryData<PaginatedResponse<PharmacyOrderFull> | undefined>(
+        queryKeys.pharmacistOrders(filters),
+        (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === id ? { ...o, status: 'rejected' as const, rejection_reason: reason } : o)) } : prev,
       );
       showToast('Order rejected', 'success');
     } catch (err: any) {
@@ -141,23 +151,24 @@ export function usePharmacistOrders() {
     setActionLoading(id);
     try {
       const updated = await pharmacyService.updateDeliveryStatus(id, { status });
-      queryClient.setQueryData<PharmacyOrderFull[]>(queryKeys.pharmacistOrders(filters), (prev) =>
-        (prev ?? []).map((o) => (o.id === id ? updated : o)),
-      );
+      updateOrderInCache(id, updated);
       showToast(`Delivery status: ${status}`, 'success');
     } catch (err: any) {
       showToast(err?.response?.data?.message ?? 'Failed to update delivery status', 'error');
     } finally {
       setActionLoading(null);
     }
-  }, [showToast, queryClient, filters]);
+  }, [showToast, updateOrderInCache]);
 
   const refresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.pharmacistOrders() });
+    queryClient.invalidateQueries({ queryKey: ['pharmacist', 'orders'] });
   }, [queryClient]);
 
   return {
     orders,
+    page,
+    totalPages: ordersData?.totalPages ?? 1,
+    goToPage,
     loading,
     actionLoading,
     statusFilter,

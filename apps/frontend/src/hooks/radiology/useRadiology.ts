@@ -3,24 +3,28 @@ import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { radiologyService } from '@/services/radiology.service';
-import { useToast } from '@/hooks/shared';
-import type { RadiologyOrder, RadiologyFindingsDto, OrderStatus } from '@/types';
+import { useToast, usePagination } from '@/hooks/shared';
+import type { RadiologyOrder, RadiologyFindingsDto, OrderStatus, PaginatedResponse } from '@/types';
 
 export function useRadiology() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
+  const { page, limit, goToPage } = usePagination();
   const [uploadOrderId, setUploadOrderId] = useState<string | null>(null);
 
-  const { data: allOrders = [], isPending: isLoading } = useQuery({
-    queryKey: queryKeys.radiologyOrders(),
-    queryFn: () => radiologyService.getOrders(),
+  const { data: ordersData, isPending: isLoading } = useQuery({
+    queryKey: queryKeys.radiologyOrders({ page, limit }),
+    queryFn: () => radiologyService.getOrders({ page, limit }),
   });
+
+  const allOrders = ordersData?.items ?? [];
 
   const submitFindingsMutation = useMutation({
     mutationFn: (vars: { id: string; data: RadiologyFindingsDto }) => radiologyService.submitResults(vars.id, vars.data),
     onSuccess: (updated) => {
-      queryClient.setQueryData<RadiologyOrder[]>(queryKeys.radiologyOrders(), (prev) =>
-        (prev ?? []).map((o) => (o.id === updated.id ? updated : o)),
+      queryClient.setQueryData<PaginatedResponse<RadiologyOrder> | undefined>(
+        queryKeys.radiologyOrders({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === updated.id ? updated : o)) } : prev,
       );
       showToast('Findings submitted', 'success');
       setUploadOrderId(null);
@@ -31,8 +35,9 @@ export function useRadiology() {
   const updateStatusMutation = useMutation({
     mutationFn: (vars: { id: string; status: OrderStatus }) => radiologyService.updateOrderStatus(vars.id, vars.status),
     onSuccess: (updated) => {
-      queryClient.setQueryData<RadiologyOrder[]>(queryKeys.radiologyOrders(), (prev) =>
-        (prev ?? []).map((o) => (o.id === updated.id ? updated : o)),
+      queryClient.setQueryData<PaginatedResponse<RadiologyOrder> | undefined>(
+        queryKeys.radiologyOrders({ page, limit }),
+        (prev) => prev ? { ...prev, items: prev.items.map((o) => (o.id === updated.id ? updated : o)) } : prev,
       );
       showToast('Order updated', 'success');
     },
@@ -76,6 +81,9 @@ export function useRadiology() {
 
   return {
     allOrders,
+    page,
+    totalPages: ordersData?.totalPages ?? 1,
+    goToPage,
     pending,
     completed,
     recentOrders,

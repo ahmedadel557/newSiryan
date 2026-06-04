@@ -1,6 +1,7 @@
 import apiClient from './api.client';
 import type {
   ApiResponse,
+  PaginatedResponse,
   Profile,
   Appointment,
   BookingResult,
@@ -73,20 +74,17 @@ export const patientService = {
     return normalize<Profile>(res.data.data);
   },
 
-  async getAppointments(): Promise<Appointment[]> {
-    const res = await apiClient.get<ApiResponse<Appointment[]>>('/patient/appointments');
-    return normalizeList<Appointment>(res.data.data).map((a) => {
-      const raw = a as any;
-      const d = raw.doctor;
-      const doctorName = d?.first_name
-        ? `${d.first_name} ${d.last_name ?? ''}`.trim()
-        : d?.username ?? undefined;
-      return {
-        ...a,
-        visit_type: raw.type ?? a.visit_type,
-        doctor_name: doctorName,
-      };
-    });
+  async getAppointments(params?: { page?: number; limit?: number }): Promise<PaginatedResponse<Appointment>> {
+    const res = await apiClient.get<ApiResponse<any>>('/patient/appointments', { params });
+    const d = res.data.data;
+    const normalizeAppt = (a: any): Appointment => {
+      const base = { ...a, id: a._id ?? a.id };
+      const doc = a.doctor;
+      const doctorName = doc?.first_name ? `${doc.first_name} ${doc.last_name ?? ''}`.trim() : doc?.username ?? undefined;
+      return { ...base, visit_type: a.type ?? a.visit_type, doctor_name: doctorName };
+    };
+    if (Array.isArray(d)) return { items: d.map(normalizeAppt), total: d.length, page: 1, limit: params?.limit ?? 20, totalPages: 1, hasNext: false, hasPrev: false };
+    return { ...d, items: (d.items ?? []).map(normalizeAppt) };
   },
 
   async getAppointment(id: string): Promise<Appointment> {
