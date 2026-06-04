@@ -48,8 +48,9 @@ useEffect(() => {
     .finally(() => setIsLoading(false))
 }, [pathname])
 
-  async function login(data: LoginDto) {
-    const res = await authService.login(data);
+  async function login(data: LoginDto & { rememberMe?: boolean }) {
+    const { rememberMe, ...loginData } = data;
+    const res = await authService.login({ ...loginData, remember_me: rememberMe });
 
     if (res.requires_profile_completion) {
       router.push('/auth/complete-profile');

@@ -237,7 +237,7 @@ export function PatientShell({ children, navItems = patientNav }: PatientShellPr
               <input
                 type="search"
                 placeholder="Search…"
-                className="w-full h-9 pl-9 pr-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-black placeholder:text-gray-500 border-0 outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-0 transition-shadow"
+                className="w-full h-9 pl-9 pr-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] placeholder:text-[var(--fg-4)] border-0 outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-0 transition-shadow"
               />
             </div>
 

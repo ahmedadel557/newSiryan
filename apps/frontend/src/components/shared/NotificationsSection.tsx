@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/button';
 import { useSettings } from '@/hooks/shared';
 
 const NOTIF_ITEMS: [string, string, string][] = [
@@ -34,8 +35,8 @@ export function NotificationsSection() {
       ) : (
         <>
           {NOTIF_ITEMS.map(([key, label, desc]) => (
-            <div key={key} className="flex items-center justify-between py-3 border-b border-[var(--border-1)] last:border-0">
-              <div>
+            <div key={key} className="flex items-center justify-between gap-4 py-3 border-b border-[var(--border-1)] last:border-0">
+              <div className="min-w-0">
                 <p className="text-[13.5px] font-medium text-[var(--fg-1)]">{label}</p>
                 <p className="text-[12px] text-[var(--fg-3)] mt-0.5">{desc}</p>
               </div>
@@ -57,13 +58,9 @@ export function NotificationsSection() {
               </button>
             </div>
           ))}
-          <button
-            onClick={onSave}
-            disabled={isSaving}
-            className="mt-2 h-9 px-5 rounded-[var(--radius-md)] bg-[var(--brand)] text-white text-[13px] font-medium hover:bg-[var(--brand-hover)] disabled:opacity-60 transition-colors"
-          >
+          <Button onClick={onSave} disabled={isSaving} className="mt-2">
             {isSaving ? 'Saving…' : 'Save preferences'}
-          </button>
+          </Button>
         </>
       )}
     </div>

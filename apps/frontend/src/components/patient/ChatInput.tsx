@@ -41,7 +41,7 @@ export function ChatInput({ value, onChange, onSend, onAttach, isTyping, attache
         <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
         <button
           onClick={() => fileRef.current?.click()}
-          className="w-8 h-8 flex items-center justify-center dark:hover:text-black rounded-full text-[var(--fg-3)] hover:text-[var(--fg-1)] hover:bg-[var(--sand-100)] transition-colors shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--fg-3)] hover:text-[var(--fg-1)] hover:bg-[var(--bg-sunken)] transition-colors shrink-0"
           title="Attach file"
         >
           <Paperclip size={16} />

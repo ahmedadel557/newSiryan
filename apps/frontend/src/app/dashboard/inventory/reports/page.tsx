@@ -93,7 +93,7 @@ export default function ReportsPage() {
               onClick={() => setTab(t.id)}
               className={[
                 'px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors',
-                tab === t.id ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-black/80',
+                tab === t.id ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]',
               ].join(' ')}
             >
               {t.label}
@@ -117,7 +117,7 @@ export default function ReportsPage() {
             {PERIODS.map((p) => (
               <button key={p} onClick={() => setPeriod(p)} className={[
                 'px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors capitalize',
-                period === p ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-black/80',
+                period === p ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]',
               ].join(' ')}>{p}</button>
             ))}
           </div>

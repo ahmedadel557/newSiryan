@@ -78,7 +78,7 @@ export function UsersTable({
                 "btn px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors whitespace-nowrap",
                 userFilter === tab.id
                   ? "bg-[var(--forest-900)] shadow-[var(--shadow-xs)] text-white"
-                  : "text-[var(--fg-3)] hover:text-black/80",
+                  : "text-[var(--fg-3)] hover:text-[var(--fg-1)]",
               ].join(" ")}
             >
               {tab.label}

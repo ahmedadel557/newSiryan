@@ -50,7 +50,7 @@ export function ReasonStep({ department, visitType, notes, departments, departme
                 key={type}
                 onClick={() => onChange({ visitType: type })}
                 className={`btn flex-1 px-3 py-2 rounded-[8px] text-[13px] font-medium transition-colors capitalize ${
-                  visitType === type ? 'bg-[var(--bg-surface)] text-[var(--fg-1)] shadow-[var(--shadow-xs)]' : 'text-black/50 hover:bg-[var(--sand-200)] dark:hover:text-black'
+                  visitType === type ? 'bg-[var(--bg-surface)] text-[var(--fg-1)] shadow-[var(--shadow-xs)]' : 'text-[var(--fg-3)] hover:bg-[var(--bg-sunken)]'
                 }`}
               >
                 {type}

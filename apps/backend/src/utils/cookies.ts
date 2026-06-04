@@ -12,7 +12,8 @@ const cookieOptions = {
 export const setAuthCookies = (
   res: Response,
   accessToken: string,
-  refreshToken: string | null
+  refreshToken: string | null,
+  rememberMe = false
 ) => {
   res.cookie("access_token", accessToken, {
     ...cookieOptions,
@@ -22,7 +23,7 @@ export const setAuthCookies = (
   if (refreshToken) {
     res.cookie("refresh_token", refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000,
     });
   }
 };

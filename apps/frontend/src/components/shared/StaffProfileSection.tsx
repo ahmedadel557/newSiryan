@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { AvatarUpload } from '@/components/shared/AvatarUpload';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/shared';
 import { useToast } from '@/hooks/shared';
 import { staffService } from '@/services/staff.service';
@@ -71,7 +72,7 @@ export function StaffProfileSection() {
         <p className="text-[12px] text-[var(--fg-3)]">Click to change photo</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {(['first_name', 'last_name'] as const).map((key) => (
           <div key={key}>
             <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">
@@ -111,7 +112,7 @@ export function StaffProfileSection() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Department</label>
           <input
@@ -130,13 +131,9 @@ export function StaffProfileSection() {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={profileSaving}
-        className="h-9 px-5 rounded-[var(--radius-md)] bg-[var(--brand)] text-white text-[13px] font-medium hover:bg-[var(--brand-hover)] disabled:opacity-60 transition-colors"
-      >
+      <Button type="submit" disabled={profileSaving}>
         {profileSaving ? 'Saving…' : 'Save changes'}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -702,6 +702,7 @@ export interface VideoCallToken {
 export interface LoginDto {
   email: string;
   password: string;
+  remember_me?: boolean;
 }
 
 export interface RegisterDto {

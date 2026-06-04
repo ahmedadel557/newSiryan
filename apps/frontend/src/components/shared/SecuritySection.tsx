@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import { useSettings } from '@/hooks/shared';
 
 function PasswordStrength({ password }: { password: string }) {
@@ -73,13 +74,9 @@ export function SecuritySection() {
         </div>
       ))}
 
-      <button
-        type="submit"
-        disabled={isSaving}
-        className="h-9 px-5 rounded-[var(--radius-md)] bg-[var(--brand)] text-white text-[13px] font-medium hover:bg-[var(--brand-hover)] disabled:opacity-60 transition-colors"
-      >
+      <Button type="submit" disabled={isSaving}>
         {isSaving ? 'Updating…' : 'Update password'}
-      </button>
+      </Button>
     </form>
   );
 }

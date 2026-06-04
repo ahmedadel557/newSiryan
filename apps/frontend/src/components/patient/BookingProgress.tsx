@@ -19,7 +19,7 @@ export function BookingProgress({ step }: BookingProgressProps) {
           <div
             key={label}
             className={`flex items-center gap-2 px-3 py-[6px] rounded-full text-[12px]  font-medium ${
-              isCurrent ? 'bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]' : 'bg-[var(--sand-100)]  dark:text-black'
+              isCurrent ? 'bg-[var(--brand-soft-bg)] text-[var(--brand-soft-fg)]' : 'bg-[var(--bg-sunken)] text-[var(--fg-2)]'
             }`}
           >
             <span

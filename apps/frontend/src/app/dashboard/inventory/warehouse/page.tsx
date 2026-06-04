@@ -282,7 +282,7 @@ export default function WarehousePage() {
             onClick={() => setPageTab(t)}
             className={[
               'px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors capitalize',
-              pageTab === t ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-black/80',
+              pageTab === t ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]' : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]',
             ].join(' ')}
           >
             {t === 'entries' ? 'Warehouse Entries' : 'Waste Log'}
@@ -331,7 +331,7 @@ export default function WarehousePage() {
               'px-3 py-[5px] rounded-[6px] text-[12px] font-medium transition-colors',
               statusFilter === tab.id
                 ? 'bg-[var(--bg-surface)] shadow-[var(--shadow-xs)] text-[var(--fg-1)]'
-                : 'text-[var(--fg-3)] hover:text-black/80',
+                : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]',
             ].join(' ')}
           >
             {tab.label}

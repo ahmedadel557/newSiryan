@@ -333,6 +333,8 @@
 
 @media (max-width: 767px) {
   :root {
+    --fs-4xl: 36px;
+    --fs-3xl: 28px;
     --fs-2xl: 22px;
     --fs-xl: 18px;
     --fs-lg: 16px;

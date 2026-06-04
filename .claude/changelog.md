@@ -1,5 +1,47 @@
 # Changelog
 
+## [2026-06-04] UI Audit Fixes — P0/P1/P2 Color Contrast + Button Consistency
+
+### Goal
+Fix all P0 (critical contrast), P1 (button consistency), and P2 (CSS token alignment) issues
+from the design-system audit report.
+
+### P0 — dark:text-black / dark:hover:text-black (6 files fixed)
+Root cause: `--sand-100` has no dark-mode override, so hover backgrounds stayed light in dark mode
+while `dark:text-black` set text to pure black on near-black surfaces (~1:1 contrast).
+Fix: replaced hover bg with `bg-[var(--bg-sunken)]`, removed all `dark:text-black` classes.
+- `components/patient/BookingProgress.tsx`, `ChatMessage.tsx`, `ChatInput.tsx`, `ReasonStep.tsx`,
+  `SuggestionChips.tsx`, `components/shared/NotificationBell.tsx`
+
+### P0 — hover:text-black/80 without dark guard (12 occurrences, 8 files)
+All inventory tab pills and UsersTable used `hover:text-black/80` with no dark-mode override.
+Fix: `hover:text-black/80` → `hover:text-[var(--fg-1)]` in:
+- `inventory/analytics`, `items`, `reports`(×2), `requests`(×2), `purchase-orders`,
+  `rooms`(×2), `warehouse`(×2), `components/staff/admin/UsersTable.tsx`
+
+### P1 — Manual <button> replaced with <Button> in 4 settings components
+Raw `<button>` with `px-5` (20px) replaced by `<Button>` (correct `px-3.5` from kit.css spec):
+- `PatientProfileSection.tsx`, `StaffProfileSection.tsx`, `SecuritySection.tsx`, `NotificationsSection.tsx`
+
+### P1 — Placeholder color token
+- `layouts/PatientShell.tsx`: `text-black placeholder:text-gray-500` → `text-[var(--fg-1)] placeholder:text-[var(--fg-4)]`
+
+### P2 — btn-sm border-radius token
+- `kit.css`: `border-radius: 8px` → `border-radius: var(--radius-md)`
+- `button.tsx` sm size: `rounded-[8px]` → `rounded-[var(--radius-md)]`
+
+### P2 — Active states for secondary/ghost buttons
+- `kit.css`: added `.btn-secondary:active, .btn-ghost:active { background: var(--bg-sunken); transform: scale(0.98) }`
+
+### P2 — Large type scale responsive
+- `tokens.css` mobile breakpoint: added `--fs-4xl: 36px`, `--fs-3xl: 28px`
+
+### Verification
+- `npx tsc --noEmit` → 0 errors
+- `grep "dark:text-black|hover:text-black"` → 0 matches
+
+---
+
 ## [2026-06-04] Auth Improvements — Part 2: Frontend + Resend Migration
 
 ### Goal

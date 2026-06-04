@@ -60,12 +60,14 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const result = await authService.login(parsed.data.body, req);
 
+    const rememberMe = !!parsed.data.body.remember_me;
+
     if (result.requires_profile_completion) {
-      setAuthCookies(res, result.accessToken, null);
+      setAuthCookies(res, result.accessToken, null, rememberMe);
       return sendSuccess(res, { requires_profile_completion: true }, 'Profile completion required');
     }
 
-    setAuthCookies(res, result.accessToken, result.refreshToken!);
+    setAuthCookies(res, result.accessToken, result.refreshToken!, rememberMe);
     sendSuccess(res, { user: result.user, profile: result.profile }, 'Login successful');
   } catch (err: any) {
     if (err.message === 'Invalid credentials') return sendError(res, 'Invalid credentials', 401);

@@ -186,7 +186,7 @@ const BellButton = forwardRef<
   <button
     ref={ref}
     {...rest}
-    className=" relative inline-flex items-center justify-center w-9 h-9 rounded-full text-[var(--fg-2)] hover:bg-[var(--sand-100)] dark:hover:text-black transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus)]"
+    className="relative inline-flex items-center justify-center w-9 h-9 rounded-full text-[var(--fg-2)] hover:bg-[var(--bg-sunken)] transition-colors focus-visible:outline-none focus-visible:shadow-[var(--shadow-focus)]"
     aria-label="Notifications"
   >
     <Bell size={18} strokeWidth={1.75} />

@@ -42,7 +42,7 @@ export default function LoginForm({ onPhoneLogin }: LoginFormProps) {
   async function onSubmit(data: FormValues) {
     setApiError('');
     try {
-      await login({ email: data.emailOrPhone.trim().toLowerCase(), password: data.password });
+      await login({ email: data.emailOrPhone.trim().toLowerCase(), password: data.password, rememberMe });
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string }; status?: number } };
       const msg = e?.response?.data?.message;

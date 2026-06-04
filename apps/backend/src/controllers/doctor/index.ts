@@ -100,9 +100,16 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
       return sendSuccess(res, { date: dateStr, available_slots: [], booked_slots: [], all_slots: [] }, 'No slots on weekends');
     }
 
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const isToday = dateStr === todayStr;
+
+    // Only use cache for future dates — today's slots shrink as hours pass
     const cacheKey = CACHE_KEYS.SLOTS(doctorId, dateStr);
-    const cached = await cache.get(cacheKey);
-    if (cached) return sendSuccess(res, cached, 'Availability fetched');
+    if (!isToday) {
+      const cached = await cache.get(cacheKey);
+      if (cached) return sendSuccess(res, cached, 'Availability fetched');
+    }
 
     const dayStart = new Date(dateStr + 'T00:00:00');
     const dayEnd = new Date(dateStr + 'T23:59:59');
@@ -123,15 +130,25 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
       for (let h = b.start_hour; h < b.end_hour; h++) blockedHours.add(h);
     }
 
+    // For today, exclude hours that have already passed (backend uses local time throughout)
+    const pastHours = new Set<number>();
+    if (isToday) {
+      const currentHour = now.getHours();
+      for (let h = 0; h <= currentHour; h++) pastHours.add(h);
+    }
+
     const allSlots = hoursForShift((doctorProfile?.shift as any) ?? '').map(
       hour => `${String(hour).padStart(2, '0')}:00`,
     );
 
-    const availableSlots = allSlots.filter(t => !bookedHours.has(parseInt(t)) && !blockedHours.has(parseInt(t)));
-    const bookedSlots    = allSlots.filter(t => bookedHours.has(parseInt(t)));
+    const availableSlots = allSlots.filter(t => {
+      const h = parseInt(t);
+      return !bookedHours.has(h) && !blockedHours.has(h) && !pastHours.has(h);
+    });
+    const bookedSlots = allSlots.filter(t => bookedHours.has(parseInt(t)));
 
     const payload = { date: dateStr, available_slots: availableSlots, booked_slots: bookedSlots, all_slots: allSlots };
-    cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);
+    if (!isToday) cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);
 
     sendSuccess(res, payload, 'Availability fetched');
   } catch (err: any) {

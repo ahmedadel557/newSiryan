@@ -41,7 +41,7 @@ export function SettingsShell({ profileSection, extraTabs = [] }: SettingsShellP
     <div className="max-w-[960px]">
       <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--fg-1)] mb-6">Settings</h1>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row md:items-start gap-6">
         <aside className="hidden md:flex flex-col gap-0.5 w-48 shrink-0">
           {allTabs.map((t) => (
             <button key={t.id} className={tabClass(t.id)} onClick={() => setActiveTab(t.id)}>
@@ -51,29 +51,31 @@ export function SettingsShell({ profileSection, extraTabs = [] }: SettingsShellP
           ))}
         </aside>
 
-        <div className="md:hidden mb-4 -mx-4 px-4 tab-scroll flex gap-2 pb-1">
-          {allTabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={cn(
-                'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium border transition-colors',
-                activeTab === t.id
-                  ? 'bg-[var(--brand)] text-white border-[var(--brand)]'
-                  : 'bg-transparent text-[var(--fg-2)] border-[var(--border-1)]'
-              )}
-            >
-              {t.icon} {t.label}
-            </button>
-          ))}
-        </div>
+        <div className="flex-1 min-w-0 flex flex-col gap-4">
+          <div className="md:hidden tab-scroll flex gap-2 pb-1">
+            {allTabs.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={cn(
+                  'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium border transition-colors',
+                  activeTab === t.id
+                    ? 'bg-[var(--brand)] text-white border-[var(--brand)]'
+                    : 'bg-transparent text-[var(--fg-2)] border-[var(--border-1)]'
+                )}
+              >
+                {t.icon} {t.label}
+              </button>
+            ))}
+          </div>
 
-        <div className="flex-1 min-w-0 bg-[var(--bg-surface)] rounded-[var(--radius-lg)] border border-[var(--border-1)] p-6">
-          {activeTab === 'profile' && profileSection}
-          {activeTab === 'notifications' && <NotificationsSection />}
-          {activeTab === 'appearance' && <AppearanceSection />}
-          {activeTab === 'security' && <SecuritySection />}
-          {extraTabs.map((t) => activeTab === t.id && <div key={t.id}>{t.content}</div>)}
+          <div className="bg-[var(--bg-surface)] rounded-[var(--radius-lg)] border border-[var(--border-1)] p-5 sm:p-6">
+            {activeTab === 'profile' && profileSection}
+            {activeTab === 'notifications' && <NotificationsSection />}
+            {activeTab === 'appearance' && <AppearanceSection />}
+            {activeTab === 'security' && <SecuritySection />}
+            {extraTabs.map((t) => activeTab === t.id && <div key={t.id}>{t.content}</div>)}
+          </div>
         </div>
       </div>
     </div>
