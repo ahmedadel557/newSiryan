@@ -15,6 +15,12 @@ export const queryKeys = {
   adminAppointments: (filters?: Record<string, unknown>) =>
     (filters ? ['admin', 'appointments', filters] : ['admin', 'appointments']) as readonly unknown[],
 
+  // Admin — Departments
+  adminDepartments: () => ['admin', 'departments'] as const,
+
+  // Departments — public role filter (register form)
+  departmentsByRole: (role: string) => ['departments', 'by-role', role] as const,
+
   // Admin — Invoices
   adminInvoices: (params?: Record<string, unknown>) =>
     (params ? ['admin', 'invoices', params] : ['admin', 'invoices']) as readonly unknown[],

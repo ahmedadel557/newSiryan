@@ -2,12 +2,15 @@
 import { Mail, Phone, ArrowRight, Building2 } from 'lucide-react';
 import type { UseFormRegister, FieldErrors } from 'react-hook-form';
 import type { StaffFields } from '@/components/auth/register/registerTypes';
-import { STAFF_ROLES, DEPARTMENT_SPECIALIZATIONS } from '@/components/auth/register/registerTypes';
+import { STAFF_ROLES } from '@/components/auth/register/registerTypes';
+import type { Department } from '@/types';
 
 interface StaffProfessionalStepProps {
   register: UseFormRegister<StaffFields>;
   errors: FieldErrors<StaffFields>;
   role: string;
+  departments: Department[];
+  departmentsLoading?: boolean;
   selectedDepartment: string;
   availableSpecializations: string[];
   nationalId?: string;
@@ -18,6 +21,8 @@ export default function StaffProfessionalStep({
   register: sReg,
   errors,
   role,
+  departments,
+  departmentsLoading = false,
   selectedDepartment,
   availableSpecializations,
   nationalId = '',
@@ -105,11 +110,19 @@ export default function StaffProfessionalStep({
           <label className="field-label">Department</label>
           <div className="auth-input-wrap">
             <Building2 size={16} strokeWidth={1.75} />
-            <select className="input" {...sReg('department')}>
-              <option value="">Select department…</option>
-              {Object.keys(DEPARTMENT_SPECIALIZATIONS).map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
+            <select className="input" {...sReg('department')} disabled={!role || departmentsLoading}>
+              <option value="">
+                {!role
+                  ? 'Select a role first'
+                  : departmentsLoading
+                    ? 'Loading departments…'
+                    : departments.length === 0
+                      ? 'No departments for this role'
+                      : 'Select department…'}
+              </option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.name}>
+                  {dept.name}
                 </option>
               ))}
             </select>

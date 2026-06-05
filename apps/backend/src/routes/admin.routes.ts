@@ -4,7 +4,7 @@ import { requireCompleteProfile } from '../middlewares/requireCompleteProfile';
 import { validateRequest } from '../middlewares/validateRequest';
 import {
   createStaffSchema, changeRoleSchema, setActiveSchema, createInsuranceCompanySchema,
-  updateInsuranceCompanySchema, createDepartmentSchema, createAdminInvoiceSchema,
+  updateInsuranceCompanySchema, createDepartmentSchema, updateDepartmentSchema, createAdminInvoiceSchema,
   cancelAdminAppointmentSchema, updateUserProfileAdminSchema, assignDepartmentSchema,
   overrideDoctorScheduleSchema, assignShiftSchema, updateShiftSchema, updatePricingSchema,
   addLabTestSchema, updateLabTestPriceSchema, addRadiologyScanSchema, updateRadiologyScanPriceSchema,
@@ -15,7 +15,7 @@ import {
   getAdminInvoices, getRevenueReport, getRatingsReport, getStats, getDoctorReport,
   getStaffRequests, approveStaff, rejectStaff, cleanupOrphanedProfiles,
   listInsuranceCompanies, createInsuranceCompany, updateInsuranceCompany, deleteInsuranceCompany,
-  getDepartments, createDepartment, deleteDepartment, getOccupancyReport, createAdminInvoice,
+  getDepartments, createDepartment, updateDepartment, deleteDepartment, getOccupancyReport, createAdminInvoice,
   getPharmacyReport, getAdminAppointments, cancelAdminAppointment, updateUserProfileAdmin,
   assignStaffDepartment, getDepartmentStaff,
   getDoctorSchedule, overrideDoctorSchedule, deleteDoctorScheduleSlot, getAllSchedules,
@@ -70,6 +70,7 @@ router.delete('/insurance/:id', deleteInsuranceCompany);
 
 router.get('/departments', getDepartments);
 router.post('/departments', validateRequest(createDepartmentSchema), createDepartment);
+router.put('/departments/:id', validateRequest(updateDepartmentSchema), updateDepartment);
 router.delete('/departments/:id', deleteDepartment);
 
 router.get('/appointments', getAdminAppointments);

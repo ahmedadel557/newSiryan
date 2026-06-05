@@ -42,6 +42,7 @@ import {
   createInsuranceCompanySchema,
   updateInsuranceCompanySchema,
   createDepartmentSchema,
+  updateDepartmentSchema,
   createAdminInvoiceSchema,
   cancelAdminAppointmentSchema,
   updateUserProfileAdminSchema,
@@ -591,9 +592,11 @@ export const deleteInsuranceCompany = async (req: AuthRequest, res: Response, ne
 
 // ─── Departments ─────────────────────────────────────────────────────────────
 
-export const getDepartments = async (_req: AuthRequest, res: Response, next: NextFunction) => {
+export const getDepartments = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const departments = await Department.find().sort({ name: 1 }).lean();
+    const includeInactive = req.query.includeInactive === 'true';
+    const filter = includeInactive ? {} : { is_active: true };
+    const departments = await Department.find(filter).sort({ name: 1 }).lean();
 
     const doctorUserIds = await User.distinct('_id', { role: 'doctor', is_active: true });
 
@@ -603,9 +606,40 @@ export const getDepartments = async (_req: AuthRequest, res: Response, next: Nex
           department: dept.name,
           user: { $in: doctorUserIds },
         });
-        return { id: (dept._id as any).toString(), name: dept.name, description: dept.description ?? null, doctor_count };
+        return {
+          id: (dept._id as any).toString(),
+          name: dept.name,
+          description: dept.description ?? null,
+          assigned_roles: dept.assigned_roles ?? [],
+          is_active: dept.is_active ?? true,
+          doctor_count,
+        };
       }),
     );
+
+    sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Public (no-auth) — used by the staff registration form to fetch only the
+// departments that accept the role the applicant selected.
+export const getDepartmentsByRole = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const role = (req.query.role as string | undefined)?.trim();
+    if (!role) return sendError(res, 'role query param is required', 400);
+
+    const departments = await Department.find({ is_active: true, assigned_roles: role })
+      .sort({ name: 1 })
+      .lean();
+
+    const result = departments.map((dept) => ({
+      id: (dept._id as any).toString(),
+      name: dept.name,
+      description: dept.description ?? null,
+      assigned_roles: dept.assigned_roles ?? [],
+    }));
 
     sendSuccess(res, result);
   } catch (err) {
@@ -627,9 +661,28 @@ export const createDepartment = async (req: AuthRequest, res: Response, next: Ne
   }
 };
 
+export const updateDepartment = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const parsed = updateDepartmentSchema.safeParse({ body: req.body });
+    if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
+
+    const dept = await Department.findByIdAndUpdate(req.params.id, parsed.data.body, { new: true, runValidators: true });
+    if (!dept) return sendError(res, 'Department not found', 404);
+
+    sendSuccess(res, dept, 'Department updated');
+    logAudit({ performedBy: req.user!.id, action: 'update_department', resource: 'department', resourceId: req.params.id, req });
+  } catch (err: any) {
+    if (err.code === 11000) return sendError(res, 'Department already exists', 409);
+    if (err.name === 'CastError') return sendError(res, 'Invalid ID', 400);
+    next(err);
+  }
+};
+
 export const deleteDepartment = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const dept = await Department.findByIdAndDelete(req.params.id);
+    // Soft delete — preserve the record (and any name references) but hide it
+    // from the active lists used by the register form, booking, and admin UI.
+    const dept = await Department.findByIdAndUpdate(req.params.id, { is_active: false }, { new: true });
     if (!dept) return sendError(res, 'Department not found', 404);
 
     sendSuccess(res, null, 'Department deleted');

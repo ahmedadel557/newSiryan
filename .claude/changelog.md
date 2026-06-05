@@ -1,5 +1,40 @@
 # Changelog
 
+## [2026-06-05] Role-Based Departments — Backend
+
+### Goal
+Make departments role-aware so the staff registration form can show only the departments
+that accept a chosen role, and registration is validated against that. Additive — department
+is still stored as a name string on `Profile` (no migration; User model unchanged).
+
+### Model
+- `models/Department.ts`: added `assigned_roles: string[]` (default `[]`) and `is_active: boolean` (default `true`).
+
+### Validation
+- `validations/admin.validation.ts`: added `departmentRoleEnum` (8 staff roles); extended
+  `createDepartmentSchema` with optional `assigned_roles` + `is_active`; added `updateDepartmentSchema`.
+
+### Controllers (`controllers/admin/index.ts`)
+- `getDepartments`: `?includeInactive=true` support; default active-only; returns `assigned_roles` + `is_active`.
+- Added `updateDepartment` (PUT) and `getDepartmentsByRole` (public-facing).
+- `deleteDepartment`: now a **soft delete** (`is_active=false`) instead of hard delete.
+
+### Routes
+- `routes/admin.routes.ts`: added `PUT /api/admin/departments/:id`.
+- New `routes/department.routes.ts`: public `GET /api/departments/by-role?role=` (mounted at `/api/departments` in `app.ts`).
+
+### Registration
+- `services/auth.service.ts` `registerStaff`: validates the chosen department exists, is active,
+  and its `assigned_roles` include the requested role.
+
+### Seed
+- `seeds/departments.seed.ts`: canonical departments now carry `assigned_roles`; added non-clinical
+  departments (Pharmacy, Laboratory, Radiology, Billing, Administration) so every registerable role
+  has a home. Backfill is non-destructive (only fills missing `assigned_roles`/`is_active`).
+
+### Already satisfied (no change)
+- `/doctor/list?department=<name>` already filters by department and returns the name.
+
 ## [2026-06-04] UI Audit Fixes — P0/P1/P2 Color Contrast + Button Consistency
 
 ### Goal

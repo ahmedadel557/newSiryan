@@ -220,3 +220,11 @@ Admin real-time (full catalog):
 - Route-diff script: `cd apps/backend && npm run audit:routes` — re-run after adding new routes
 - Shape-fallback hotspots audited (2026-06-02) — see .claude/api-contract-report.md
 - Post-launch: shared contract (packages/contracts) + E2E tests — tracked in todos.md
+
+## Role-Based Departments (Backend, 2026-06-05)
+- Department model now has `assigned_roles: string[]` + `is_active: boolean` (was name+description only).
+- Department is STILL stored as a NAME string on `Profile` (not ObjectId on User) — seeds, /doctor/list, booking, admin filters all key off the name. No migration.
+- Admin CRUD lives in controllers/admin/index.ts (no service layer): getDepartments(?includeInactive), createDepartment, updateDepartment (PUT), deleteDepartment (SOFT delete = is_active:false).
+- Public no-auth endpoint GET /api/departments/by-role?role= (routes/department.routes.ts, mounted /api/departments in app.ts) — returns active depts whose assigned_roles include the role; used by staff register form.
+- registerStaff (auth.service.ts) rejects departments that are missing/inactive or do not list the requested role.
+- Seed assigns roles to clinical depts + adds Pharmacy/Laboratory/Radiology/Billing/Administration so every registerable role has a department. Backfill is non-destructive (preserves admin edits across restarts).

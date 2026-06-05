@@ -209,3 +209,14 @@ apps/frontend/src/hooks/shared/useNotifications.ts — TanStack Query (refetchIn
 apps/frontend/src/lib/queryKeys.ts                 — ALL query key factories (admin through notifications/chatbot)
 apps/frontend/src/lib/queryClient.ts               — Singleton QueryClient
 apps/frontend/src/providers/QueryProvider.tsx      — QueryClientProvider wrapper
+
+## Backend — Role-Based Departments (2026-06-05)
+apps/backend/src/models/Department.ts            — + assigned_roles: string[], is_active: boolean
+apps/backend/src/routes/department.routes.ts     — NEW public route: GET /api/departments/by-role?role=
+apps/backend/src/controllers/admin/index.ts      — + updateDepartment, getDepartmentsByRole; getDepartments(?includeInactive); deleteDepartment now soft-delete
+apps/backend/src/validations/admin.validation.ts — departmentRoleEnum; create/updateDepartmentSchema (assigned_roles, is_active)
+apps/backend/src/routes/admin.routes.ts          — + PUT /api/admin/departments/:id
+apps/backend/src/services/auth.service.ts        — registerStaff validates department active + role-allowed
+apps/backend/src/seeds/departments.seed.ts       — assigned_roles per dept + Pharmacy/Laboratory/Radiology/Billing/Administration; non-destructive backfill
+apps/backend/src/app.ts                          — mounts /api/departments
+(department stays a NAME string on Profile; User model unchanged; /doctor/list already filters by department name)

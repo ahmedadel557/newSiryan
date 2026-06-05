@@ -537,7 +537,9 @@ export interface Department {
   id: string;
   name: string;
   description?: string;
-  doctor_count: number;
+  assigned_roles?: string[];
+  is_active?: boolean;
+  doctor_count?: number;
 }
 
 /* ----------------------------------------------------------------

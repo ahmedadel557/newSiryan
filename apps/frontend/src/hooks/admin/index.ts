@@ -11,3 +11,4 @@ export {
 } from './useAdminReports';
 export { useAdminDashboardStats } from './useAdminDashboardStats';
 export { useAdminAuditLog } from './useAdminAuditLog';
+export { useAdminDepartments } from './useAdminDepartments';

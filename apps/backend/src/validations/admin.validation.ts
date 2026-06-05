@@ -86,10 +86,27 @@ export const updateInsuranceCompanySchema = z.object({
   }),
 });
 
+// Staff roles a department can be assigned to (all non-patient, non-admin roles).
+const departmentRoleEnum = z.enum([
+  'doctor', 'nurse', 'receptionist', 'pharmacist',
+  'inventory_manager', 'lab_technician', 'radiology_technician', 'cashier',
+]);
+
 export const createDepartmentSchema = z.object({
   body: z.object({
     name: z.string().min(1).max(100),
     description: z.string().optional(),
+    assigned_roles: z.array(departmentRoleEnum).optional(),
+    is_active: z.boolean().optional(),
+  }),
+});
+
+export const updateDepartmentSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).max(100).optional(),
+    description: z.string().optional(),
+    assigned_roles: z.array(departmentRoleEnum).optional(),
+    is_active: z.boolean().optional(),
   }),
 });
 

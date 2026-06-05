@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import type { SubmitHandler } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/services/api.client';
+import { departmentService } from '@/services/department.service';
+import { queryKeys } from '@/lib/queryKeys';
 import { useUsernameCheck } from '@/hooks/shared';
 import StepIndicator from '@/components/auth/shared/StepIndicator';
 import StaffProfessionalStep from '@/components/auth/register/steps/StaffProfessionalStep';
@@ -42,6 +45,21 @@ export default function StaffForm({ onSuccess }: StaffFormProps) {
   const nationalIdVal = watch('national_id') ?? '';
   const availableSpecializations = DEPARTMENT_SPECIALIZATIONS[selectedDepartment] || [];
   const usernameStatus = useUsernameCheck(usernameVal);
+
+  // Departments are role-aware: only those that accept the selected role are shown.
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
+    queryKey: queryKeys.departmentsByRole(role),
+    queryFn: () => departmentService.getByRole(role),
+    enabled: !!role,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Reset department (and the dependent specialization) whenever the role changes,
+  // since the available department set changes with the role.
+  useEffect(() => {
+    setValue('department', '');
+    setValue('specialization', '');
+  }, [role, setValue]);
 
   useEffect(() => {
     setValue('specialization', '');
@@ -106,6 +124,8 @@ export default function StaffForm({ onSuccess }: StaffFormProps) {
           register={register}
           errors={errors}
           role={role}
+          departments={departments}
+          departmentsLoading={departmentsLoading}
           selectedDepartment={selectedDepartment}
           availableSpecializations={availableSpecializations}
           nationalId={nationalIdVal}

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import User from '../models/User';
 import Profile from '../models/Profile';
+import Department from '../models/Department';
 import Notification from '../models/Notification';
 import { sendEmail } from '../utils/mailer';
 import { logAudit } from '../utils/audit';
@@ -92,6 +93,12 @@ export const registerStaff = async (data: {
 }) => {
   if (await User.findOne({ email: data.email }))       throw new Error('Email already in use');
   if (await User.findOne({ username: data.username })) throw new Error('Username already taken');
+
+  // Department must be a real, active department that accepts this role.
+  const dept = await Department.findOne({ name: data.department, is_active: true });
+  if (!dept) throw new Error('Invalid or inactive department');
+  if (!dept.assigned_roles.includes(data.role))
+    throw new Error('Selected department is not available for this role');
 
   const user = await User.create({
     username: data.username, email: data.email, password: data.password,
