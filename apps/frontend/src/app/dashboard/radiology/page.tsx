@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Scan, CalendarDays, ArrowRight } from 'lucide-react';
 import { useRadiology } from '@/hooks/radiology';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { RadiologyOrdersTable } from '@/components/staff/radiology/RadiologyOrdersTable';
 import { UploadScanModal } from '@/components/staff/radiology/UploadScanModal';
 
@@ -59,6 +60,8 @@ export default function RadiologyDashboardPage() {
 
       {/* KPI cards */}
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       {/* Recent orders */}
       <div className="flex flex-col gap-3">

@@ -18,11 +18,12 @@ import {
 import { RateVisitModal } from '@/components/patient/RateVisitModal';
 import { WaitingEstimateBadge } from '@/components/patient/WaitingEstimateBadge';
 import { usePatientAppointments, type AppointmentTab } from '@/hooks/patient';
+import { usePricing } from '@/hooks/shared';
 import { Pagination } from '@/components/ui/Pagination';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatEGP, feeForVisitType } from '@/lib/pricing';
+import { formatEGP } from '@/lib/pricing';
 import { getStatusVariant } from '@/lib/statusBadge';
 import type { Appointment } from '@/types';
 
@@ -71,11 +72,13 @@ function AppointmentCard({
   tab,
   onCancel,
   onRate,
+  appointmentFee,
 }: {
   appt: Appointment;
   tab: AppointmentTab;
   onCancel: (id: string) => void;
   onRate: (appt: Appointment) => void;
+  appointmentFee: (type: 'physical' | 'online') => number;
 }) {
   const isOnline = appt.visit_type === 'online';
   const isUpcomingCancellable =
@@ -88,7 +91,7 @@ function AppointmentCard({
     minute: '2-digit',
   });
 
-  const fee = appt.fee ?? (appt.visit_type ? feeForVisitType(appt.visit_type) : undefined);
+  const fee = appt.fee ?? (appt.visit_type ? appointmentFee(appt.visit_type as 'physical' | 'online') : undefined);
   const payment = appt.payment_status ?? 'unpaid';
   const needsOnlinePayment =
     tab === 'upcoming' && isOnline && payment !== 'paid' && appt.status !== 'cancelled';
@@ -246,6 +249,7 @@ export default function AppointmentsPage() {
     cancelAppointment,
     rateAppointment,
   } = usePatientAppointments();
+  const { appointmentFee } = usePricing();
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [rateTarget, setRateTarget] = useState<Appointment | null>(null);
   const rateCheckDone = useRef(false);
@@ -398,6 +402,7 @@ export default function AppointmentsPage() {
                 tab={activeTab}
                 onCancel={handleCancelClick}
                 onRate={setRateTarget}
+                appointmentFee={appointmentFee}
               />
             ))}
           </ul>

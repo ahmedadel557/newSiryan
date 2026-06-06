@@ -23,6 +23,9 @@ import departmentRoutes from "./routes/department.routes";
 import notificationRoutes from "./routes/notification.routes";
 import uploadRoutes from "./routes/upload.routes";
 import settingsRoutes from "./routes/settings.routes";
+import scheduleRoutes from "./routes/schedule.routes";
+import shiftsRoutes from "./routes/shifts.routes";
+import insuranceProvidersRoutes from "./routes/insuranceProviders.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { rateLimiter } from "./middlewares/rateLimiter";
 import { maintenanceGuard } from "./middlewares/maintenanceMode";
@@ -60,6 +63,9 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/schedule", scheduleRoutes);
+app.use("/api/shifts", shiftsRoutes);
+app.use("/api/insurance-providers", insuranceProvidersRoutes);
 
 app.use(errorHandler);
 

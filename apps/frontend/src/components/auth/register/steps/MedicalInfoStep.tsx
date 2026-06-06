@@ -13,6 +13,9 @@ interface MedicalInfoStepProps {
   onNidBlur?: (value: string) => void;
   nationalId?: string;
   dobHint?: string;
+  providers?: { id: string; name: string }[];
+  providersLoading?: boolean;
+  providersError?: boolean;
 }
 
 export default function MedicalInfoStep({
@@ -23,6 +26,9 @@ export default function MedicalInfoStep({
   onNidBlur,
   nationalId = '',
   dobHint,
+  providers = [],
+  providersLoading = false,
+  providersError = false,
 }: MedicalInfoStepProps) {
   const { onBlur: rhfNidBlur, ...nidReg } = pReg('national_id');
 
@@ -74,11 +80,21 @@ export default function MedicalInfoStep({
         </div>
         <div className="field">
           <label className="field-label">Insurance provider</label>
-          <select className="input select" {...pReg('insurance_provider')}>
-            <option value="">Select…</option>
-            <option value="NSSF">NSSF</option>
-            <option value="Private">Private</option>
-            <option value="None">None</option>
+          <select
+            className="input select"
+            disabled={providersLoading}
+            {...pReg('insurance_provider')}
+          >
+            {providersLoading && <option value="">Loading…</option>}
+            {!providersLoading && providersError && (
+              <option value="" disabled>Could not load insurance providers</option>
+            )}
+            {!providersLoading && !providersError && (
+              <option value="">Select…</option>
+            )}
+            {providers.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
           </select>
         </div>
       </div>

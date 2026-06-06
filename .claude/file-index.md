@@ -1,7 +1,28 @@
 # File Index
 
+## Frontend — System Health Page (2026-06-06)
+apps/frontend/src/app/dashboard/admin/system/health/page.tsx  — 4-row health dashboard: Core Services, System Resources (CPU/Memory/Heap), Application (Uptime/DB Connections/Last Deploy), Background Jobs grid
+apps/frontend/src/types/index.ts                              — SystemHealth interface expanded; CronJobStatus type added
+
+## Backend — System Health Enhancements (2026-06-06)
+apps/backend/src/controllers/admin/index.ts  — getSystemHealth: cpu, full memory (system+heap), cron_jobs, db_connections, stream_api, last_deploy; module-level CPU sampler
+apps/backend/src/server.ts                   — healthInterval broadcast expanded with all new fields
+apps/backend/src/jobs/inventoryAlert.job.ts  — + getInventoryAlertJobStatus()
+apps/backend/src/jobs/inventoryExpiry.job.ts — + getInventoryExpiryJobStatus()
+apps/backend/src/jobs/inventoryReport.job.ts — + getInventoryReportJobStatus()
+apps/backend/src/jobs/appointmentReminder.job.ts — + getAppointmentReminderJobStatus()
+apps/backend/src/jobs/profileCleanup.job.ts  — + getProfileCleanupJobStatus()
+apps/backend/src/jobs/pharmacyExpiry.job.ts  — + getPharmacyExpiryJobStatus()
+apps/backend/src/jobs/pharmacyReport.job.ts  — + getPharmacyReportJobStatus()
+
 > NOTE: Paths below use the legacy `newSiryan_backEnd/` prefix from the original plan.
 > The real location is `apps/backend/` (monorepo). New entries use the correct path.
+
+## Frontend — Shift & Schedule (Staff Dashboard + Patient Booking, 2026-06-06)
+apps/frontend/src/hooks/shared/useMySchedule.ts         — TanStack Query: GET /api/schedule/me; refetch 5min; schedule:updated socket → invalidate + toast
+apps/frontend/src/components/shared/MyScheduleWidget.tsx — rich weekly schedule card: today banner, 7-day strip, blocked/off states, skeleton
+apps/frontend/src/components/patient/TimeStep.tsx        — updated "no slots" empty state to mention doctor may not be scheduled
+All 8 staff dashboard pages (doctor/nurse/receptionist/pharmacist/lab/radiology/inventory/cashier) — MyScheduleWidget inserted after KPI strip
 
 ## Frontend — Data layer: TanStack Query v5 (Admin + Cashier, 2026-06-02)
 apps/frontend/src/lib/queryClient.ts                — singleton QueryClient (30s stale, 5min gc, retry policy)
@@ -209,6 +230,44 @@ apps/frontend/src/hooks/shared/useNotifications.ts — TanStack Query (refetchIn
 apps/frontend/src/lib/queryKeys.ts                 — ALL query key factories (admin through notifications/chatbot)
 apps/frontend/src/lib/queryClient.ts               — Singleton QueryClient
 apps/frontend/src/providers/QueryProvider.tsx      — QueryClientProvider wrapper
+
+## Frontend — Shift & Schedule System (Admin, 2026-06-06)
+apps/frontend/src/services/schedule.service.ts                      — scheduleService: shifts CRUD, dept/doctor/staff schedules upsert, blocked dates CRUD
+apps/frontend/src/hooks/admin/useAdminShifts.ts                     — TanStack Query: ShiftDefinitions list + create/update/delete mutations
+apps/frontend/src/hooks/admin/useAdminDepartmentSchedule.ts         — TanStack Query: dept schedule (by dept string) + upsert mutation
+apps/frontend/src/hooks/admin/useAdminDoctorSchedules.ts            — TanStack Query: all doctor schedules list + upsertMutation; useAdminDoctorSchedule(id) single
+apps/frontend/src/hooks/admin/useAdminStaffSchedules.ts             — TanStack Query: staff schedules (dept/role filters) + upsert + applyTemplate mutations
+apps/frontend/src/hooks/admin/useAdminBlockedDates.ts               — TanStack Query: blocked dates (scope/dept/user filters) + create/delete mutations
+apps/frontend/src/components/admin/ScheduleGrid.tsx                 — shared chip-style timetable grid; props: shifts, assignments (GridState), onAdd, onRemove; exports SCHEDULE_DAYS
+apps/frontend/src/app/dashboard/admin/schedules/page.tsx            — merged Schedules page; 5 internal tabs (Shift Definitions, Dept Schedules, Doctor Schedules, Staff Schedules, Blocked Dates); default=Doctor Schedules
+
+## Frontend — Role-Based Departments (2026-06-05)
+apps/frontend/src/services/department.service.ts           — getAll / getByRole / create / update / delete
+apps/frontend/src/hooks/admin/useAdminDepartments.ts       — TanStack Query: departments list + 3 mutations
+apps/frontend/src/app/dashboard/admin/departments/page.tsx — Admin CRUD page (table + modal + ConfirmDialog)
+apps/frontend/src/lib/queryKeys.ts                         — adminDepartments + departmentsByRole keys (already present)
+apps/frontend/src/components/auth/register/StaffForm.tsx   — role-aware department fetch (TanStack Query)
+apps/frontend/src/components/auth/register/steps/StaffProfessionalStep.tsx — department select field after role
+apps/frontend/src/components/auth/register/registerTypes.ts — staffSchema: department required
+apps/frontend/src/services/patient.service.ts              — + getDoctors(department?): GET /doctor/list
+apps/frontend/src/hooks/shared/useBooking.ts               — departments via departmentsByRole('doctor'); auto-select 1; getDoctors via service
+apps/frontend/src/components/patient/ReasonStep.tsx        — department cards (was select); Department[] prop type
+
+## Backend — Shift & Schedule System (2026-06-06)
+apps/backend/src/models/ShiftDefinition.ts          — shift time templates (name, start_time, end_time, is_active); model 'ShiftDefinition'
+apps/backend/src/models/DepartmentSchedule.ts       — weekly dept schedule (department name, entries: day_of_week+ShiftDefinition+is_active)
+apps/backend/src/models/StaffSchedule.ts            — per-staff schedule (user unique, dept, role, entries, overrides: date+is_blocked)
+apps/backend/src/models/DoctorSchedule.ts           — per-doctor schedule (user unique, admin_controlled, entries, overrides)
+apps/backend/src/models/BlockedDate.ts              — date blocks (scope dept|user, date, reason, created_by; dual compound indexes)
+apps/backend/src/controllers/admin/shiftDefinition.controller.ts    — list/create/update/softDelete ShiftDefinitions + public listActive
+apps/backend/src/controllers/admin/departmentSchedule.controller.ts — list/get/upsert/deleteEntry; upsert → notify dept staff
+apps/backend/src/controllers/admin/doctorScheduleNew.controller.ts  — list/get/upsert/deleteEntry DoctorSchedule; notify doctor
+apps/backend/src/controllers/admin/staffSchedule.controller.ts      — list/get/upsert StaffSchedule + applyDepartmentTemplate
+apps/backend/src/controllers/admin/blockedDates.controller.ts        — list/create/delete BlockedDate
+apps/backend/src/controllers/schedule.controller.ts — GET /api/schedule/me: self-view with 7-day week_view + blocked dates
+apps/backend/src/routes/schedule.routes.ts          — GET /api/schedule/me (authenticate + requireCompleteProfile)
+apps/backend/src/routes/shifts.routes.ts            — GET /api/shifts public → active ShiftDefinitions
+apps/backend/src/seeds/shiftDefinitions.seed.ts     — seeds Morning/Afternoon/Night ShiftDefinitions (idempotent)
 
 ## Backend — Role-Based Departments (2026-06-05)
 apps/backend/src/models/Department.ts            — + assigned_roles: string[], is_active: boolean

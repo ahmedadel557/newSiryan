@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { HeartPulse, AlertTriangle, Pill } from 'lucide-react';
 import { useNurse } from '@/hooks/nurse';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { VitalsDrawer } from '@/components/staff/nurse/VitalsDrawer';
 import { EmergencyFlagModal } from '@/components/staff/nurse/EmergencyFlagModal';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -131,6 +132,8 @@ export default function NurseDashboardPage() {
 
       {/* KPI Cards */}
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       {/* Activity Feed */}
       <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>

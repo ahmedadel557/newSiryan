@@ -21,6 +21,9 @@ import Notification from '../../models/Notification';
 import { hoursForShift } from '../../utils/shifts';
 import { emitToUser } from '../../config/socket';
 import BlockedSlot from '../../models/BlockedSlot';
+import DoctorSchedule from '../../models/DoctorSchedule';
+import ShiftDefinition from '../../models/ShiftDefinition';
+import BlockedDate from '../../models/BlockedDate';
 import RoomBooking from '../../models/RoomBooking';
 import Room from '../../models/Room';
 import Invoice from '../../models/Invoice';
@@ -96,10 +99,6 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
     const date = new Date(dateStr + 'T00:00:00');
     const dayOfWeek = date.getDay();
 
-    if (dayOfWeek === 5 || dayOfWeek === 6) {
-      return sendSuccess(res, { date: dateStr, available_slots: [], booked_slots: [], all_slots: [] }, 'No slots on weekends');
-    }
-
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const isToday = dateStr === todayStr;
@@ -114,38 +113,100 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
     const dayStart = new Date(dateStr + 'T00:00:00');
     const dayEnd = new Date(dateStr + 'T23:59:59');
 
-    const [booked, doctorProfile, blocks] = await Promise.all([
+    // Check new DoctorSchedule model first
+    const doctorSchedule = await DoctorSchedule.findOne({ user: doctorId })
+      .populate<{ entries: Array<{ day_of_week: number; shift: any; is_active: boolean }> }>('entries.shift', 'start_time end_time name is_active')
+      .lean();
+
+    // Check if the date is blocked in BlockedDate (department or user scope)
+    const doctorProfile = await Profile.findOne({ user: doctorId }).select('shift department').lean();
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    const nextDay = new Date(dateStr + 'T23:59:59');
+
+    const blockedDateEntry = await BlockedDate.findOne({
+      $or: [
+        { scope: 'user', user: doctorId, date: { $gte: dateObj, $lte: nextDay } },
+        { scope: 'department', department: doctorProfile?.department, date: { $gte: dateObj, $lte: nextDay } },
+      ],
+    }).lean();
+
+    if (blockedDateEntry) {
+      const payload = { date: dateStr, available_slots: [], booked_slots: [], all_slots: [], blocked: true, blocked_reason: blockedDateEntry.reason };
+      if (!isToday) cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);
+      return sendSuccess(res, payload, 'Date is blocked');
+    }
+
+    // Determine working hours from DoctorSchedule or fall back to Profile.shift
+    let allSlots: string[] = [];
+    if (doctorSchedule && doctorSchedule.entries.length > 0) {
+      // Check if doctor is scheduled on this day of week
+      const override = doctorSchedule.overrides?.find((o: any) => {
+        const d = new Date(o.date);
+        return d.toISOString().slice(0, 10) === dateStr;
+      });
+      if (override && override.is_blocked) {
+        const payload = { date: dateStr, available_slots: [], booked_slots: [], all_slots: [], blocked: true };
+        if (!isToday) cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);
+        return sendSuccess(res, payload, 'Date is blocked');
+      }
+
+      const activeEntries = doctorSchedule.entries.filter(
+        (e) => e.is_active && e.day_of_week === dayOfWeek && e.shift?.is_active !== false,
+      );
+
+      if (activeEntries.length === 0) {
+        const payload = { date: dateStr, available_slots: [], booked_slots: [], all_slots: [] };
+        if (!isToday) cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);
+        return sendSuccess(res, payload, 'Doctor not scheduled on this day');
+      }
+
+      // Collect hours from all active shift entries for this day
+      const hourSet = new Set<number>();
+      for (const entry of activeEntries) {
+        const shift = entry.shift;
+        if (!shift?.start_time || !shift?.end_time) continue;
+        const startH = parseInt(shift.start_time.split(':')[0], 10);
+        const endH = parseInt(shift.end_time.split(':')[0], 10);
+        for (let h = startH; h < endH; h++) hourSet.add(h);
+      }
+      allSlots = Array.from(hourSet).sort((a, b) => a - b).map((h) => `${String(h).padStart(2, '0')}:00`);
+    } else {
+      // Fallback: old Profile.shift + weekend logic
+      if (dayOfWeek === 5 || dayOfWeek === 6) {
+        return sendSuccess(res, { date: dateStr, available_slots: [], booked_slots: [], all_slots: [] }, 'No slots on weekends');
+      }
+      allSlots = hoursForShift((doctorProfile?.shift as any) ?? '').map(
+        (hour) => `${String(hour).padStart(2, '0')}:00`,
+      );
+    }
+
+    const [booked, blocks] = await Promise.all([
       Appointment.find({
         doctor: doctorId,
         scheduled_at: { $gte: dayStart, $lte: dayEnd },
         status: { $nin: ['cancelled'] },
       }).select('scheduled_at'),
-      Profile.findOne({ user: doctorId }).select('shift').lean(),
       BlockedSlot.find({ doctor: doctorId, date: dateStr }).select('start_hour end_hour').lean(),
     ]);
 
-    const bookedHours = new Set(booked.map(a => new Date(a.scheduled_at).getHours()));
+    const bookedHours = new Set(booked.map((a) => new Date(a.scheduled_at).getHours()));
     const blockedHours = new Set<number>();
     for (const b of blocks) {
       for (let h = b.start_hour; h < b.end_hour; h++) blockedHours.add(h);
     }
 
-    // For today, exclude hours that have already passed (backend uses local time throughout)
+    // For today, exclude hours that have already passed
     const pastHours = new Set<number>();
     if (isToday) {
       const currentHour = now.getHours();
       for (let h = 0; h <= currentHour; h++) pastHours.add(h);
     }
 
-    const allSlots = hoursForShift((doctorProfile?.shift as any) ?? '').map(
-      hour => `${String(hour).padStart(2, '0')}:00`,
-    );
-
-    const availableSlots = allSlots.filter(t => {
+    const availableSlots = allSlots.filter((t) => {
       const h = parseInt(t);
       return !bookedHours.has(h) && !blockedHours.has(h) && !pastHours.has(h);
     });
-    const bookedSlots = allSlots.filter(t => bookedHours.has(parseInt(t)));
+    const bookedSlots = allSlots.filter((t) => bookedHours.has(parseInt(t)));
 
     const payload = { date: dateStr, available_slots: availableSlots, booked_slots: bookedSlots, all_slots: allSlots };
     if (!isToday) cache.set(cacheKey, payload, CACHE_TTL.APPOINTMENT_SLOTS);

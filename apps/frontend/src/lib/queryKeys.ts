@@ -18,6 +18,18 @@ export const queryKeys = {
   // Admin — Departments
   adminDepartments: () => ['admin', 'departments'] as const,
 
+  // Admin — Schedule system
+  adminShifts: () => ['admin', 'shifts'] as const,
+  adminDepartmentSchedule: (department: string) =>
+    ['admin', 'department-schedule', department] as const,
+  adminDoctorSchedules: () => ['admin', 'doctor-schedules'] as const,
+  adminDoctorSchedule: (doctorId: string) =>
+    ['admin', 'doctor-schedule', doctorId] as const,
+  adminStaffSchedules: (filters?: Record<string, unknown>) =>
+    (filters ? ['admin', 'staff-schedules', filters] : ['admin', 'staff-schedules']) as readonly unknown[],
+  adminBlockedDates: (filters?: Record<string, unknown>) =>
+    (filters ? ['admin', 'blocked-dates', filters] : ['admin', 'blocked-dates']) as readonly unknown[],
+
   // Departments — public role filter (register form)
   departmentsByRole: (role: string) => ['departments', 'by-role', role] as const,
 
@@ -130,10 +142,16 @@ export const queryKeys = {
   bookingDepartments: () => ['booking', 'departments'] as const,
   bookingDoctors: (department: string) => ['booking', 'doctors', department] as const,
 
+  // Public pricing (no auth required)
+  publicPricing: () => ['public', 'pricing'] as const,
+
   // Notifications
   notifications: () => ['notifications'] as const,
 
   // Chatbot (placeholder — session history future use)
   chatbotHistory: (sessionId?: string) =>
     (sessionId ? ['chatbot', 'history', sessionId] : ['chatbot', 'history']) as readonly unknown[],
+
+  // Schedule — staff self-view
+  scheduleMe: () => ['schedule', 'me'] as const,
 } as const;

@@ -18,6 +18,7 @@ import type {
   RoomBookingDto,
   InsuranceCompany,
   VideoCallToken,
+  DoctorAvailability,
 } from '@/types';
 import type { MockPaymentMethod } from '@/lib/pricing';
 
@@ -241,12 +242,25 @@ export const patientService = {
     return res.data.data.map((c) => ({ ...c, id: (c as any)._id ?? c.id })) as InsuranceCompany[];
   },
 
+  async getPublicInsuranceProviders(): Promise<{ id: string; name: string }[]> {
+    const res = await apiClient.get<ApiResponse<InsuranceCompany[]>>('/insurance-providers');
+    return (res.data.data ?? []).map((c: any) => ({ id: c._id ?? c.id, name: c.name }));
+  },
+
   async getDepartments(): Promise<{ id: string; name: string }[]> {
     const res = await apiClient.get<ApiResponse<any>>('/patient/departments');
     const raw: any[] = Array.isArray(res.data.data)
       ? res.data.data
       : (res.data.data?.departments ?? []);
     return raw.map((d) => ({ id: d._id ?? d.id ?? d.name, name: d.name ?? String(d) }));
+  },
+
+  async getDoctors(department?: string): Promise<DoctorAvailability[]> {
+    const res = await apiClient.get<ApiResponse<DoctorAvailability[]>>('/doctor/list', {
+      params: department ? { department } : undefined,
+    });
+    const data = res.data.data;
+    return (Array.isArray(data) ? data : []).map((d: any) => ({ ...d, id: d._id ?? d.id }));
   },
 
   // Video token for an online appointment — backend GET /doctor/video/token/:id authorizes patients too.

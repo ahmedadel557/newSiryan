@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useUsernameCheck } from '@/hooks/shared';
 import { authService } from '@/services/auth.service';
+import { patientService } from '@/services/patient.service';
 import { extractDOBFromNationalId } from '@/lib/validateNationalId';
 import StepIndicator from '@/components/auth/shared/StepIndicator';
 import PersonalInfoStep from '@/components/auth/register/steps/PersonalInfoStep';
@@ -22,6 +23,16 @@ export default function PatientForm() {
   const [step, setStep] = useState(1);
   const [apiError, setApiError] = useState('');
   const [dobHint, setDobHint] = useState('');
+  const [providers, setProviders] = useState<{ id: string; name: string }[]>([]);
+  const [providersLoading, setProvidersLoading] = useState(true);
+  const [providersError, setProvidersError] = useState(false);
+
+  useEffect(() => {
+    patientService.getPublicInsuranceProviders()
+      .then(setProviders)
+      .catch(() => setProvidersError(true))
+      .finally(() => setProvidersLoading(false));
+  }, []);
 
   const {
     register,
@@ -113,6 +124,9 @@ export default function PatientForm() {
           onNidBlur={handleNationalIdBlur}
           nationalId={nationalIdVal}
           dobHint={dobHint}
+          providers={providers}
+          providersLoading={providersLoading}
+          providersError={providersError}
         />
       )}
 

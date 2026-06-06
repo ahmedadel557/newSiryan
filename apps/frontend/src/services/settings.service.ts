@@ -1,9 +1,14 @@
 import apiClient from './api.client';
-import type { ApiResponse, UserSettings } from '@/types';
+import type { ApiResponse, UserSettings, PricingSettings } from '@/types';
 
 const normalize = <T>(data: any): T => ({ ...data, id: data._id ?? data.id });
 
 export const settingsService = {
+  async getPublicPricing(): Promise<PricingSettings> {
+    const res = await apiClient.get<ApiResponse<PricingSettings>>('/settings/pricing');
+    return res.data.data;
+  },
+
   async getSettings(): Promise<UserSettings> {
     const res = await apiClient.get<ApiResponse<UserSettings>>('/settings');
     return normalize<UserSettings>(res.data.data);

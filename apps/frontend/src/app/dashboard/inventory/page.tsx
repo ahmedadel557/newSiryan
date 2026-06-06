@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Plus, ShoppingCart, Trash2, ArrowLeftRight, X } from 'lucide-react';
 import { useInventory } from '@/hooks/inventory';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { LowStockBanner } from '@/components/staff/inventory/LowStockBanner';
 import { InventoryTable } from '@/components/staff/inventory/InventoryTable';
 import { SupplyRequestsTable } from '@/components/staff/inventory/SupplyRequestsTable';
@@ -178,6 +179,8 @@ export default function InventoryDashboardPage() {
       )}
 
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
         <div className="card flex flex-col gap-3">

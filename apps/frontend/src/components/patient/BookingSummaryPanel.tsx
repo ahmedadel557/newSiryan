@@ -1,7 +1,7 @@
 ﻿import { Info } from 'lucide-react';
 import type { BookingFormData } from '@/hooks/shared';
 import type { DoctorAvailability } from '@/types';
-import { feeForVisitType, formatEGP } from '@/lib/pricing';
+import { formatEGP } from '@/lib/pricing';
 import React, { Fragment } from 'react';
 
 interface BookingSummaryPanelProps {
@@ -10,10 +10,11 @@ interface BookingSummaryPanelProps {
   step: number;
   onConfirm: () => void;
   isLoading: boolean;
+  appointmentFee: (type: 'physical' | 'online') => number;
 }
 
-export function BookingSummaryPanel({ formData, selectedDoctor, step, onConfirm, isLoading }: BookingSummaryPanelProps) {
-  const fee = feeForVisitType(formData.visitType);
+export function BookingSummaryPanel({ formData, selectedDoctor, step, onConfirm, isLoading, appointmentFee }: BookingSummaryPanelProps) {
+  const fee = appointmentFee(formData.visitType);
   const items = [
     { label: 'Department', value: formData.department || '—' },
     { label: 'Doctor', value: selectedDoctor?.name ?? '—' },

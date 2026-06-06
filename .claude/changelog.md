@@ -1,5 +1,270 @@
 # Changelog
 
+## [2026-06-06] Enhanced System Health Endpoint + Dashboard Page
+
+### Goal
+Expand the `/api/admin/system/health` endpoint and the admin health page with CPU, memory, cron job status, DB connections, Stream API, and last deploy info.
+
+### Backend Changes
+- `apps/backend/src/jobs/inventoryAlert.job.ts` — added `getInventoryAlertJobStatus()` export
+- `apps/backend/src/jobs/inventoryExpiry.job.ts` — added `getInventoryExpiryJobStatus()` export
+- `apps/backend/src/jobs/inventoryReport.job.ts` — added `getInventoryReportJobStatus()` export
+- `apps/backend/src/jobs/appointmentReminder.job.ts` — added `getAppointmentReminderJobStatus()` export
+- `apps/backend/src/jobs/profileCleanup.job.ts` — added `getProfileCleanupJobStatus()` export
+- `apps/backend/src/jobs/pharmacyExpiry.job.ts` — added `getPharmacyExpiryJobStatus()` export
+- `apps/backend/src/jobs/pharmacyReport.job.ts` — added `getPharmacyReportJobStatus()` export
+- `apps/backend/src/controllers/admin/index.ts` — `getSystemHealth` adds: `cpu.usage_percent`, full `memory` (system + heap), `cron_jobs` (7 jobs), `db_connections`, `stream_api`, `last_deploy`; keeps legacy fields for compat
+- `apps/backend/src/server.ts` — `healthInterval` broadcast expanded with all new fields; CPU sampler uses snapshot delta for current usage
+
+### Frontend Changes
+- `apps/frontend/src/types/index.ts` — `SystemHealth` interface expanded with all new fields; `CronJobStatus` type added
+- `apps/frontend/src/app/dashboard/admin/system/health/page.tsx` — 4-row layout: Row 1 Core Services (MongoDB/Redis/Socket.IO/Stream API), Row 2 System Resources (CPU/Memory/Heap each with colored progress bar), Row 3 Application (Uptime/DB Connections/Last Deploy), Row 4 Background Jobs grid
+
+### New Response Shape (health endpoint)
+```
+{ mongodb, redis, socket, uptime, cpu, memory, cron_jobs, db_connections, stream_api, last_deploy }
+```
+
+---
+
+## [2026-06-06] Merged All Schedule Pages into Single Tabbed Page
+
+### Goal
+Replace 5 separate schedule pages and sidebar items with one `/dashboard/admin/schedules` page containing 5 internal tabs.
+
+### New Files
+- `apps/frontend/src/components/admin/ScheduleGrid.tsx` — shared chip-style timetable grid; props: shifts, assignments (GridState), onAdd, onRemove, isLoading, isMutating; exports SCHEDULE_DAYS, GridPerson, GridState, GridShift
+
+### Changed Files
+- `apps/frontend/src/app/dashboard/admin/schedules/page.tsx` — replaced old weekly slot overview with new merged page; 5 tabs: Shift Definitions | Dept Schedules | Doctor Schedules | Staff Schedules | Blocked Dates; default tab = Doctor Schedules; tab bar with brand-color bottom border on active tab
+- `apps/frontend/src/config/navItems.tsx` — replaced 5 schedule nav items (Shift Definitions, Dept Schedules, Doctor Schedules, Staff Schedules, Blocked Dates) with one "Schedules" entry pointing to `/dashboard/admin/schedules`
+
+### Deleted Files
+- `apps/frontend/src/app/dashboard/admin/shifts/page.tsx`
+- `apps/frontend/src/app/dashboard/admin/schedules/department/page.tsx`
+- `apps/frontend/src/app/dashboard/admin/schedules/doctors/page.tsx`
+- `apps/frontend/src/app/dashboard/admin/schedules/staff/page.tsx`
+- `apps/frontend/src/app/dashboard/admin/schedules/blocked-dates/page.tsx`
+
+### Tab Details
+- **Shift Definitions** — KPI strip + add/edit/deactivate shift modal (same as old shifts page)
+- **Dept Schedules** — department picker + checkbox grid (same as old dept page)
+- **Doctor Schedules** — department selector + ScheduleGrid chip timetable + AddDoctorModal (refactored from old doctors page)
+- **Staff Schedules** — role+dept selectors + ScheduleGrid chip timetable + AddStaffModal (new chip-style design; replaces old list+modal design); "Apply Dept Template" button with confirm dialog
+- **Blocked Dates** — inner dept/individual tabs + forms + lists (same as old blocked-dates page)
+
+
+
+## [2026-06-06] Dynamic Insurance Providers in Patient Register Form
+
+### Goal
+Replace the hardcoded insurance provider dropdown in the patient registration form with a live list fetched from the backend.
+
+### Backend Changes
+- `apps/backend/src/routes/insuranceProviders.routes.ts` — new public route file; `GET /` → `getInsuranceCompanies` (no auth required)
+- `apps/backend/src/app.ts` — mounts `/api/insurance-providers`
+
+### Frontend Changes
+- `apps/frontend/src/services/patient.service.ts` — `getPublicInsuranceProviders()` calls `GET /insurance-providers`; returns `{ id, name }[]`
+- `apps/frontend/src/components/auth/register/PatientForm.tsx` — fetches providers on mount via `useEffect`; passes `providers`, `providersLoading`, `providersError` to `MedicalInfoStep`
+- `apps/frontend/src/components/auth/register/steps/MedicalInfoStep.tsx` — accepts provider props; renders dynamic `<option>` list; shows "Loading…" while fetching; shows "Could not load insurance providers" on error; dropdown disabled while loading
+
+
+
+## [2026-06-06] Doctor Schedules Page — Grid Timetable UI
+
+### Goal
+Replace the doctor schedule list view with a school-timetable-style grid: rows = shifts, columns = 7 days (Sat→Fri), cells = doctor name chips with inline add/remove.
+
+### Changed File
+`apps/frontend/src/app/dashboard/admin/schedules/doctors/page.tsx` — full rewrite.
+
+### Features
+- **Department selector** at the top (fetches from `departmentService.getByRole('doctor')` via TanStack Query); grid and modal both filter by selected department.
+- **Timetable grid**: `<table>` with `border-collapse`; first column = shift label (name + HH:MM–HH:MM, `--sand-50` bg); header row = day names (`--sand-100` bg); today's column highlighted with `--brand-soft`.
+- **Doctor chips**: pill-shaped (`--brand-soft` bg, `--border-1` border), name truncated with `title`, inline `×` button (turns `--critical` on hover) to remove.
+- **Remove flow**: finds the doctor's schedule record, filters out the entry, calls `upsertMutation`.
+- **Add flow**: dashed `+` ghost button at the bottom of each cell opens `AddDoctorModal`.
+- **AddDoctorModal**: title "Assign Doctor · [Day] · [Shift]"; autofocused search input; list of doctors in the department (avatar initials, name, specialization); already-assigned doctors greyed out with "✓ Assigned" badge; clicking "Assign" calls `upsertMutation` (merges with existing entries, no duplicates) then closes modal.
+- **Grid builder** (`buildGrid`): pure function, `useMemo`-derived — no local state for cell contents; data flows from `useAdminDoctorSchedules` cache.
+- **Empty states**: "Select a department", "No shift definitions", loading skeletons for both grid and modal.
+- **Responsive**: `overflow-x: auto` wrapper; `minWidth: 860px` table; `colgroup` for column widths.
+- **TypeScript**: `npx tsc --noEmit` → 0 errors.
+
+### No new hooks/services/types needed — reuses existing `useAdminDoctorSchedules`, `useAdminShifts`, `departmentService`, `patientService.getDoctors`.
+
+---
+
+## [2026-06-06] Shift & Schedule System — Frontend (Staff Dashboard + Patient Booking)
+
+### Goal
+Frontend integration for the backend schedule system: `useMySchedule` hook (TanStack Query + socket), `MyScheduleWidget` component (rich weekly view), integration into all 8 staff dashboards, and improved patient booking empty state.
+
+### New Hook
+- `apps/frontend/src/hooks/shared/useMySchedule.ts` — TanStack Query v5; GET /api/schedule/me; queryKey `['schedule','me']`; refetchInterval 5min; listens to `schedule:updated` socket event → invalidate + toast "Your schedule has been updated by the admin."
+
+### New Component
+- `apps/frontend/src/components/shared/MyScheduleWidget.tsx` — full-featured weekly schedule card; today banner (brand color, shift name + time range); 7-day horizontal strip; today highlighted; blocked → "Day Off"; no shift → "Off"; loading skeleton; empty state for no schedule; department badge in header.
+
+### Updated Files
+- `apps/frontend/src/lib/queryKeys.ts` — added `scheduleMe()` factory
+- `apps/frontend/src/types/index.ts` — added `WeekViewDay`, `MyScheduleResponse` interfaces
+- `apps/frontend/src/hooks/shared/index.ts` — exports `useMySchedule`
+- All 8 staff dashboards (doctor, nurse, receptionist, pharmacist, lab, radiology, inventory, cashier) — `<MyScheduleWidget />` inserted after KPI strip
+- `apps/frontend/src/components/patient/TimeStep.tsx` — "no slots" message now reads "No available slots for this day. The doctor may not be scheduled on this day."
+
+---
+
+## [2026-06-06] Shift & Schedule System — Frontend (Admin)
+
+### Goal
+Admin UI for the shift/schedule system. Five new pages under the admin dashboard; all backed by TanStack Query v5 hooks and a new `schedule.service.ts`.
+
+### New Types (`apps/frontend/src/types/index.ts`)
+- `ShiftDefinition` — shift template (name, start_time, end_time, is_active)
+- `ScheduleEntry` — single day+shift cell (day_of_week, shift ref/populated, is_active)
+- `DepartmentScheduleRecord` — department → entries[]
+- `DoctorScheduleRecord` — user → entries[] + doctor_name/department/specialization
+- `StaffScheduleRecord` — user → role + department + entries[]
+- `BlockedDateRecord` — scope(department|user) + date + reason + created_by
+
+### New Service (`apps/frontend/src/services/schedule.service.ts`)
+Methods: getShifts, createShift, updateShift, deleteShift, getDepartmentSchedule, upsertDepartmentSchedule, getDoctorSchedules, getDoctorSchedule, upsertDoctorSchedule, getStaffSchedules, upsertStaffSchedule, applyDepartmentTemplate, getBlockedDates, createBlockedDate, deleteBlockedDate.
+Routes: `/admin/schedule/shifts`, `/admin/department-schedules`, `/admin/doctor-schedules`, `/admin/staff-schedules`, `/admin/blocked-dates`.
+
+### New Query Keys (`apps/frontend/src/lib/queryKeys.ts`)
+adminShifts, adminDepartmentSchedule(dept), adminDoctorSchedules, adminDoctorSchedule(id), adminStaffSchedules(filters?), adminBlockedDates(filters?)
+
+### New Hooks (`apps/frontend/src/hooks/admin/`)
+- `useAdminShifts.ts` — query + create/update/delete mutations
+- `useAdminDepartmentSchedule.ts` — query(dept) + upsert mutation; 404 retry=false
+- `useAdminDoctorSchedules.ts` — list query + upsert mutation; `useAdminDoctorSchedule(id)` single
+- `useAdminStaffSchedules.ts` — list query(filters) + upsert + applyTemplate mutations
+- `useAdminBlockedDates.ts` — list query(filters) + create/delete mutations
+All exported from `hooks/admin/index.ts`.
+
+### New Admin Pages
+- `app/dashboard/admin/shifts/page.tsx` — "Shift Definitions" table (replaces old assignment page); inline add/edit modal; KPI strip
+- `app/dashboard/admin/schedules/department/page.tsx` — department picker + weekly grid (Sat→Fri × active shifts); checkbox cells; Save button
+- `app/dashboard/admin/schedules/doctors/page.tsx` — list of doctor schedule records; search + dept filter; click → `SchedulePanel` modal with weekly grid
+- `app/dashboard/admin/schedules/staff/page.tsx` — list of staff schedule records; dept + role + name filters; edit panel; "Apply dept template" confirmation flow
+- `app/dashboard/admin/schedules/blocked-dates/page.tsx` — "Department" / "Individual" tabs; inline form; table of existing blocks with delete
+
+### Nav Update (`apps/frontend/src/config/navItems.tsx`)
+Replaced "Schedules" + "Shifts" nav items with 5 items: Shift Definitions (Clock), Dept Schedules (CalendarDays), Doctor Schedules (Stethoscope), Staff Schedules (Users), Blocked Dates (CalendarX). Added Stethoscope + CalendarX to lucide imports.
+
+---
+
+## [2026-06-06] Shift & Schedule System — Backend
+
+### Goal
+Full shift-definition and weekly schedule system for departments, doctors, and non-doctor staff. Replaces the flat Profile.shift string approach with structured, admin-controlled schedules tied to reusable shift time templates.
+
+### New Models
+- `apps/backend/src/models/ShiftDefinition.ts` — shift time templates (name, start_time HH:MM, end_time, is_active). Mongoose model `ShiftDefinition`.
+- `apps/backend/src/models/DepartmentSchedule.ts` — per-department weekly repeating schedule. entries: [{day_of_week 0–6, shift: ShiftDefinition ref, is_active}]. One doc per department (upsert).
+- `apps/backend/src/models/StaffSchedule.ts` — per-staff-user schedule. entries same shape + overrides [{date, is_blocked, reason}]. One doc per user (unique).
+- `apps/backend/src/models/DoctorSchedule.ts` — per-doctor schedule with admin_controlled flag + same entries/overrides shape. One doc per doctor (unique).
+- `apps/backend/src/models/BlockedDate.ts` — scope-based date blocks (scope: department|user, department string, user ref, date, reason, created_by). Dual compound indexes.
+
+### New Admin Controllers
+- `controllers/admin/shiftDefinition.controller.ts` — CRUD for ShiftDefinition + public listActive export
+- `controllers/admin/departmentSchedule.controller.ts` — list/get/upsert/deleteEntry; upsert notifies all dept staff (Notification + socket schedule:updated)
+- `controllers/admin/doctorScheduleNew.controller.ts` — list/get/upsert/deleteEntry for DoctorSchedule; notifies doctor on save; invalidates DOCTOR_SCHEDULE cache
+- `controllers/admin/staffSchedule.controller.ts` — list/get/upsert + applyDepartmentTemplate (bulk-applies dept template to all non-doctor staff)
+- `controllers/admin/blockedDates.controller.ts` — list (filterable by scope/dept/user/date range)/create/delete
+
+### New General Controllers
+- `controllers/schedule.controller.ts` — GET /api/schedule/me: returns calling user's DoctorSchedule or StaffSchedule populated with shifts + blocked dates (dept + user scope) + next-7-days week_view computation
+
+### New Routes / Route Updates
+- `routes/schedule.routes.ts` — GET /api/schedule/me (authenticate + requireCompleteProfile, any role)
+- `routes/shifts.routes.ts` — GET /api/shifts (public, no auth) → lists active ShiftDefinitions
+- `routes/admin.routes.ts` — Sections 13–17 added:
+  - `/schedule/shifts` — ShiftDefinition CRUD (avoids collision with existing `/shifts` assignment routes)
+  - `/department-schedules` — DepartmentSchedule CRUD
+  - `/doctor-schedules` — DoctorSchedule CRUD
+  - `/staff-schedules` — StaffSchedule CRUD + POST /staff-schedules/department-template
+  - `/blocked-dates` — BlockedDate CRUD
+
+### app.ts Mounts
+- `/api/schedule` → scheduleRoutes
+- `/api/shifts` → shiftsRoutes (public)
+
+### Doctor Availability Update (`controllers/doctor/index.ts`)
+- `getDoctorAvailability` now checks `DoctorSchedule` first:
+  - Checks `BlockedDate` (user + dept scope) — returns `blocked: true` if found
+  - Checks `DoctorSchedule.overrides` for specific-date blocks
+  - Computes available hours from `DoctorSchedule.entries` (day_of_week + ShiftDefinition time range)
+  - Falls back to old Profile.shift + weekend logic if no DoctorSchedule doc exists
+
+### Seed
+- `seeds/shiftDefinitions.seed.ts` — seeds Morning (08:00–14:00), Afternoon (14:00–20:00), Night (20:00–08:00) ShiftDefinitions on startup (idempotent upsert)
+- Wired into `server.ts` startup sequence
+
+### Naming Note
+The existing `Shift.ts` model is a staff-assignment record (user+date-range). The new `ShiftDefinition.ts` is the time template. Existing `/api/admin/shifts` routes remain unchanged. New ShiftDefinition admin routes are at `/api/admin/schedule/shifts`.
+
+---
+
+## [2026-06-05] Role-Based Departments — Frontend (Patient Booking)
+
+### Goal
+Improve the patient booking flow to use role-filtered departments (`/departments/by-role?role=doctor`)
+and replace the department dropdown in step 1 with visual clickable cards.
+
+### Service (`apps/frontend/src/services/patient.service.ts`)
+- Added `getDoctors(department?: string)` → `GET /doctor/list?department=name` (wraps the existing direct apiClient call)
+- Imported `DoctorAvailability` type
+
+### Hook (`apps/frontend/src/hooks/shared/useBooking.ts`)
+- Departments query switched from `patientService.getDepartments()` (all depts) to `departmentService.getByRole('doctor')` (role-filtered)
+- Query key changed from `bookingDepartments()` to `departmentsByRole('doctor')`
+- Auto-select: if exactly one department exists, always force-select it; otherwise select first on initial load
+- Doctor fetch uses `patientService.getDoctors(formData.department)` (service layer) instead of direct apiClient call
+- `departments` return type is now `Department[]`
+
+### UI (`apps/frontend/src/components/patient/ReasonStep.tsx`)
+- Department `<select>` replaced with a 2/3-column grid of clickable cards
+- Selected card gets `brand` border + `brand-soft-bg` highlight
+- Loading state shows 3 Skeleton placeholders
+- Prop type for `departments` updated from `{ id: string; name: string }[]` to `Department[]`
+
+---
+
+## [2026-06-05] Role-Based Departments — Frontend (Admin + Register)
+
+### Goal
+Frontend support for the role-aware departments system: admin CRUD page, TanStack Query hook,
+department service, nav item, and staff register form department select.
+
+### Service (`apps/frontend/src/services/department.service.ts`)
+- `getAll(includeInactive?)`: `GET /admin/departments` — admin list (active + inactive)
+- `getByRole(role)`: `GET /departments/by-role?role=` — public role-filtered list
+- `create`, `update`, `delete` for admin CRUD
+
+### Hook (`apps/frontend/src/hooks/admin/useAdminDepartments.ts`)
+- TanStack Query v5; key `['admin','departments']`; `createDepartment`, `updateDepartment`, `deleteDepartment` mutations — all invalidate on success
+
+### Admin Page (`apps/frontend/src/app/dashboard/admin/departments/page.tsx`)
+- Table with department name, description, assigned-role badges, doctor count, active badge, edit/delete actions
+- Add/Edit modal: name, description, assigned-roles grid (8 checkboxes), is_active toggle
+- ConfirmDialog wired for soft-delete; loading skeletons and empty state
+
+### Nav (`apps/frontend/src/config/navItems.tsx`)
+- "Departments" entry (Building2 icon) already present in `adminNav`
+
+### Staff Register Form
+- `StaffForm.tsx`: TanStack Query fetches `departmentService.getByRole(role)` when role is selected; resets department + specialization on role change
+- `StaffProfessionalStep.tsx`: Department select rendered after Role; disabled until role selected; placeholder changes on loading / empty
+- `registerTypes.ts`: `staffSchema.department` is `required`; `staffSchema.specialization` required only when `role === 'doctor'`
+
+### Query Keys (`apps/frontend/src/lib/queryKeys.ts`)
+- `adminDepartments`: `['admin','departments']`
+- `departmentsByRole(role)`: `['departments','by-role', role]` (used by register + booking hooks)
+
+---
+
 ## [2026-06-05] Role-Based Departments — Backend
 
 ### Goal

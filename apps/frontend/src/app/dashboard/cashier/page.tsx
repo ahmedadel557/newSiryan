@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, FileText } from 'lucide-react';
 import { useCashierDashboard } from '@/hooks/cashier';
 import { useSocketEvent } from '@/hooks/shared';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { TodaysTransactions } from '@/components/staff/cashier/TodaysTransactions';
 import { CreateInvoiceModal } from '@/components/staff/cashier/CreateInvoiceModal';
@@ -85,6 +86,8 @@ export default function CashierDashboardPage() {
       )}
 
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       <TodaysTransactions transactions={transactions} loading={loading} />
 

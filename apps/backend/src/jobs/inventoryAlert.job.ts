@@ -95,7 +95,11 @@ const runInventoryCheck = async () => {
   }
 };
 
+let _started = false;
+export const getInventoryAlertJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startInventoryAlertJob = () => {
+  _started = true;
   const task = cron.schedule(
     "0 */6 * * *",
     runInventoryCheck,

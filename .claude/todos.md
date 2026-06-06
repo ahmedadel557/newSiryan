@@ -1,6 +1,7 @@
 # TODOs
 
 ## High Priority
+- [ ] Browser smoke-test MyScheduleWidget: (1) staff with schedule configured see weekly strip + today banner; (2) staff with no schedule see "No schedule configured yet" state; (3) changing schedule via admin → `schedule:updated` socket fires → toast shown + widget refreshes.
 - [ ] Test full doctor flow locally with real Stream credentials (set backend `STREAM_API_KEY`/`STREAM_API_SECRET` + frontend `NEXT_PUBLIC_STREAM_API_KEY`; verify video call + in-call chat doctor↔patient). In-call chat also needs the **Chat product enabled** on the Stream app.
 - [ ] Browser smoke-test the full TanStack Query migration (all 10 roles now migrated). Key things to verify: (1) Admin/cashier pages; (2) nurse alerts, receptionist queue, pharmacist orders, lab/radiology; (3) socket-driven cache invalidations across roles; (4) notifications bell updates in real time via socket + refetchInterval.
 - [ ] Consider adding React Query Devtools for staging only — exclude from production build using `process.env.NODE_ENV !== 'production'` guard in `QueryProvider.tsx`. (The devtools package `@tanstack/react-query-devtools` is already installed.)

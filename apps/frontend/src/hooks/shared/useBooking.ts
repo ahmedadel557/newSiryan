@@ -4,9 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/services/api.client';
 import { patientService } from '@/services/patient.service';
+import { departmentService } from '@/services/department.service';
 import { queryKeys } from '@/lib/queryKeys';
 import { useToast } from './useToast';
-import type { ApiResponse, DoctorAvailability, TimeSlot } from '@/types';
+import { usePricing } from './usePricing';
+import type { ApiResponse, Department, DoctorAvailability, TimeSlot } from '@/types';
 
 export type BookingStep = 1 | 2 | 3 | 4;
 
@@ -26,6 +28,7 @@ function todayStr(): string {
 export function useBooking() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { pricing, appointmentFee } = usePricing();
 
   const [step, setStep] = useState<BookingStep>(1);
   const [formData, setFormData] = useState<BookingFormData>({
@@ -49,19 +52,25 @@ export function useBooking() {
 
   const retryDoctors = useCallback(() => setDoctorsRetryKey((k) => k + 1), []);
 
-  // ── Departments (TanStack Query) ──────────────────────────────────────────
-  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-    queryKey: queryKeys.bookingDepartments(),
-    queryFn: () => patientService.getDepartments(),
+  // ── Departments (role-filtered: only depts that accept doctors) ──────────
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery<Department[]>({
+    queryKey: queryKeys.departmentsByRole('doctor'),
+    queryFn: () => departmentService.getByRole('doctor'),
     staleTime: 5 * 60 * 1000,
   });
 
-  // Set first department as default once list loads
+  // Auto-select: first dept on initial load; always auto-select if only one exists
   useEffect(() => {
-    if (departments.length > 0 && formData.department === '') {
+    if (departments.length === 0) return;
+    if (departments.length === 1) {
+      setFormData((prev) => ({ ...prev, department: departments[0].name }));
+      return;
+    }
+    if (formData.department === '') {
       setFormData((prev) => ({ ...prev, department: departments[0].name }));
     }
-  }, [departments, formData.department]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departments]);
 
   // Clear selected doctor whenever department changes (skip initial mount)
   useEffect(() => {
@@ -80,13 +89,10 @@ export function useBooking() {
     if (step !== 2 || !formData.department) return;
     setIsDoctorsLoading(true);
     setDoctorsError(false);
-    apiClient
-      .get<ApiResponse<DoctorAvailability[]>>('/doctor/list', {
-        params: { department: formData.department },
-      })
-      .then((r) => {
-        const data = r.data.data;
-        setDoctors(Array.isArray(data) ? data : []);
+    patientService
+      .getDoctors(formData.department)
+      .then((data) => {
+        setDoctors(data);
         setDoctorsError(false);
       })
       .catch(() => {
@@ -176,6 +182,8 @@ export function useBooking() {
     selectedDoctor,
     departments,
     departmentsLoading,
+    pricing,
+    appointmentFee,
     update,
     nextStep,
     prevStep,

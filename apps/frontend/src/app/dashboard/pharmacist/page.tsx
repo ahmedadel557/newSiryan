@@ -2,6 +2,7 @@
 
 import { usePharmacistDashboard } from '@/hooks/pharmacist';
 import { PharmacistSummaryCards } from '@/components/staff/pharmacist/PharmacistSummaryCards';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { RecentOrdersList } from '@/components/staff/pharmacist/RecentOrdersList';
 import { LowStockAlertList } from '@/components/staff/pharmacist/LowStockAlertList';
 import { ExpiringAlertList } from '@/components/staff/pharmacist/ExpiringAlertList';
@@ -29,6 +30,8 @@ export default function PharmacistDashboardPage() {
 
       {/* Summary cards */}
       <PharmacistSummaryCards stats={stats} />
+
+      <MyScheduleWidget />
 
       {/* Recent orders */}
       <div>

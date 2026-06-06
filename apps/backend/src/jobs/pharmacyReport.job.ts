@@ -76,7 +76,11 @@ const generateDailyReport = async (targetDate?: Date) => {
 
 export { generateDailyReport };
 
+let _started = false;
+export const getPharmacyReportJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startPharmacyReportJob = () => {
+  _started = true;
   const task = cron.schedule('59 23 * * *', () => generateDailyReport(), { timezone: 'Africa/Cairo' });
   console.log('Pharmacy daily report job started');
   return task;

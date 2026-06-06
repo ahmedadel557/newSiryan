@@ -1,7 +1,7 @@
 ﻿import { Calendar, Clock, User, Stethoscope, Wallet, FileText } from 'lucide-react';
 import type { BookingFormData } from '@/hooks/shared';
 import type { DoctorAvailability } from '@/types';
-import { feeForVisitType, formatEGP } from '@/lib/pricing';
+import { formatEGP } from '@/lib/pricing';
 
 interface ConfirmStepProps {
   formData: BookingFormData;
@@ -9,10 +9,11 @@ interface ConfirmStepProps {
   onBack: () => void;
   onConfirm: () => void;
   isLoading: boolean;
+  appointmentFee: (type: 'physical' | 'online') => number;
 }
 
-export function ConfirmStep({ formData, selectedDoctor, onBack, onConfirm, isLoading }: ConfirmStepProps) {
-  const fee = feeForVisitType(formData.visitType);
+export function ConfirmStep({ formData, selectedDoctor, onBack, onConfirm, isLoading, appointmentFee }: ConfirmStepProps) {
+  const fee = appointmentFee(formData.visitType);
   const rows = [
     { icon: <Stethoscope size={16} />, label: 'Department', value: formData.department },
     { icon: <User size={16} />, label: 'Doctor', value: selectedDoctor?.name ?? '—' },

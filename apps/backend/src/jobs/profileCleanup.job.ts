@@ -32,7 +32,11 @@ const runProfileCleanup = async () => {
   }
 };
 
+let _started = false;
+export const getProfileCleanupJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startProfileCleanupJob = () => {
+  _started = true;
   const task = cron.schedule("0 2 * * *", runProfileCleanup, {
     timezone: "Africa/Cairo",
   });

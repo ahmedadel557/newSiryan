@@ -1222,6 +1222,89 @@ export interface AssignShiftDto {
   notes?: string;
 }
 
+// ---- Shift Definitions (new schedule system) ----
+export interface ShiftDefinition {
+  id: string;
+  _id?: string;
+  name: string;
+  start_time: string; // HH:MM
+  end_time: string;   // HH:MM
+  is_active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScheduleEntry {
+  id: string;
+  _id?: string;
+  day_of_week: number; // 0=Sun … 6=Sat
+  shift: ShiftDefinition | string;
+  is_active: boolean;
+}
+
+export interface DepartmentScheduleRecord {
+  id: string;
+  _id?: string;
+  department: string;
+  entries: ScheduleEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DoctorScheduleRecord {
+  id: string;
+  _id?: string;
+  user: string | { id: string; _id?: string; username: string; email: string };
+  doctor_id?: string;
+  doctor_name?: string;
+  department?: string;
+  specialization?: string;
+  admin_controlled: boolean;
+  entries: ScheduleEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StaffScheduleRecord {
+  id: string;
+  _id?: string;
+  user: string | { id: string; _id?: string; username: string; email: string; role: string };
+  staff_name?: string;
+  department: string;
+  role: string;
+  entries: ScheduleEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlockedDateRecord {
+  id: string;
+  _id?: string;
+  scope: 'department' | 'user';
+  department?: string;
+  user?: { id: string; _id?: string; username: string; email: string; role: string } | string;
+  date: string;
+  reason?: string;
+  created_by: { username: string; email: string } | string;
+  createdAt: string;
+}
+
+export interface WeekViewDay {
+  date: string;
+  day_of_week: number;
+  shift: { name: string; start_time: string; end_time: string } | null;
+  is_working: boolean;
+  blocked_reason?: string;
+}
+
+export interface MyScheduleResponse {
+  role: string;
+  department: string;
+  schedule: DoctorScheduleRecord | StaffScheduleRecord | null;
+  week_view: WeekViewDay[];
+  message?: string;
+}
+
 // ---- Announcements ----
 export interface Announcement {
   id: string;
@@ -1293,13 +1376,30 @@ export interface SystemHealthEntry {
   latency_ms?: number;
   message?: string;
 }
+export type CronJobStatus = 'running' | 'stopped';
 export interface SystemHealth {
   mongodb: SystemHealthEntry;
   redis: SystemHealthEntry;
-  socket_connections: number;
-  uptime_seconds: number;
-  memory: { used_mb: number; total_mb: number; percentage: number };
-  checked_at: string;
+  socket: { active_connections: number };
+  uptime: number;
+  cpu: { usage_percent: number };
+  memory: { used_mb: number; total_mb: number; percent: number; heap_used_mb: number; heap_total_mb: number };
+  cron_jobs: {
+    inventory_alert: CronJobStatus;
+    inventory_expiry: CronJobStatus;
+    inventory_report: CronJobStatus;
+    appointment_reminder: CronJobStatus;
+    profile_cleanup: CronJobStatus;
+    pharmacy_expiry: CronJobStatus;
+    pharmacy_report: CronJobStatus;
+  };
+  db_connections: { active: number; available: number };
+  stream_api: { status: 'ok' | 'unavailable' };
+  last_deploy: { timestamp: string };
+  // Legacy fields kept for compat
+  socket_connections?: number;
+  uptime_seconds?: number;
+  checked_at?: string;
 }
 export interface ErrorLog {
   id: string;

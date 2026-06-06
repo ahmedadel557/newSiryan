@@ -35,7 +35,14 @@
       "Bash(npx next *)",
       "Bash(Select-String -Pattern \"kB|First Load|shared\")",
       "Bash(git commit *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\('Sunset:', !!l.Sunset, 'BanIcon:', !!l.BanIcon, 'Moon:', !!l.Moon, 'Sun:', !!l.Sun\\)\")",
+      "PowerShell(cd \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\"; npx tsc --noEmit; Write-Host \"Exit: $LASTEXITCODE\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\shifts\\\\page.tsx\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\department\\\\page.tsx\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\doctors\\\\page.tsx\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\staff\\\\page.tsx\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\blocked-dates\\\\page.tsx\" -Force)"
     ]
   }
 }

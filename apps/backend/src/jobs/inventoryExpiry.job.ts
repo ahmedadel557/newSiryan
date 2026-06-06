@@ -105,7 +105,11 @@ export const runInventoryExpiryCheck = async () => {
   }
 };
 
+let _started = false;
+export const getInventoryExpiryJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startInventoryExpiryJob = () => {
+  _started = true;
   const task = cron.schedule(
     "0 7 * * *",
     runInventoryExpiryCheck,

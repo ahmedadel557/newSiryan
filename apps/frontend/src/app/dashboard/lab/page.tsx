@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { FlaskConical, CalendarDays, ArrowRight } from 'lucide-react';
 import { useLab } from '@/hooks/lab';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { LabOrdersTable } from '@/components/staff/lab/LabOrdersTable';
 import { UploadResultsModal } from '@/components/staff/lab/UploadResultsModal';
 
@@ -59,6 +60,8 @@ export default function LabDashboardPage() {
 
       {/* KPI cards */}
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       {/* Recent orders */}
       <div className="flex flex-col gap-3">

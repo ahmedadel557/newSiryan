@@ -77,7 +77,11 @@ const runExpiryCheck = async () => {
   }
 };
 
+let _started = false;
+export const getPharmacyExpiryJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startPharmacyExpiryJob = () => {
+  _started = true;
   const task = cron.schedule('0 8 * * *', runExpiryCheck, { timezone: 'Africa/Cairo' });
   console.log('Pharmacy expiry alert job started');
   return task;

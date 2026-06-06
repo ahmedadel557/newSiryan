@@ -213,7 +213,11 @@ const runAppointmentReminders =
     }
   };
 
+let _started = false;
+export const getAppointmentReminderJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startAppointmentReminderJob = () => {
+  _started = true;
   const task = cron.schedule(
     "*/5 * * * *",
     runAppointmentReminders,

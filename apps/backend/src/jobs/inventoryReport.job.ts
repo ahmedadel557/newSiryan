@@ -23,7 +23,11 @@ export const generateInventoryReport = async (targetDate?: Date) => {
   }
 };
 
+let _started = false;
+export const getInventoryReportJobStatus = (): 'running' | 'stopped' => _started ? 'running' : 'stopped';
+
 export const startInventoryReportJob = () => {
+  _started = true;
   const task = cron.schedule(
     "0 1 1 * *",
     () => generateInventoryReport(),

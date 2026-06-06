@@ -41,7 +41,7 @@ export function TimeStep({ selectedDate, slots, slotsLoading, selectedSlot, onDa
         ) : !selectedDate ? (
           <p className="text-[13px] text-[var(--fg-3)]">Pick a date above to see available slots.</p>
         ) : slots.length === 0 ? (
-          <p className="text-[13px] text-[var(--fg-3)]">No slots available for this date.</p>
+          <p className="text-[13px] text-[var(--fg-3)]">No available slots for this day. The doctor may not be scheduled on this day.</p>
         ) : (
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
             {slots.map((slot) => {

@@ -7,6 +7,7 @@ import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
 import { DoctorShiftCard } from '@/components/doctor/DoctorShiftCard';
 import { DoctorRatingsCard } from '@/components/doctor/DoctorRatingsCard';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { PatientQueueTable } from '@/components/doctor/PatientQueueTable';
 import { ActiveAlertsCard } from '@/components/doctor/ActiveAlertsCard';
 import { EmergencyAlertBanner } from '@/components/doctor/EmergencyAlertBanner';
@@ -122,6 +123,8 @@ export default function DoctorQueuePage() {
       </div>
 
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       <ActiveAlertsCard />
 

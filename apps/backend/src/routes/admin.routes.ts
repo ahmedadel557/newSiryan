@@ -32,6 +32,21 @@ import { getStaffProfile, updateStaffProfile } from '../controllers/staff/profil
 import { updateStaffProfileSchema } from '../validations/staff.validation';
 import Profile from '../models/Profile';
 import { sendSuccess } from '../utils/response';
+import {
+  listShiftDefinitions, createShiftDefinition, updateShiftDefinition, deleteShiftDefinition,
+} from '../controllers/admin/shiftDefinition.controller';
+import {
+  listDepartmentSchedules, getDepartmentSchedule, upsertDepartmentSchedule, deleteDepartmentScheduleEntry,
+} from '../controllers/admin/departmentSchedule.controller';
+import {
+  listDoctorSchedules, getDoctorScheduleNew, upsertDoctorSchedule, deleteDoctorScheduleEntry,
+} from '../controllers/admin/doctorScheduleNew.controller';
+import {
+  listStaffSchedules, getStaffSchedule, upsertStaffSchedule, applyDepartmentTemplate,
+} from '../controllers/admin/staffSchedule.controller';
+import {
+  listBlockedDates, createBlockedDate, deleteBlockedDate,
+} from '../controllers/admin/blockedDates.controller';
 
 const router = Router();
 
@@ -140,5 +155,36 @@ router.patch('/deletion-requests/:id/reject', validateRequest(rejectDeletionSche
 // ─── Section 12: System Health ────────────────────────────────────────────────
 router.get('/system/health', getSystemHealth);
 router.get('/system/logs', getSystemLogs);
+
+// ─── Section 13: Shift Definitions (time templates: Morning/Afternoon/Evening) ─
+// Note: existing /shifts routes are staff-assignment records (Shift model).
+// New /schedule/shifts routes manage ShiftDefinition templates used by schedules.
+router.get('/schedule/shifts', listShiftDefinitions);
+router.post('/schedule/shifts', createShiftDefinition);
+router.put('/schedule/shifts/:id', updateShiftDefinition);
+router.delete('/schedule/shifts/:id', deleteShiftDefinition);
+
+// ─── Section 14: Department Schedules ────────────────────────────────────────
+router.get('/department-schedules', listDepartmentSchedules);
+router.get('/department-schedules/:department', getDepartmentSchedule);
+router.put('/department-schedules/:department', upsertDepartmentSchedule);
+router.delete('/department-schedules/:department/entries/:entryId', deleteDepartmentScheduleEntry);
+
+// ─── Section 15: Doctor Schedules (new DoctorSchedule model) ─────────────────
+router.get('/doctor-schedules', listDoctorSchedules);
+router.get('/doctor-schedules/:doctorId', getDoctorScheduleNew);
+router.put('/doctor-schedules/:doctorId', upsertDoctorSchedule);
+router.delete('/doctor-schedules/:doctorId/entries/:entryId', deleteDoctorScheduleEntry);
+
+// ─── Section 16: Staff Schedules ─────────────────────────────────────────────
+router.get('/staff-schedules', listStaffSchedules);
+router.get('/staff-schedules/:userId', getStaffSchedule);
+router.put('/staff-schedules/:userId', upsertStaffSchedule);
+router.post('/staff-schedules/department-template', applyDepartmentTemplate);
+
+// ─── Section 17: Blocked Dates ───────────────────────────────────────────────
+router.get('/blocked-dates', listBlockedDates);
+router.post('/blocked-dates', createBlockedDate);
+router.delete('/blocked-dates/:id', deleteBlockedDate);
 
 export default router;

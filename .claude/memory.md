@@ -225,6 +225,51 @@ Admin real-time (full catalog):
 - Department model now has `assigned_roles: string[]` + `is_active: boolean` (was name+description only).
 - Department is STILL stored as a NAME string on `Profile` (not ObjectId on User) — seeds, /doctor/list, booking, admin filters all key off the name. No migration.
 - Admin CRUD lives in controllers/admin/index.ts (no service layer): getDepartments(?includeInactive), createDepartment, updateDepartment (PUT), deleteDepartment (SOFT delete = is_active:false).
-- Public no-auth endpoint GET /api/departments/by-role?role= (routes/department.routes.ts, mounted /api/departments in app.ts) — returns active depts whose assigned_roles include the role; used by staff register form.
+- Public no-auth endpoint GET /api/departments/by-role?role= (routes/department.routes.ts, mounted /api/departments in app.ts) — returns active depts whose assigned_roles include the role; used by staff register form AND patient booking.
 - registerStaff (auth.service.ts) rejects departments that are missing/inactive or do not list the requested role.
 - Seed assigns roles to clinical depts + adds Pharmacy/Laboratory/Radiology/Billing/Administration so every registerable role has a department. Backfill is non-destructive (preserves admin edits across restarts).
+
+## Shift & Schedule System (Backend, 2026-06-06) — COMPLETE
+
+### New Models
+- `ShiftDefinition` — time templates (name, start_time HH:MM, end_time, is_active). Seeded: Morning/Afternoon/Night.
+- `DepartmentSchedule` — weekly repeating schedule per department (entries: day_of_week + ShiftDefinition ref)
+- `StaffSchedule` — per non-doctor-staff schedule (entries + overrides)
+- `DoctorSchedule` — per doctor schedule with `admin_controlled` flag (entries + overrides)
+- `BlockedDate` — scope-based date blocks (scope=department|user; compound indexes)
+
+### Naming Collision Resolved
+- Existing `Shift.ts` = staff assignment records (user + date range). Unchanged.
+- New `ShiftDefinition.ts` = time templates for the new schedule system.
+- Existing `/api/admin/shifts` routes = assignment CRUD. Unchanged.
+- New ShiftDefinition admin routes = `/api/admin/schedule/shifts`.
+
+### New Admin Routes (all under /api/admin, all require admin role)
+- `/schedule/shifts` — ShiftDefinition CRUD (GET list, POST create, PUT update, DELETE soft-deactivate)
+- `/department-schedules` — DepartmentSchedule list/get/upsert/deleteEntry; upsert notifies dept staff via Notification + socket `schedule:updated`
+- `/doctor-schedules` — DoctorSchedule list/get/upsert/deleteEntry; notifies doctor; invalidates DOCTOR_SCHEDULE cache
+- `/staff-schedules` — StaffSchedule list/get/upsert; POST `/staff-schedules/department-template` bulk-applies dept template
+- `/blocked-dates` — BlockedDate list (filterable)/create/delete
+
+### Other New Routes
+- `GET /api/schedule/me` — authenticated staff self-view; returns schedule + 7-day week_view; role=doctor uses DoctorSchedule, others use StaffSchedule
+- `GET /api/shifts` — public, lists active ShiftDefinitions (for booking forms etc.)
+
+### Doctor Availability Updated
+- `getDoctorAvailability` checks DoctorSchedule first (blocks BlockedDate, overrides, day_of_week entries → ShiftDefinition time range)
+- Falls back to old Profile.shift + weekend logic if no DoctorSchedule exists for the doctor
+- Backward compatible: existing doctors without DoctorSchedule docs are unaffected
+
+## Schedule Pages Merge (Frontend, 2026-06-06) — COMPLETE
+- All 5 schedule pages merged into `/dashboard/admin/schedules` with internal tab navigation.
+- Tabs: Shift Definitions | Dept Schedules | Doctor Schedules (default) | Staff Schedules | Blocked Dates.
+- Shared component: `src/components/admin/ScheduleGrid.tsx` — chip-style timetable (7 days × N shifts); used by Doctor and Staff tabs.
+- Staff Schedules redesigned from list+modal to chip-style grid (matching Doctor Schedules); "Apply Dept Template" confirm dialog preserved.
+- Admin sidebar: 5 separate items replaced with single "Schedules" → `/dashboard/admin/schedules`.
+- Deleted: shifts/page.tsx, schedules/department/page.tsx, schedules/doctors/page.tsx, schedules/staff/page.tsx, schedules/blocked-dates/page.tsx.
+
+## Role-Based Departments (Frontend, 2026-06-05) — ALL PARTS COMPLETE
+- `departmentService.getByRole('doctor')` used by both staff register form AND patient booking hook (not `patientService.getDepartments()` anymore).
+- Booking hook (`useBooking.ts`): queryKey `departmentsByRole('doctor')`; auto-selects if 1 dept; doctor fetch uses `patientService.getDoctors(department)`.
+- Booking step 1 (`ReasonStep.tsx`): department cards grid (2–3 col) with brand highlight, not a select dropdown.
+- Admin dept page + hook already complete; all queryKeys present in queryKeys.ts.

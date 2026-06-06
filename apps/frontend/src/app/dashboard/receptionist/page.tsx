@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useReceptionist } from '@/hooks/receptionist';
 import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
+import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { DoctorRequestBanner } from '@/components/staff/receptionist/DoctorRequestBanner';
 import { ConflictWarningBanner } from '@/components/staff/receptionist/ConflictWarningBanner';
 import { Badge } from '@/components/ui/Badge';
@@ -119,6 +120,8 @@ export default function ReceptionistDashboardPage() {
       </div>
 
       <DoctorKPIStrip cards={kpiCards} />
+
+      <MyScheduleWidget />
 
       {/* Today's timeline */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] overflow-hidden">

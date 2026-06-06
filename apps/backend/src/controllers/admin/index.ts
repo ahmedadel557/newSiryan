@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import os from 'os';
 import { Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import PDFDocument from 'pdfkit';
@@ -30,6 +31,14 @@ import { sendEmail } from '../../utils/mailer';
 import { logAudit } from '../../utils/audit';
 import { emitToRole, emitToUser, getIO } from '../../config/socket';
 import { redisClient } from '../../config/redis';
+import { isStreamConfigured, getStreamClient } from '../../config/stream';
+import { getInventoryAlertJobStatus } from '../../jobs/inventoryAlert.job';
+import { getInventoryExpiryJobStatus } from '../../jobs/inventoryExpiry.job';
+import { getInventoryReportJobStatus } from '../../jobs/inventoryReport.job';
+import { getAppointmentReminderJobStatus } from '../../jobs/appointmentReminder.job';
+import { getProfileCleanupJobStatus } from '../../jobs/profileCleanup.job';
+import { getPharmacyExpiryJobStatus } from '../../jobs/pharmacyExpiry.job';
+import { getPharmacyReportJobStatus } from '../../jobs/pharmacyReport.job';
 import { cache } from '../../utils/cache';
 import { CACHE_KEYS, CACHE_TTL } from '../../config/cacheTtl';
 import { AuthRequest } from '../../middlewares/auth';
@@ -1975,6 +1984,26 @@ export const rejectDeletion = async (req: AuthRequest, res: Response, next: Next
 
 // ─── Section 12: System Health & Logs ────────────────────────────────────────
 
+let _prevCpuSample: { idle: number; total: number } | null = null;
+function sampleCpuUsagePercent(): number {
+  const cpus = os.cpus();
+  let idle = 0, total = 0;
+  for (const cpu of cpus) {
+    for (const [k, v] of Object.entries(cpu.times)) {
+      total += v;
+      if (k === 'idle') idle += v;
+    }
+  }
+  if (!_prevCpuSample) {
+    _prevCpuSample = { idle, total };
+    return 0;
+  }
+  const idleDelta = idle - _prevCpuSample.idle;
+  const totalDelta = total - _prevCpuSample.total;
+  _prevCpuSample = { idle, total };
+  return totalDelta > 0 ? Math.round(100 - (idleDelta / totalDelta) * 100) : 0;
+}
+
 export const getSystemHealth = async (_req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     // MongoDB
@@ -2000,21 +2029,70 @@ export const getSystemHealth = async (_req: AuthRequest, res: Response, next: Ne
       redisStatus = 'ok';
     } catch { /* unavailable */ }
 
-    // Memory
-    const mem = process.memoryUsage();
-    const used_mb = Math.round(mem.heapUsed / 1024 / 1024);
-    const total_mb = Math.round(mem.heapTotal / 1024 / 1024);
-    const percentage = total_mb > 0 ? Math.round((mem.heapUsed / mem.heapTotal) * 100) : 0;
+    // CPU
+    const cpu_usage_percent = sampleCpuUsagePercent();
 
+    // Memory — system + heap
+    const sysTotalMb = Math.round(os.totalmem() / 1024 / 1024);
+    const sysFreeMb = Math.round(os.freemem() / 1024 / 1024);
+    const sysUsedMb = sysTotalMb - sysFreeMb;
+    const memPercent = sysTotalMb > 0 ? Math.round((sysUsedMb / sysTotalMb) * 100) : 0;
+    const heapMem = process.memoryUsage();
+    const heap_used_mb = Math.round(heapMem.heapUsed / 1024 / 1024);
+    const heap_total_mb = Math.round(heapMem.heapTotal / 1024 / 1024);
+
+    // Socket
     const io = getIO();
     const socket_connections = io ? io.sockets.sockets.size : 0;
+
+    // DB connections
+    const pool = (mongoose.connection as any).pool;
+    const db_connections = {
+      active: pool?.totalConnectionCount ?? 0,
+      available: pool?.availableConnectionCount ?? 0,
+    };
+
+    // Stream API
+    let streamStatus: 'ok' | 'unavailable' = 'unavailable';
+    if (isStreamConfigured) {
+      try { getStreamClient(); streamStatus = 'ok'; } catch { /* unconfigured */ }
+    }
+
+    // Last deploy
+    const deployRef =
+      process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) ??
+      process.env.RAILWAY_DEPLOYMENT_ID ??
+      process.env.npm_package_version ??
+      'unknown';
 
     sendSuccess(res, {
       mongodb: { status: mongoStatus, latency_ms: mongoLatency },
       redis: { status: redisStatus, latency_ms: redisLatency },
+      socket: { active_connections: socket_connections },
+      uptime: Math.floor(process.uptime()),
+      cpu: { usage_percent: cpu_usage_percent },
+      memory: {
+        used_mb: sysUsedMb,
+        total_mb: sysTotalMb,
+        percent: memPercent,
+        heap_used_mb,
+        heap_total_mb,
+      },
+      cron_jobs: {
+        inventory_alert: getInventoryAlertJobStatus(),
+        inventory_expiry: getInventoryExpiryJobStatus(),
+        inventory_report: getInventoryReportJobStatus(),
+        appointment_reminder: getAppointmentReminderJobStatus(),
+        profile_cleanup: getProfileCleanupJobStatus(),
+        pharmacy_expiry: getPharmacyExpiryJobStatus(),
+        pharmacy_report: getPharmacyReportJobStatus(),
+      },
+      db_connections,
+      stream_api: { status: streamStatus },
+      last_deploy: { timestamp: deployRef },
+      // Legacy fields kept for backward compat
       socket_connections,
       uptime_seconds: Math.floor(process.uptime()),
-      memory: { used_mb, total_mb, percentage },
       checked_at: new Date().toISOString(),
     });
   } catch (err) {

@@ -4,10 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Lock, CheckCircle2 } from 'lucide-react';
 import { patientService } from '@/services/patient.service';
-import { useToast } from '@/hooks/shared';
+import { useToast, usePricing } from '@/hooks/shared';
 import {
   MOCK_PAYMENT_METHODS,
-  feeForVisitType,
   formatEGP,
   type MockPaymentMethod,
 } from '@/lib/pricing';
@@ -17,6 +16,7 @@ export default function MockPaymentPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { showToast } = useToast();
+  const { appointmentFee } = usePricing();
   const appointmentId = params.id;
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -39,9 +39,9 @@ export default function MockPaymentPage() {
 
   const fee = useMemo(() => {
     if (appointment?.fee) return appointment.fee;
-    if (appointment?.visit_type) return feeForVisitType(appointment.visit_type);
-    return 300;
-  }, [appointment]);
+    if (appointment?.visit_type) return appointmentFee(appointment.visit_type as 'physical' | 'online');
+    return appointmentFee('online');
+  }, [appointment, appointmentFee]);
 
   async function handlePay() {
     setIsPaying(true);

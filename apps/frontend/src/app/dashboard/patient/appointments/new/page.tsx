@@ -32,6 +32,7 @@ export default function NewAppointmentPage() {
     selectedDoctor,
     departments,
     departmentsLoading,
+    appointmentFee,
     update,
     nextStep,
     prevStep,
@@ -87,19 +88,19 @@ export default function NewAppointmentPage() {
             />
           )}
           {step === 4 && (
-            <ConfirmStep formData={formData} selectedDoctor={selectedDoctor} onBack={prevStep} onConfirm={submitBooking} isLoading={isLoading} />
+            <ConfirmStep formData={formData} selectedDoctor={selectedDoctor} onBack={prevStep} onConfirm={submitBooking} isLoading={isLoading} appointmentFee={appointmentFee} />
           )}
         </div>
 
         {/* Desktop: sidebar */}
         <div className="hidden md:block">
-          <BookingSummaryPanel formData={formData} selectedDoctor={selectedDoctor} step={step} onConfirm={submitBooking} isLoading={isLoading} />
+          <BookingSummaryPanel formData={formData} selectedDoctor={selectedDoctor} step={step} onConfirm={submitBooking} isLoading={isLoading} appointmentFee={appointmentFee} />
         </div>
       </div>
 
       {/* Mobile: summary panel below step content */}
       <div className="md:hidden">
-        <BookingSummaryPanel formData={formData} selectedDoctor={selectedDoctor} step={step} onConfirm={submitBooking} isLoading={isLoading} />
+        <BookingSummaryPanel formData={formData} selectedDoctor={selectedDoctor} step={step} onConfirm={submitBooking} isLoading={isLoading} appointmentFee={appointmentFee} />
       </div>
     </div>
   );
