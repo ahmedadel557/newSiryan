@@ -67,6 +67,8 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/shifts", shiftsRoutes);
 app.use("/api/insurance-providers", insuranceProvidersRoutes);
 
+app.get("/api/health", (_, res) => res.json({ status: "ok" }));
+
 app.use(errorHandler);
 
 export default app;
