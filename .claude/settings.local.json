@@ -42,7 +42,12 @@
       "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\department\\\\page.tsx\" -Force)",
       "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\doctors\\\\page.tsx\" -Force)",
       "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\staff\\\\page.tsx\" -Force)",
-      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\blocked-dates\\\\page.tsx\" -Force)"
+      "Bash(Remove-Item \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\app\\\\dashboard\\\\admin\\\\schedules\\\\blocked-dates\\\\page.tsx\" -Force)",
+      "PowerShell(aws sts get-caller-identity *)",
+      "PowerShell(aws configure get region *)",
+      "PowerShell(Test-Path *)",
+      "Bash(git -C \"C:/Users/Admin/Desktop/newSiryan\" remote get-url origin)",
+      "Bash(ssh *)"
     ]
   }
 }

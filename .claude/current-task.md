@@ -1,6 +1,28 @@
 # Current Task
 
 ## Task
+EC2 #2 Frontend Server Setup — siryan.xyz (2026-06-06). Part 1 DONE (assets created).
+
+## Status
+Part 1 COMPLETE — deployment scripts, nginx config, PM2 ecosystem config, and `.env.production` written to `deploy/`.
+Operator must run `deploy/setup-frontend-ec2.sh` on the fresh Ubuntu 22.04 EC2 instance, then manually run certbot for SSL.
+
+## What was done (Part 1)
+- Created `deploy/setup-frontend-ec2.sh` — full 9-step setup script for EC2 #2
+- Created `deploy/ecosystem.config.js` — PM2 app config (siryan-frontend, port 3000)
+- Created `deploy/nginx-frontend.conf` — Nginx reverse-proxy config for siryan.xyz + www
+- Frontend env for production: `NEXT_PUBLIC_API_URL=https://api.siryan.xyz/api`, `NEXT_PUBLIC_SOCKET_URL=https://api.siryan.xyz`
+- Backend EC2 #1 must have `FRONTEND_URL=https://siryan.xyz`, `CORS_ORIGIN=https://siryan.xyz`, `COOKIE_DOMAIN=.siryan.xyz` (set manually)
+
+## Pending (operator)
+- SSH into EC2 #2, run `bash setup-frontend-ec2.sh`
+- After PM2 startup output, run the sudo systemd command it prints
+- Run `sudo certbot --nginx -d siryan.xyz -d www.siryan.xyz`
+- Update EC2 #1 backend `.env` with FRONTEND_URL/CORS_ORIGIN/COOKIE_DOMAIN
+
+---
+
+## Previous Task
 UI Audit Fixes — P0/P1/P2 color contrast + button consistency (2026-06-04). COMPLETE.
 
 ## Status

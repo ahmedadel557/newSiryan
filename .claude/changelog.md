@@ -1,5 +1,35 @@
 # Changelog
 
+## [2026-06-06] EC2 #2 Frontend Server Setup — siryan.xyz
+
+### Goal
+Provision EC2 #2 (Ubuntu 22.04, t3.small) as the Next.js frontend server for siryan.xyz and www.siryan.xyz.
+
+### Created Files
+- `deploy/setup-frontend-ec2.sh` — 9-step setup script: apt packages, nvm+Node 20, PM2, UFW, git clone, `.env.production`, npm build, Nginx config, PM2 start. Run on EC2 #2 as the ubuntu user.
+- `deploy/ecosystem.config.js` — PM2 app definition: `siryan-frontend`, cwd `apps/frontend`, `next start -p 3000`, fork mode, log paths.
+- `deploy/nginx-frontend.conf` — Nginx server block: proxy_pass to localhost:3000, all required headers for Next.js WebSocket upgrade. Certbot appends HTTPS block after `sudo certbot --nginx`.
+
+### Environment
+- `apps/frontend/.env.production` (written by the script on EC2):
+  - `NEXT_PUBLIC_API_URL=https://api.siryan.xyz/api`
+  - `NEXT_PUBLIC_SOCKET_URL=https://api.siryan.xyz`
+  - `NEXT_PUBLIC_STREAM_API_KEY=ncyqq96s4wpy`
+  - `NODE_ENV=production`
+- EC2 #1 backend `.env` additions needed (manual):
+  - `FRONTEND_URL=https://siryan.xyz`
+  - `CORS_ORIGIN=https://siryan.xyz`
+  - `COOKIE_DOMAIN=.siryan.xyz`
+
+### Operator Steps Remaining
+1. `scp deploy/setup-frontend-ec2.sh ubuntu@<EC2-2-IP>:~/ && scp deploy/ecosystem.config.js ubuntu@<EC2-2-IP>:~/`
+2. SSH in, run `bash setup-frontend-ec2.sh`
+3. Run the `sudo env PATH=... pm2 startup systemd` command it prints
+4. Run `sudo certbot --nginx -d siryan.xyz -d www.siryan.xyz`
+5. Verify: `curl -I https://siryan.xyz` → expect 200 or redirect, valid TLS
+
+---
+
 ## [2026-06-06] Enhanced System Health Endpoint + Dashboard Page
 
 ### Goal

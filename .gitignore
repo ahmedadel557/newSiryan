@@ -33,3 +33,5 @@ apps/backend/uploads/avatars/*
 # Misc
 .DS_Store
 *.pem
+
+deploy/nginx-frontend.conf
