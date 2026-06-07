@@ -30,6 +30,7 @@ export default function LoginForm({ onPhoneLogin }: LoginFormProps) {
   const { login } = useAuth();
   const [apiError, setApiError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [sessionConflict, setSessionConflict] = useState<{ message: string; credentials: { email: string; password: string } } | null>(null);
 
   const {
     register,
@@ -41,19 +42,35 @@ export default function LoginForm({ onPhoneLogin }: LoginFormProps) {
 
   async function onSubmit(data: FormValues) {
     setApiError('');
+    setSessionConflict(null);
     try {
       await login({ email: data.emailOrPhone.trim().toLowerCase(), password: data.password, rememberMe });
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string }; status?: number } };
+      const e = err as { response?: { data?: { message?: string; code?: string }; status?: number } };
       const msg = e?.response?.data?.message;
+      const code = e?.response?.data?.code;
       const status = e?.response?.status;
-      if (status === 403 && msg?.toLowerCase().includes('pending')) {
+      if (status === 409 && code === 'SESSION_CONFLICT') {
+        setSessionConflict({ message: msg ?? 'This account is already signed in on another device.', credentials: { email: data.emailOrPhone.trim().toLowerCase(), password: data.password } });
+      } else if (status === 403 && msg?.toLowerCase().includes('pending')) {
         setApiError('__pending__');
       } else if (status === 403) {
         setApiError(msg || '__rejected__');
       } else {
         setApiError(msg || 'Invalid credentials.');
       }
+    }
+  }
+
+  async function forceLogin() {
+    if (!sessionConflict) return;
+    setSessionConflict(null);
+    setApiError('');
+    try {
+      await login({ email: sessionConflict.credentials.email, password: sessionConflict.credentials.password, rememberMe, force: true });
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setApiError(e?.response?.data?.message || 'Login failed.');
     }
   }
 
@@ -104,6 +121,19 @@ export default function LoginForm({ onPhoneLogin }: LoginFormProps) {
             Forgot password?
           </Link>
         </div>
+
+        {sessionConflict && (
+          <div className="auth-err" style={{ background: 'var(--caution-soft-bg)', color: 'var(--caution-soft-fg)', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+              <AlertCircle size={16} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>{sessionConflict.message}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1, fontSize: 13 }} onClick={() => setSessionConflict(null)}>Cancel</button>
+              <button type="button" className="btn btn-primary" style={{ flex: 1, fontSize: 13 }} onClick={forceLogin}>Sign in anyway</button>
+            </div>
+          </div>
+        )}
 
         {apiError === '__pending__' ? (
           <div

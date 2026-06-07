@@ -59,6 +59,7 @@ export const loginSchema = z.object({
     email:       z.string().email(),
     password:    z.string().min(1),
     remember_me: z.boolean().optional(),
+    force:       z.boolean().optional(),
   }),
 });
 

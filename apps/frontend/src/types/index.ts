@@ -705,6 +705,7 @@ export interface LoginDto {
   email: string;
   password: string;
   remember_me?: boolean;
+  force?: boolean;
 }
 
 export interface RegisterDto {

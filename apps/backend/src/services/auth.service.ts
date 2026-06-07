@@ -150,7 +150,7 @@ export const registerStaff = async (data: {
   return { pending: true, message: 'Registration submitted. Awaiting admin approval.' };
 };
 
-export const login = async (data: { email: string; password: string }, req?: Request) => {
+export const login = async (data: { email: string; password: string; force?: boolean }, req?: Request) => {
   const user = await User.findOne({ email: data.email });
   if (!user)           throw new Error('Invalid credentials');
   if (!user.is_active) throw new Error('Account is deactivated');
@@ -162,9 +162,21 @@ export const login = async (data: { email: string; password: string }, req?: Req
   const valid = await user.comparePassword(data.password);
   if (!valid) throw new Error('Invalid credentials');
 
+  const userId = user._id.toString();
+  const clientIp = req?.ip ?? '';
+
+  if (!data.force) {
+    const conflictIp = await checkSessionConflict(userId, clientIp);
+    if (conflictIp) {
+      const err = new Error('SESSION_CONFLICT') as any;
+      err.maskedIp = conflictIp;
+      throw err;
+    }
+  }
+
   if (user.is_profile_complete === false) {
     const tempToken = sign(
-      { id: user._id.toString(), role: user.role, ipc: false },
+      { id: userId, role: user.role, ipc: false },
       process.env.JWT_SECRET!,
       '30m'
     );
@@ -173,10 +185,11 @@ export const login = async (data: { email: string; password: string }, req?: Req
 
   const pwc = user.password_changed !== false;
   const ive = user.is_email_verified ?? false;
-  const { accessToken, refreshToken } = makeTokens(user._id.toString(), user.role, true, pwc, ive);
-  const profile = await fetchProfile(user._id.toString());
+  const { accessToken, refreshToken } = makeTokens(userId, user.role, true, pwc, ive);
+  const profile = await fetchProfile(userId);
 
-  logAudit({ performedBy: user._id.toString(), action: 'login', resource: 'user', resourceId: user._id.toString(), req });
+  await setActiveSession(userId, clientIp);
+  logAudit({ performedBy: userId, action: 'login', resource: 'user', resourceId: userId, req });
 
   return {
     accessToken,
@@ -215,6 +228,37 @@ export const changePassword = async (userId: string, newPassword: string) => {
   await user.save();
   const tokens = makeTokens(user._id.toString(), user.role, user.is_profile_complete, true, user.is_email_verified ?? false);
   return { tokens, user };
+};
+
+const SESSION_TTL = 7 * 24 * 60 * 60; // 7 days, matches refresh token
+
+const maskIp = (ip: string) => {
+  if (ip.includes(':')) return ip.replace(/:[^:]+$/, ':****');
+  const parts = ip.split('.');
+  if (parts.length === 4) return `${parts[0]}.${parts[1]}.*.*`;
+  return '****';
+};
+
+export const setActiveSession = async (userId: string, ip: string): Promise<void> => {
+  if (!redisClient.isReady) return;
+  try {
+    await redisClient.setEx(`session:active:${userId}`, SESSION_TTL, JSON.stringify({ ip, loginAt: Date.now() }));
+  } catch { /* non-fatal */ }
+};
+
+export const clearActiveSession = async (userId: string): Promise<void> => {
+  if (!redisClient.isReady) return;
+  try { await redisClient.del(`session:active:${userId}`); } catch { /* non-fatal */ }
+};
+
+const checkSessionConflict = async (userId: string, currentIp: string): Promise<string | null> => {
+  if (!redisClient.isReady) return null;
+  try {
+    const raw = await redisClient.get(`session:active:${userId}`);
+    if (!raw) return null;
+    const { ip } = JSON.parse(raw) as { ip: string };
+    return ip !== currentIp ? maskIp(ip) : null;
+  } catch { return null; }
 };
 
 export const blacklistToken = async (token: string): Promise<void> => {

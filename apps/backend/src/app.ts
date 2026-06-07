@@ -32,6 +32,7 @@ import { maintenanceGuard } from "./middlewares/maintenanceMode";
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet());
 const corsOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '')
   .split(',').map((o) => o.trim()).filter(Boolean);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from '../../services/auth.service';
 import * as otpService from '../../services/otp.service';
-import { blacklistToken } from '../../services/auth.service';
+import { blacklistToken, clearActiveSession } from '../../services/auth.service';
 import { sendSuccess, sendError } from '../../utils/response';
 import { setAuthCookies, clearAuthCookies } from '../../utils/cookies';
 import { logAudit } from '../../utils/audit';
@@ -58,7 +58,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const parsed = loginSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
-    const result = await authService.login(parsed.data.body, req);
+    const result = await authService.login({ ...parsed.data.body, force: parsed.data.body.force }, req);
 
     const rememberMe = !!parsed.data.body.remember_me;
 
@@ -75,6 +75,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return sendError(res, 'Your account is pending admin approval. You will be notified by email once approved.', 403);
     if (err.message?.startsWith('Account rejected'))
       return sendError(res, err.message.replace('Account rejected', 'Your registration was not approved'), 403);
+    if (err.message === 'SESSION_CONFLICT')
+      return res.status(409).json({ success: false, code: 'SESSION_CONFLICT', message: `This account is already signed in from another device (${err.maskedIp}).` });
     next(err);
   }
 };
@@ -85,6 +87,7 @@ export const logout = async (req: AuthRequest, res: Response, next: NextFunction
     if (refreshTkn) {
       blacklistToken(refreshTkn).catch(() => {});
     }
+    clearActiveSession(req.user!.id).catch(() => {});
     clearAuthCookies(res);
     logAudit({ performedBy: req.user!.id, action: 'logout', resource: 'user', resourceId: req.user!.id, req });
     sendSuccess(res, null, 'Logged out successfully');
