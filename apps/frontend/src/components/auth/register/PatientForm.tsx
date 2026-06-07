@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -27,12 +27,15 @@ export default function PatientForm() {
   const [providersLoading, setProvidersLoading] = useState(true);
   const [providersError, setProvidersError] = useState(false);
 
+  const providersFetchedRef = useRef(false);
   useEffect(() => {
+    if (step < 2 || providersFetchedRef.current) return;
+    providersFetchedRef.current = true;
     patientService.getPublicInsuranceProviders()
       .then(setProviders)
       .catch(() => setProvidersError(true))
       .finally(() => setProvidersLoading(false));
-  }, []);
+  }, [step]);
 
   const {
     register,
