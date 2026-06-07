@@ -120,8 +120,8 @@ export default function ChangePasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowNew((v) => !v)}
-                    style={{ background: 'none', border: 'none', color: 'var(--fg-3)', padding: '0 8px', cursor: 'pointer' }}
                     tabIndex={-1}
+                    aria-label={showNew ? 'Hide password' : 'Show password'}
                   >
                     {showNew ? <EyeOff size={15} strokeWidth={1.75} /> : <Eye size={15} strokeWidth={1.75} />}
                   </button>
@@ -145,8 +145,8 @@ export default function ChangePasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
-                    style={{ background: 'none', border: 'none', color: 'var(--fg-3)', padding: '0 8px', cursor: 'pointer' }}
                     tabIndex={-1}
+                    aria-label={showConfirm ? 'Hide password' : 'Show password'}
                   >
                     {showConfirm ? <EyeOff size={15} strokeWidth={1.75} /> : <Eye size={15} strokeWidth={1.75} />}
                   </button>

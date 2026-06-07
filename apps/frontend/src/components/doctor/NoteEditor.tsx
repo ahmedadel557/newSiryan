@@ -70,7 +70,7 @@ export function NoteEditor({ patientId, appointmentId }: NoteEditorProps) {
                   <div className="flex flex-col gap-2">
                     <textarea value={editDraft} onChange={(e) => setEditDraft(e.target.value)} rows={2} className={inputClass} />
                     <div className="flex gap-2 justify-end">
-                      <button onClick={() => setEditingId(null)} className="btn-ghost text-[12px] py-[3px] px-2 inline-flex items-center gap-1">
+                      <button onClick={() => setEditingId(null)} className="btn btn-ghost text-[12px] py-[3px] px-2 inline-flex items-center gap-1">
                         <X size={13} /> Cancel
                       </button>
                       <button onClick={() => saveEdit(n.id)} className="btn btn-primary text-[12px] py-[3px] px-3 inline-flex items-center gap-1">
@@ -82,10 +82,10 @@ export function NoteEditor({ patientId, appointmentId }: NoteEditorProps) {
                   <div className="flex items-start gap-3">
                     <p className="text-[13px] text-[var(--fg-1)] flex-1 min-w-0 whitespace-pre-wrap">{n.content}</p>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => { setEditingId(n.id); setEditDraft(n.content); }} className="btn-ghost p-1" aria-label="Edit note">
-                        <Pencil size={13} />
+                      <button onClick={() => { setEditingId(n.id); setEditDraft(n.content); }} className="btn btn-ghost p-1" aria-label="Edit note">
+                        <Pencil size={13}  />
                       </button>
-                      <button onClick={() => deleteNote(n.id)} className="btn-ghost p-1" aria-label="Delete note">
+                      <button onClick={() => deleteNote(n.id)} className="btn btn-ghost p-1" aria-label="Delete note">
                         <Trash2 size={13} />
                       </button>
                     </div>

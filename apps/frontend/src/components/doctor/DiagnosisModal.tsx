@@ -147,10 +147,10 @@ export function DiagnosisModal({ open, onClose, appointmentId, onSubmit }: Diagn
               </div>
 
               <div className="flex gap-2 pt-1">
-                <button type="button" onClick={onClose} className="btn-ghost flex-1">
+                <button type="button" onClick={onClose} className="btn btn-ghost flex-1">
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary flex-1">
+                <button type="submit" className="btn btn-primary flex-1">
                   Save diagnosis
                 </button>
               </div>

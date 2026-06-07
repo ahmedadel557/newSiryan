@@ -1306,6 +1306,23 @@ export interface MyScheduleResponse {
   message?: string;
 }
 
+export interface ShiftEntry {
+  id: string;
+  name: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface DayScheduleData {
+  date: string;
+  dayOfWeek: number;
+  isToday: boolean;
+  isBlocked: boolean;
+  blockedReason?: string;
+  shifts: ShiftEntry[];
+  appointments: Appointment[];
+}
+
 // ---- Announcements ----
 export interface Announcement {
   id: string;

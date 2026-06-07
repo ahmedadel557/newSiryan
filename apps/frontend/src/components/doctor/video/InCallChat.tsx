@@ -2,20 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { X, Send } from 'lucide-react';
-import { useInCallChat } from '@/hooks/shared';
+import type { ChatMessage } from '@/hooks/shared';
 
 interface InCallChatProps {
-  apiKey: string | null;
   userId: string;
-  userName: string;
-  token: string | null;
-  callId: string | null;
-  otherUserId?: string | null;
+  chat: {
+    messages: ChatMessage[];
+    sendMessage: (text: string) => Promise<void>;
+    isConnecting: boolean;
+    error: string | null;
+  };
   onClose: () => void;
 }
 
-export function InCallChat({ apiKey, userId, userName, token, callId, otherUserId, onClose }: InCallChatProps) {
-  const { messages, sendMessage, isConnecting, error } = useInCallChat({ apiKey, userId, userName, token, callId, otherUserId });
+export function InCallChat({ userId, chat, onClose }: InCallChatProps) {
+  const { messages, sendMessage, isConnecting, error } = chat;
   const [draft, setDraft] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
 

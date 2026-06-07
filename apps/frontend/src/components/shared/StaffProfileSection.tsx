@@ -80,7 +80,7 @@ export function StaffProfileSection() {
             </label>
             <input
               {...register(key)}
-              className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+              className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
             />
           </div>
         ))}
@@ -91,7 +91,7 @@ export function StaffProfileSection() {
         <input
           value={user?.email ?? ''}
           disabled
-          className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
+          className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
         />
       </div>
 
@@ -99,7 +99,7 @@ export function StaffProfileSection() {
         <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Phone</label>
         <input
           {...register('phone')}
-          className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+          className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
         />
       </div>
 
@@ -108,7 +108,7 @@ export function StaffProfileSection() {
         <textarea
           {...register('bio')}
           rows={3}
-          className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none resize-none"
+          className="w-full dark:text-black/80 px-3 py-2 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none resize-none"
         />
       </div>
 
@@ -118,7 +118,7 @@ export function StaffProfileSection() {
           <input
             value={staffProfile?.department ?? '—'}
             disabled
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
+            className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
           />
         </div>
         <div>
@@ -126,7 +126,7 @@ export function StaffProfileSection() {
           <input
             value={staffProfile?.specialization ?? '—'}
             disabled
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
+            className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
           />
         </div>
       </div>

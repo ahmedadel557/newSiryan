@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ChevronLeft, ChevronRight, Ban } from 'lucide-react';
 import { useDoctorSchedule } from '@/hooks/doctor';
@@ -29,7 +29,6 @@ export default function DoctorSchedulePage() {
 
   const confirmedCount = appointments.filter((a) => a.status === 'confirmed' || a.status === 'scheduled').length;
   const completedCount = appointments.filter((a) => a.status === 'completed').length;
-  const cancelledCount = appointments.filter((a) => a.status === 'cancelled').length;
   const onlineCount = appointments.filter((a) => a.visit_type === 'online').length;
 
   const kpiCards = [

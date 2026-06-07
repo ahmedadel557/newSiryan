@@ -113,7 +113,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
         <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-1)]">
           <Pill size={16} style={{ color: 'var(--positive-soft-fg)' }} />
           <p className="text-[14px] font-semibold text-[var(--fg-1)] flex-1">Active prescriptions</p>
-          <button onClick={onNewPrescription} className="btn-primary text-[12px] py-[4px] px-3">
+          <button onClick={onNewPrescription} className=" btn btn-primary text-[12px] py-[4px] px-3">
             + New prescription
           </button>
         </div>
@@ -160,7 +160,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
           <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-1)]">
             <TestTube size={16} style={{ color: 'var(--info-soft-fg)' }} />
             <p className="text-[14px] font-semibold text-[var(--fg-1)] flex-1">Recent labs</p>
-            <button onClick={onNewLab} className="btn-ghost text-[12px] py-[4px]">
+            <button onClick={onNewLab} className="btn btn-ghost text-[12px] py-[4px]">
               + Order
             </button>
           </div>
@@ -189,7 +189,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
           <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-1)]">
             <Scan size={16} style={{ color: 'var(--info-soft-fg)' }} />
             <p className="text-[14px] font-semibold text-[var(--fg-1)] flex-1">Imaging</p>
-            <button onClick={onNewRadiology} className="btn-ghost text-[12px] py-[4px]">
+            <button onClick={onNewRadiology} className="btn btn-ghost text-[12px] py-[4px]">
               + Order
             </button>
           </div>

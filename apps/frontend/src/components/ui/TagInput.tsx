@@ -47,7 +47,7 @@ export function TagInput({ value, onChange, placeholder = 'Type and press Enterâ
       }}
     >
       {value.map((tag) => (
-        <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--sand-100)] text-[12px] font-medium">
+        <span key={tag} className="inline-flex dark:text-black/80 items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--sand-100)] text-[12px] font-medium">
           {tag}
 
           {!disabled && (

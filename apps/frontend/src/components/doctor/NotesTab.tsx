@@ -33,10 +33,10 @@ export function NotesTab({ record, records, onSaveNote, patientId, appointmentId
             className="w-full resize-none rounded-[var(--radius-md)] border border-[var(--border-1)] bg-[var(--bg-surface)] px-3 py-2 text-[13px] text-[var(--fg-1)] placeholder:text-[var(--fg-4)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-0"
           />
           <div className="flex gap-2 justify-end">
-            <button onClick={() => onSaveNote(draft)} className="btn-secondary text-[12px] py-[4px] px-3">
+            <button onClick={() => onSaveNote(draft)} className="btn btn-secondary text-[12px] py-[4px] px-3">
               Save draft
             </button>
-            <button onClick={() => onSaveNote(draft)} className="btn-primary text-[12px] py-[4px] px-3">
+            <button onClick={() => onSaveNote(draft)} className=" btn btn-primary text-[12px] py-[4px] px-3">
               Sign & save
             </button>
           </div>

@@ -165,7 +165,8 @@
 .auth-input-wrap {
   position: relative;
 }
-.auth-input-wrap .lucide {
+/* Only the direct-child icon (left side, e.g. Lock/Mail) gets absolute positioning */
+.auth-input-wrap > .lucide {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -173,9 +174,32 @@
   width: 16px;
   height: 16px;
   color: var(--fg-3);
+  pointer-events: none;
 }
 .auth-input-wrap .input {
   padding-left: 38px;
+}
+/* When a toggle button is present, make room on the right */
+.auth-input-wrap .input:has(~ button) {
+  padding-right: 38px;
+}
+/* Show/hide password toggle button */
+.auth-input-wrap > button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-3);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.auth-input-wrap > button:hover {
+  color: var(--fg-1);
 }
 
 /* Inline field error */

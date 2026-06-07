@@ -60,12 +60,12 @@ export function SecuritySection() {
             <input
               type={showPw[key] ? 'text' : 'password'}
               {...pwForm.register(key, { required: true })}
-              className="w-full h-9 pl-3 pr-9 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+              className="w-full dark:text-black/80 h-9 pl-3 pr-9 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
             />
             <button
               type="button"
               onClick={() => setShowPw((p) => ({ ...p, [key]: !p[key] }))}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--fg-3)] hover:text-[var(--fg-1)]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
             >
               {showPw[key] ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>

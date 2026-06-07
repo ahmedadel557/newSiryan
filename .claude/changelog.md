@@ -1,5 +1,52 @@
 # Changelog
 
+## [2026-06-07] Restore Doctor Schedule Page to Appointments View
+
+### Problem
+Previous task incorrectly replaced the doctor's appointments calendar (My Schedule page) with an admin-shift display. The My Schedule page must show patient appointments, not shifts.
+
+### Restored files (to exact git commit 2208576 state)
+- `apps/frontend/src/hooks/doctor/useDoctorSchedule.ts` — reverted to original: fetches doctor appointments (`/doctor/schedule`), patients, blocked slots, room bookings; derives hour slots from profile shift; exposes block/unblock mutations and week navigation.
+- `apps/frontend/src/app/dashboard/doctor/schedule/page.tsx` — reverted to original: `WeekCalendarGrid` + `BlockTimeModal` + `DoctorKPIStrip` (this week / confirmed / completed / online KPIs). Block time button preserved.
+
+### Unchanged (shift display lives here, NOT on the schedule page)
+- `components/shared/MyScheduleWidget.tsx` — dashboard card showing today's admin-assigned shifts (multi-shift support added in previous task remains correct here).
+- `hooks/shared/useMySchedule.ts` — `todayShifts` array remains.
+- `components/doctor/DoctorScheduleGrid.tsx` — new component remains (for potential future use or alternate views).
+
+---
+
+## [2026-06-07] Doctor Schedule — Full Dynamic Overhaul
+
+### Goal
+Replace static/old self-selection schedule system on the doctor dashboard and schedule page with fully dynamic admin-assigned shift data.
+
+### Types (`apps/frontend/src/types/index.ts`)
+- Added `ShiftEntry { id, name, start_time, end_time }` — display-time shift shape.
+- Added `DayScheduleData { date, dayOfWeek, isToday, isBlocked, blockedReason, shifts, appointments }` — per-day view model used by schedule grid.
+
+### Hook changes
+- **`useMySchedule`** (`hooks/shared/useMySchedule.ts`): now computes `todayShifts: ShiftEntry[]` by reading `schedule.entries` grouped on today's `day_of_week`. Supports multiple shifts in one day.
+- **`useDoctorSchedule`** (`hooks/doctor/useDoctorSchedule.ts`): fully rewritten. Now fetches `schedule/me` + `doctor/schedule` (appointments), computes `DayScheduleData[]` for the navigated week (Mon–Sun). Exposes `days`, `weekLabel`, `totalAppts`, `hasSchedule`, `department`, `prevWeek/nextWeek/goToday`.
+
+### New component — `DoctorScheduleGrid` (`components/doctor/DoctorScheduleGrid.tsx`)
+- 7-column horizontal week grid (overflow-x-auto on small screens).
+- Each `DayColumn`: header with day/date/shift count; shift blocks; appointment chips inside each block; unmatched appointments in an "Other" section.
+- `ShiftBlock`: branded card per shift with name + time range + `ApptChip` list (online = Video icon, physical = MapPin icon).
+- Loading: skeleton columns. No-schedule: centered empty state.
+
+### Updated component — `MyScheduleWidget` (`components/shared/MyScheduleWidget.tsx`)
+- `TodayBanner` updated to render ALL of today's shifts as rows (from `todayShifts` array).
+- Shift count badge (e.g. "2 shifts") in today banner header.
+- 7-day strip unchanged (still uses `week_view` single-shift per day for compact display).
+
+### Schedule page (`app/dashboard/doctor/schedule/page.tsx`)
+- Fully rewritten. Removed all `BlockTimeModal`, `WeekCalendarGrid`, `BlockTimeModal`, and block/unblock controls.
+- Read-only: shows `DoctorKPIStrip` (shifts/week, appts/week, today's shifts, today's appts) + `DoctorScheduleGrid`.
+- Prev/Next/Today week navigation preserved.
+
+---
+
 ## [2026-06-07] Protect root admin account from modification
 
 ### Goal

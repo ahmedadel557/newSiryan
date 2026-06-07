@@ -6,6 +6,7 @@ import { RemoteVideoTile } from './RemoteVideoTile';
 import { LocalVideoTile } from './LocalVideoTile';
 import { CallControls } from './CallControls';
 import { InCallChat } from './InCallChat';
+import { useInCallChat } from '@/hooks/shared';
 
 interface VideoCallLayoutProps {
   call: Call;
@@ -17,6 +18,7 @@ interface VideoCallLayoutProps {
   userName: string;
   otherUserId?: string | null;
   remoteWaitingLabel?: string;
+  tokenProvider?: (() => Promise<string>) | null;
 }
 
 export function VideoCallLayout({
@@ -29,8 +31,14 @@ export function VideoCallLayout({
   userName,
   otherUserId,
   remoteWaitingLabel,
+  tokenProvider,
 }: VideoCallLayoutProps) {
   const [chatOpen, setChatOpen] = useState(false);
+
+  // Chat is initialized at this level — always mounted for the full duration of
+  // the call — so the Stream Chat connection survives chat-panel open/close cycles
+  // and doesn't reconnect on every toggle.
+  const chat = useInCallChat({ apiKey, userId, userName, token, callId, otherUserId, tokenProvider });
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -39,12 +47,8 @@ export function VideoCallLayout({
       <CallControls chatOpen={chatOpen} onToggleChat={() => setChatOpen((v) => !v)} onEndCall={onEndCall} />
       {chatOpen && (
         <InCallChat
-          apiKey={apiKey}
           userId={userId}
-          userName={userName}
-          token={token}
-          callId={callId}
-          otherUserId={otherUserId}
+          chat={chat}
           onClose={() => setChatOpen(false)}
         />
       )}

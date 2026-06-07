@@ -1,8 +1,8 @@
 ﻿'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X, AlertTriangle } from 'lucide-react';
 import { StreamVideo, StreamCall } from '@stream-io/video-react-sdk';
 import { useAuth } from '@/hooks/shared';
 import { useVideoCall } from '@/hooks/shared';
@@ -13,7 +13,8 @@ export default function DoctorVideoCallPage() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const router = useRouter();
   const { user, profile } = useAuth();
-  const { client, call, callId, token, apiKey, otherUserId, isConnected, error, initCall, endCall } = useVideoCall();
+  const { client, call, callId, token, apiKey, otherUserId, isConnected, error, mediaWarning, initCall, endCall, tokenProvider } = useVideoCall();
+  const [warnDismissed, setWarnDismissed] = useState(false);
 
   const userId = user?.id ?? '';
   const userName = profile ? `Dr. ${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : 'Doctor';
@@ -41,21 +42,36 @@ export default function DoctorVideoCallPage() {
           </button>
         </div>
       ) : isConnected && client && call ? (
-        <StreamVideo client={client}>
-          <StreamCall call={call}>
-            <VideoCallLayout
-              call={call}
-              onEndCall={handleEnd}
-              apiKey={apiKey}
-              token={token}
-              callId={callId}
-              userId={userId}
-              userName={userName}
-              otherUserId={otherUserId}
-              remoteWaitingLabel="Waiting for the patient to join…"
-            />
-          </StreamCall>
-        </StreamVideo>
+        <div className="relative h-full w-full">
+          {mediaWarning && !warnDismissed && (
+            <div
+              className="absolute top-3 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium"
+              style={{ background: 'rgba(255,200,60,0.18)', border: '1px solid rgba(255,200,60,0.4)', color: '#ffe07a', backdropFilter: 'blur(8px)' }}
+            >
+              <AlertTriangle size={14} className="shrink-0" />
+              <span>{mediaWarning}</span>
+              <button onClick={() => setWarnDismissed(true)} className="ms-1 opacity-70 hover:opacity-100" aria-label="Dismiss">
+                <X size={13} />
+              </button>
+            </div>
+          )}
+          <StreamVideo client={client}>
+            <StreamCall call={call}>
+              <VideoCallLayout
+                call={call}
+                onEndCall={handleEnd}
+                apiKey={apiKey}
+                token={token}
+                callId={callId}
+                userId={userId}
+                userName={userName}
+                otherUserId={otherUserId}
+                tokenProvider={tokenProvider}
+                remoteWaitingLabel="Waiting for the patient to join…"
+              />
+            </StreamCall>
+          </StreamVideo>
+        </div>
       ) : (
         <CallStatusOverlay title="Connecting…" subtitle="Setting up your secure video room" />
       )}

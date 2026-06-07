@@ -126,7 +126,7 @@ function ResetPasswordInner() {
                     <div className="auth-input-wrap">
                       <Lock size={16} strokeWidth={1.75} />
                       <input className="input" type={showNew ? 'text' : 'password'} autoComplete="new-password" placeholder="Min. 8 characters" {...register('new_password')} />
-                      <button type="button" onClick={() => setShowNew((v) => !v)} style={{ background: 'none', border: 'none', color: 'var(--fg-3)', padding: '0 8px', cursor: 'pointer' }} tabIndex={-1}>
+                      <button type="button" onClick={() => setShowNew((v) => !v)} tabIndex={-1} aria-label={showNew ? 'Hide password' : 'Show password'}>
                         {showNew ? <EyeOff size={15} strokeWidth={1.75} /> : <Eye size={15} strokeWidth={1.75} />}
                       </button>
                     </div>
@@ -139,7 +139,7 @@ function ResetPasswordInner() {
                     <div className="auth-input-wrap">
                       <Lock size={16} strokeWidth={1.75} />
                       <input className="input" type={showConfirm ? 'text' : 'password'} autoComplete="new-password" placeholder="Re-enter password" {...register('confirm_password')} />
-                      <button type="button" onClick={() => setShowConfirm((v) => !v)} style={{ background: 'none', border: 'none', color: 'var(--fg-3)', padding: '0 8px', cursor: 'pointer' }} tabIndex={-1}>
+                      <button type="button" onClick={() => setShowConfirm((v) => !v)} tabIndex={-1} aria-label={showConfirm ? 'Hide password' : 'Show password'}>
                         {showConfirm ? <EyeOff size={15} strokeWidth={1.75} /> : <Eye size={15} strokeWidth={1.75} />}
                       </button>
                     </div>

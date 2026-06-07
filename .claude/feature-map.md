@@ -17,7 +17,7 @@
  ├── prescriptions (create, manage)
  ├── lab orders (order, view results)
  ├── radiology orders (order, view results)
- ├── schedule (view/manage availability, blocked slots)
+ ├── schedule (read-only weekly view — admin-assigned shifts + appointment overlay)   [fully dynamic ✓ 2026-06-07]
  ├── shared records (receive shared patient records)
  ├── record (create new medical record)
  ├── queue (today's appointment queue)                              [backend ✓ P1 · frontend ✓ P2 /doctor/queue]

@@ -19,7 +19,7 @@ export function PrescriptionsTab({ prescriptions, onNew }: PrescriptionsTabProps
       <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-1)]">
         <Pill size={16} style={{ color: 'var(--positive-soft-fg)' }} />
         <p className="text-[14px] font-semibold text-[var(--fg-1)] flex-1">Active prescriptions</p>
-        <button onClick={onNew} className="btn-primary text-[12px] py-[4px] px-3">
+        <button onClick={onNew} className=" btn btn-primary text-[12px] py-[4px] px-3">
           + New prescription
         </button>
       </div>

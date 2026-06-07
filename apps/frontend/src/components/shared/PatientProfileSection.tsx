@@ -76,7 +76,7 @@ export function PatientProfileSection() {
             </label>
             <input
               {...register(key)}
-              className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+              className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
             />
           </div>
         ))}
@@ -87,7 +87,7 @@ export function PatientProfileSection() {
         <input
           value={user?.email ?? ''}
           disabled
-          className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
+          className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-3)] border border-transparent outline-none cursor-not-allowed"
         />
       </div>
 
@@ -96,7 +96,7 @@ export function PatientProfileSection() {
         <input
           {...register('phone')}
           placeholder="01XXXXXXXXX"
-          className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+          className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
         />
       </div>
 
@@ -106,14 +106,14 @@ export function PatientProfileSection() {
           <input
             type="date"
             {...register('date_of_birth')}
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+            className="w-full dark:text-black/80   h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
           />
         </div>
         <div>
           <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Gender</label>
           <select
             {...register('gender')}
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+            className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
           >
             <option value="">Select</option>
             <option value="male">Male</option>
@@ -126,7 +126,7 @@ export function PatientProfileSection() {
         <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Blood type</label>
         <select
           {...register('blood_type')}
-          className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+          className="w-full dark:text-black/80   h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
         >
           <option value="">Select</option>
           {BLOOD_TYPES.map((bt) => <option key={bt} value={bt}>{bt}</option>)}
@@ -148,7 +148,7 @@ export function PatientProfileSection() {
           <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Insurance provider</label>
           <select
             {...register('insurance_provider')}
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+            className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
           >
             <option value="">No insurance</option>
             {insuranceCompanies.map((c) => (
@@ -160,7 +160,7 @@ export function PatientProfileSection() {
           <label className="block text-[12px] font-medium text-[var(--fg-2)] mb-1">Insurance number</label>
           <input
             {...register('insurance_number')}
-            className="w-full h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+            className="w-full dark:text-black/80 h-9 px-3 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
           />
         </div>
       </div>

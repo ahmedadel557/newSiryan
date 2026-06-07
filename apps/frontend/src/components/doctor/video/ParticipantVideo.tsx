@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import type { Call, StreamVideoParticipant } from '@stream-io/video-react-sdk';
 
 interface ParticipantVideoProps {
@@ -22,7 +22,9 @@ export function ParticipantVideo({ call, participant, muted, withAudio }: Partic
     return call.bindVideoElement(el, participant.sessionId, 'videoTrack');
   }, [call, participant.sessionId]);
 
-  useEffect(() => {
+  // useLayoutEffect fires synchronously after DOM mutations — before the SDK's
+  // AudioBindingsWatchdog timer can fire — eliminating "Dangling audio bindings" warnings.
+  useLayoutEffect(() => {
     if (!withAudio) return;
     const el = audioRef.current;
     if (!el) return;
@@ -31,7 +33,13 @@ export function ParticipantVideo({ call, participant, muted, withAudio }: Partic
 
   return (
     <>
-      <video ref={videoRef} autoPlay playsInline muted={muted} className="h-full w-full object-cover" />
+      {/*
+        Always mute the <video> element when withAudio is true: bindVideoElement sets
+        the srcObject to a stream that can carry audio, so without this the remote
+        participant's audio plays through both the <video> and the <audio> element,
+        causing an echo / doubling effect. Audio-only comes from the dedicated <audio>.
+      */}
+      <video ref={videoRef} autoPlay playsInline muted={muted || withAudio} className="h-full w-full object-cover" />
       {withAudio && <audio ref={audioRef} autoPlay />}
     </>
   );
