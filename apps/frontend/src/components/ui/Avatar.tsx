@@ -1,3 +1,5 @@
+'use client';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AvatarProps {
@@ -20,10 +22,11 @@ function getInitials(name: string): string {
 }
 
 export function Avatar({ name, size = 'md', src, className }: AvatarProps) {
+  const [imgError, setImgError] = useState(false);
   const base = cn('inline-flex shrink-0 items-center justify-center rounded-full font-semibold', sizeClasses[size], className);
 
-  if (src) {
-    return <img src={src} alt={name} className={cn(base, 'object-cover')} />;
+  if (src && !imgError) {
+    return <img src={src} alt={name} className={cn(base, 'object-cover')} onError={() => setImgError(true)} />;
   }
 
   return (

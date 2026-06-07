@@ -1,0 +1,19 @@
+services:
+  backend:
+    image: siryan-backend
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile
+    container_name: siryan-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - /home/ubuntu/siryan-uploads:/app/uploads
+    networks:
+      - siryan
+
+networks:
+  siryan:
+    driver: bridge

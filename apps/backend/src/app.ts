@@ -4,7 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
-import "dotenv/config";
+import "dotenv-flow/config";
 import passport from "passport";
 import "./config/passport";
 
@@ -41,7 +41,7 @@ app.use(passport.initialize());
 app.use(rateLimiter);
 app.use(maintenanceGuard);
 app.use(
-  "/api/uploads",
+  "/uploads",
   (req, res, next) => {
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();

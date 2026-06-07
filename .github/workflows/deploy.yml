@@ -1,0 +1,73 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  # ── Detect which apps changed ─────────────────────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+              - 'deploy/docker-compose.yml'
+            frontend:
+              - 'apps/frontend/**'
+
+  # ── Deploy backend to EC2 #1 ──────────────────────────────────────────────
+  deploy-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy backend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_BACKEND_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: GH_PAT
+          script: |
+            cd /home/ubuntu/siryan
+            git pull https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+            cd deploy
+            docker compose up -d --build
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+
+  # ── Deploy frontend to EC2 #2 ─────────────────────────────────────────────
+  deploy-frontend:
+    needs: [changes, deploy-backend]
+    # Run if frontend changed AND (backend job succeeded OR was skipped)
+    if: |
+      always() &&
+      needs.changes.outputs.frontend == 'true' &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_FRONTEND_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: GH_PAT
+          command_timeout: 15m
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            cd /home/ubuntu/siryan
+            git pull https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+            NODE_OPTIONS="--max-old-space-size=1400" npx turbo build --filter=@siryan/frontend
+            pm2 restart siryan-frontend
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}

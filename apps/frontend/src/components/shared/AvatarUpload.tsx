@@ -26,13 +26,14 @@ export function AvatarUpload({ currentUrl, name, size = 'md', onUpload, onDelete
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [uploadingPreview, setUploadingPreview] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
   const { setProfile } = useAuth();
   const px = sizes[size];
 
   const base = process.env.NEXT_PUBLIC_SOCKET_URL ?? '';
-  const displayUrl = uploadingPreview ?? (currentUrl ? (currentUrl.startsWith('/uploads/') ? `${base}${currentUrl}` : currentUrl) : null);
+  const displayUrl = uploadingPreview ?? (currentUrl && !imgError ? (currentUrl.startsWith('/uploads/') ? `${base}${currentUrl}` : currentUrl) : null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,7 +118,7 @@ export function AvatarUpload({ currentUrl, name, size = 'md', onUpload, onDelete
         }}
       >
         {displayUrl ? (
-          <img src={displayUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={displayUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImgError(true)} />
         ) : (
           <span>{getInitials(name) || '?'}</span>
         )}
