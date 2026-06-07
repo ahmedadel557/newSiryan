@@ -1,5 +1,19 @@
 # Bugs
 
+## [BUG-SLOTS-1] Available slots missing after admin assigns shifts (cache not invalidated)
+- **Status:** resolved (2026-06-07)
+- **Reproduction:** Admin assigns shifts for a doctor on Day X. Patient queries Day X availability within ~5 min of a previous query (before shift was assigned). Gets empty slots even though shifts are now assigned.
+- **Root Cause:** `upsertDoctorSchedule` only invalidated `CACHE_KEYS.DOCTOR_SCHEDULE(doctorId)` (`schedule:doctor:{id}`), never the per-date slot caches (`slots:{doctorId}:{date}`). The "not scheduled on this day" response was cached for 5 min. After the admin added entries, those caches remained stale.
+- **Fix:** Added `cache.delPattern(pattern)` to `src/utils/cache.ts` (Redis SCAN-based, non-blocking). Called `cache.delPattern('slots:{doctorId}:*')` in both `upsertDoctorSchedule` and `deleteDoctorScheduleEntry` to flush all per-date slot caches for the affected doctor on any schedule change.
+- **Files:** `apps/backend/src/utils/cache.ts`, `apps/backend/src/controllers/admin/doctorScheduleNew.controller.ts`
+
+## [BUG-SLOTS-2] Multi-shift merge silently dropped slots when ShiftDefinition was deleted/orphaned
+- **Status:** resolved (2026-06-07)
+- **Reproduction:** Doctor assigned to two shifts on Monday. One ShiftDefinition is deleted. The slot endpoint returned only the remaining shift's hours — no error, no warning, silently fewer slots.
+- **Root Cause:** The `activeEntries` filter used `e.shift?.is_active !== false` which passes entries with `null` shifts (orphaned refs after populate). The hour-generation loop then hit `if (!shift?.start_time || !shift?.end_time) continue` and skipped them silently. The multi-shift iteration code was already correct (Set-based merge over all `activeEntries`), but orphaned entries contaminated the count while contributing no hours.
+- **Fix:** Tightened the filter in `getDoctorAvailability` to require `e.shift != null && e.shift.is_active !== false && e.shift.start_time && e.shift.end_time`. Entries that pass the filter are guaranteed to have valid time data, so the inner `if (!shift...)` guard was removed as redundant. Multiple shifts for the same day are still all iterated and merged via `Set<number>`.
+- **Files:** `apps/backend/src/controllers/doctor/index.ts`
+
 ## [BUG-AUTH-1] Staff registration "stuck on Submitting…" then jumps to success after ~30s
 - **Status:** resolved (2026-06-02)
 - **Reproduction:** Submit `/auth/register` (staff tab). Button shows "Submitting…" for tens of seconds, then suddenly transitions to `StaffSuccessScreen`. API does eventually return 2xx — it's slow, not failing.
@@ -310,6 +324,12 @@
 - **Root Cause:** `.tbl tr:hover td`, `.btn-secondary:hover`, `.btn-ghost:hover` and the React Button secondary/ghost hovers used fixed `--sand-50`/`--sand-100`; a `.dark .btn-ghost:hover { color: black }` hack patched only one case.
 - **Fix:** Pointed all four hovers at `--bg-sunken` (theme-flipping) and deleted the dark ghost-hover color-black hack.
 - **Files:** `apps/frontend/src/styles/kit.css`, `apps/frontend/src/components/ui/button.tsx`
+
+## [SEC-ROOT-1] Root admin account had no protection against modification by other admins
+- **Status:** resolved (2026-06-07)
+- **Root Cause:** No field on the User model distinguished the root admin from regular admins. Admin routes (`PATCH /users/:id/role`, `PATCH /users/:id/activate`, `PATCH /users/:id/profile`, `DELETE /users/:id`, `PUT /staff/:id/department`) applied only the generic self-action guard (`req.params.id === req.user.id`), leaving the root account editable/deletable by any other admin.
+- **Fix:** Added `isRootAdmin: Boolean (default false)` to the User model. Created `middlewares/protectRootAdmin.ts` which looks up the target user and returns 403 if `isRootAdmin` is true. Middleware is inserted before the controller on all five user-mutation routes in `admin.routes.ts`. The flag is never exposed in registration or create-staff flows — it must be set directly in the DB (or a seed script).
+- **Files:** `apps/backend/src/models/User.ts`, `apps/backend/src/middlewares/protectRootAdmin.ts`, `apps/backend/src/routes/admin.routes.ts`
 
 ## Template
 

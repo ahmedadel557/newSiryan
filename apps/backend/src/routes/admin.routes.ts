@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middlewares/auth';
 import { requireCompleteProfile } from '../middlewares/requireCompleteProfile';
+import { protectRootAdmin } from '../middlewares/protectRootAdmin';
 import { validateRequest } from '../middlewares/validateRequest';
 import {
   createStaffSchema, changeRoleSchema, setActiveSchema, createInsuranceCompanySchema,
@@ -57,10 +58,10 @@ router.get('/reports/doctors', getDoctorReport);
 router.get('/users', listUsers);
 router.get('/users/:id', getUserById);
 router.post('/users', validateRequest(createStaffSchema), createStaff);
-router.patch('/users/:id/role', validateRequest(changeRoleSchema), changeRole);
-router.patch('/users/:id/activate', validateRequest(setActiveSchema), setActive);
-router.patch('/users/:id/profile', validateRequest(updateUserProfileAdminSchema), updateUserProfileAdmin);
-router.delete('/users/:id', deleteUser);
+router.patch('/users/:id/role', protectRootAdmin, validateRequest(changeRoleSchema), changeRole);
+router.patch('/users/:id/activate', protectRootAdmin, validateRequest(setActiveSchema), setActive);
+router.patch('/users/:id/profile', protectRootAdmin, validateRequest(updateUserProfileAdminSchema), updateUserProfileAdmin);
+router.delete('/users/:id', protectRootAdmin, deleteUser);
 router.get('/audit-log', getAuditLog);
 router.get('/invoices', getAdminInvoices);
 router.get('/reports/revenue', getRevenueReport);
@@ -106,7 +107,7 @@ router.post('/fix-google-profiles', async (_req, res, next) => {
 });
 
 // ─── Section 4: Department Assignments ───────────────────────────────────────
-router.put('/staff/:id/department', validateRequest(assignDepartmentSchema), assignStaffDepartment);
+router.put('/staff/:id/department', protectRootAdmin, validateRequest(assignDepartmentSchema), assignStaffDepartment);
 router.get('/departments/:id/staff', getDepartmentStaff);
 
 // ─── Section 5: Doctor Schedule Management ───────────────────────────────────

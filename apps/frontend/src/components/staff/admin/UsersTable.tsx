@@ -98,8 +98,8 @@ export function UsersTable({
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                {cols.map((h, i) => (
-                  <th key={i} className={thClass}>
+                {cols.map((h) => (
+                  <th key={h} className={thClass}>
                     {h}
                   </th>
                 ))}
@@ -107,9 +107,9 @@ export function UsersTable({
             </thead>
             <tbody>
               {Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
-                  {cols.map((__, j) => (
-                    <td key={j} className={tdClass}>
+                <tr key={`skeleton-row-${i}`}>
+                  {cols.map((col) => (
+                    <td key={col} className={tdClass}>
                       <div className="h-4 w-24 rounded bg-[var(--sand-100)] animate-pulse" />
                     </td>
                   ))}
@@ -133,12 +133,12 @@ export function UsersTable({
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => {
+              {users.map((user, idx) => {
                 const isExpanded = expandedRows.has(user.id);
                 const isSelf = !!currentUserId && user.id === currentUserId;
                 const notActivated = isNotActivated(user);
                 return (
-                  <Fragment key={user.id}>
+                  <Fragment key={user.id ?? (user as any)._id ?? `user-${idx}`}>
                     <tr className="hover:bg-[var(--sand-50)] dark:hover:bg-[var(--forest-900)] transition-colors">
                       <td className={tdClass}>
                         <div className="flex items-center gap-3">
@@ -160,7 +160,7 @@ export function UsersTable({
                       <td className={`${tdClass} text-[var(--fg-2)] hidden md:table-cell`}>{user.email}</td>
                       <td className={`${tdClass} hidden md:table-cell`}>
                         <Badge variant="info" dot>
-                          {user.role.replace(/_/g, " ")}
+                          {user.role?.replace(/_/g, " ") ?? "—"}
                         </Badge>
                       </td>
                       <td className={`${tdClass} hidden md:table-cell`}>

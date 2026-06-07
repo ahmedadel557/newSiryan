@@ -67,8 +67,12 @@ export default function AdminUsersPage() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSubmit={async (data) => {
-          await createUser.mutateAsync(data);
-          setCreateModalOpen(false);
+          try {
+            await createUser.mutateAsync(data);
+            setCreateModalOpen(false);
+          } catch {
+            // error already shown via toast in useAdminUsers onError
+          }
         }}
       />
 

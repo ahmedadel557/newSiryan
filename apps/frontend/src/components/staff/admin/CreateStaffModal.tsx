@@ -39,21 +39,24 @@ export function CreateStaffModal({ open, onClose, onSubmit }: CreateStaffModalPr
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    await onSubmit({ username, email, password, role, first_name: firstName, last_name: lastName });
-    setSubmitting(false);
-    setUsername('');
-    setEmail('');
-    setPassword('');
-    setRole('nurse');
-    setFirstName('');
-    setLastName('');
+    try {
+      await onSubmit({ username, email, password, role, first_name: firstName, last_name: lastName });
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setRole('nurse');
+      setFirstName('');
+      setLastName('');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 z-40" />
-        <Dialog.Content className="fixed inset-0 flex items-center justify-center z-50 p-4">
+        <Dialog.Content aria-describedby={undefined} className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--bg-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] w-full max-w-[500px] flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-[var(--border-1)]">
               <Dialog.Title className="text-[15px] font-semibold text-[var(--fg-1)]">Create staff account</Dialog.Title>

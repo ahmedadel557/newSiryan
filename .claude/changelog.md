@@ -1,5 +1,58 @@
 # Changelog
 
+## [2026-06-07] Protect root admin account from modification
+
+### Goal
+Prevent any admin from editing or deleting the designated root/primary admin account.
+
+### Model (`apps/backend/src/models/User.ts`)
+- Added `isRootAdmin: { type: Boolean, default: false }` to schema and `IUser` interface.
+- Field is never written by registration or create-staff flows — must be set manually or via seed.
+
+### New Middleware (`apps/backend/src/middlewares/protectRootAdmin.ts`)
+- Looks up `req.params.id` (or `req.params.userId`) in the DB with a lean `.select('isRootAdmin')` query.
+- Returns 403 `"This account cannot be modified."` if the target user has `isRootAdmin: true`.
+- Errors during the lookup call `next()` (fail-open) so an unreachable DB doesn't lock out all admin actions.
+
+### Routes (`apps/backend/src/routes/admin.routes.ts`)
+`protectRootAdmin` inserted before the controller on:
+- `PATCH /admin/users/:id/role`
+- `PATCH /admin/users/:id/activate`
+- `PATCH /admin/users/:id/profile`
+- `DELETE /admin/users/:id`
+- `PUT /admin/staff/:id/department`
+
+### Verification
+- `npx tsc --noEmit` (backend) → 0 errors.
+- No frontend changes.
+
+---
+
+## [2026-06-07] Fix available slots bugs — cache invalidation + multi-shift merge
+
+### Bug 1 — Stale slot cache after admin schedule change
+- `apps/backend/src/utils/cache.ts` — added `cache.delPattern(pattern: string)`: uses Redis `scanIterator` to delete all keys matching a glob pattern (non-blocking SCAN + batched DEL).
+- `apps/backend/src/controllers/admin/doctorScheduleNew.controller.ts` — `upsertDoctorSchedule` and `deleteDoctorScheduleEntry` now call `cache.delPattern('slots:{doctorId}:*')` after each schedule change, flushing all per-date slot caches for the doctor so patients see fresh availability immediately.
+
+### Bug 2 — Orphaned ShiftDefinitions silently dropped hours
+- `apps/backend/src/controllers/doctor/index.ts` (`getDoctorAvailability`) — the `activeEntries` filter now requires `e.shift != null && e.shift.is_active !== false && e.shift.start_time && e.shift.end_time`. Entries whose ShiftDefinition was deleted (null after populate) no longer pass the filter, so they don't inflate `activeEntries.length` while contributing zero hours. The redundant null guard inside the hour-generation loop was removed; the Set-based multi-shift merge is preserved and now operates on a clean entry list.
+
+---
+
+## [2026-06-07] Remove doctor self-shift selection card
+
+### Goal
+Shifts are now admin-managed. Remove the interactive `DoctorShiftCard` from the doctor dashboard so doctors can no longer edit their own shift.
+
+### Changed Files
+- `apps/frontend/src/app/dashboard/doctor/page.tsx` — removed `DoctorShiftCard` import and its usage; unwrapped `DoctorRatingsCard` from the now-unnecessary two-column grid.
+
+### Not changed
+- `DoctorShiftCard.tsx` component file kept (not deleted)
+- All other dashboard cards, layout, and functionality preserved
+
+---
+
 ## [2026-06-06] EC2 #2 Frontend Server Setup — siryan.xyz
 
 ### Goal

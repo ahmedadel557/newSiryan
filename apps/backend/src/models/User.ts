@@ -29,6 +29,7 @@ export interface IUser extends Document {
   reset_token?: string;
   reset_token_expires?: Date;
   is_email_verified?: boolean;
+  isRootAdmin?: boolean;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -48,6 +49,7 @@ const UserSchema = new Schema<IUser>(
     reset_token:          { type: String },
     reset_token_expires:  { type: Date },
     is_email_verified:    { type: Boolean, default: false },
+    isRootAdmin:          { type: Boolean, default: false },
   },
   { timestamps: true }
 );

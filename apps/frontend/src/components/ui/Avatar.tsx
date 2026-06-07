@@ -16,13 +16,14 @@ const sizeClasses = {
   lg: 'h-12 w-12 text-[16px]',
 };
 
-function getInitials(name: string): string {
+function getInitials(name: string | undefined | null): string {
+  if (!name?.trim()) return '?';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export function Avatar({ name, size = 'md', src, className }: AvatarProps) {
+export function Avatar({ name, size = 'md', src, className }: Omit<AvatarProps, 'name'> & { name?: string }) {
   const [imgError, setImgError] = useState(false);
   const base = cn('inline-flex shrink-0 items-center justify-center rounded-full font-semibold', sizeClasses[size], className);
 

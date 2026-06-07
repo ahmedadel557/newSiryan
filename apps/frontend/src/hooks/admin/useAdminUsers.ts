@@ -50,7 +50,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       );
       showToast('User created', 'success');
     },
-    onError: () => showToast('Failed to create user', 'error'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to create user';
+      showToast(msg, 'error');
+    },
   });
 
   const updateRole = useMutation({
@@ -62,7 +65,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       );
       showToast('Role updated', 'success');
     },
-    onError: () => showToast('Failed to update role', 'error'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to update role';
+      showToast(msg, 'error');
+    },
   });
 
   const toggleActive = useMutation({
@@ -74,7 +80,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       );
       showToast(vars.isActive ? 'User activated' : 'User deactivated', 'success');
     },
-    onError: () => showToast('Failed to update user', 'error'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to update user';
+      showToast(msg, 'error');
+    },
   });
 
   const deleteUser = useMutation({
@@ -85,7 +94,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       );
       showToast('User deleted', 'success');
     },
-    onError: () => showToast('Failed to delete user', 'error'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to delete user';
+      showToast(msg, 'error');
+    },
   });
 
   const updateProfile = useMutation({
@@ -96,7 +108,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       qc.invalidateQueries({ queryKey: queryKeys.adminUsers() });
       showToast('Profile updated', 'success');
     },
-    onError: () => showToast('Failed to update profile', 'error'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to update profile';
+      showToast(msg, 'error');
+    },
   });
 
   return {

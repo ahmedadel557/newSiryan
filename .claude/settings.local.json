@@ -47,7 +47,8 @@
       "PowerShell(aws configure get region *)",
       "PowerShell(Test-Path *)",
       "Bash(git -C \"C:/Users/Admin/Desktop/newSiryan\" remote get-url origin)",
-      "Bash(ssh *)"
+      "Bash(ssh *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Admin\\\\Desktop\\\\newSiryan\\\\apps\\\\frontend\\\\src\\\\hooks\\\\\" -Recurse | Where-Object { -not $_.PSIsContainer } | Select-Object -ExpandProperty FullName)"
     ]
   }
 }

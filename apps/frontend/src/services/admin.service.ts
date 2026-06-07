@@ -20,8 +20,9 @@ export const adminService = {
   },
 
   async createUser(data: CreateUserDto): Promise<User> {
-    const res = await apiClient.post<ApiResponse<User>>('/admin/users', data);
-    return normalize<User>(res.data.data);
+    const res = await apiClient.post<ApiResponse<{ user: User; profile: unknown } | User>>('/admin/users', data);
+    const raw: any = res.data.data;
+    return normalize<User>(raw?.user ?? raw);
   },
 
   async updateUserRole(id: string, role: Role): Promise<User> {

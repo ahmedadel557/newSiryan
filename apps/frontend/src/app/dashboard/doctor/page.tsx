@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useDoctor } from '@/hooks/doctor';
 import { useSocketEvent } from '@/hooks/shared';
 import { DoctorKPIStrip } from '@/components/doctor/DoctorKPIStrip';
-import { DoctorShiftCard } from '@/components/doctor/DoctorShiftCard';
 import { DoctorRatingsCard } from '@/components/doctor/DoctorRatingsCard';
 import { MyScheduleWidget } from '@/components/shared/MyScheduleWidget';
 import { PatientQueueTable } from '@/components/doctor/PatientQueueTable';
@@ -128,10 +127,7 @@ export default function DoctorQueuePage() {
 
       <ActiveAlertsCard />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <DoctorShiftCard />
-        <DoctorRatingsCard />
-      </div>
+      <DoctorRatingsCard />
 
       <PatientQueueTable
         rows={rows}

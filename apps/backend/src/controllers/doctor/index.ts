@@ -150,8 +150,15 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
         return sendSuccess(res, payload, 'Date is blocked');
       }
 
+      // Require the shift itself to be present and active (guards against orphaned ShiftDefinition refs)
       const activeEntries = doctorSchedule.entries.filter(
-        (e) => e.is_active && e.day_of_week === dayOfWeek && e.shift?.is_active !== false,
+        (e) =>
+          e.is_active &&
+          e.day_of_week === dayOfWeek &&
+          e.shift != null &&
+          e.shift.is_active !== false &&
+          e.shift.start_time &&
+          e.shift.end_time,
       );
 
       if (activeEntries.length === 0) {
@@ -160,13 +167,11 @@ export const getDoctorAvailability = async (req: AuthRequest, res: Response, nex
         return sendSuccess(res, payload, 'Doctor not scheduled on this day');
       }
 
-      // Collect hours from all active shift entries for this day
+      // Merge slots from ALL assigned shifts for this day (a doctor may have >1 shift)
       const hourSet = new Set<number>();
       for (const entry of activeEntries) {
-        const shift = entry.shift;
-        if (!shift?.start_time || !shift?.end_time) continue;
-        const startH = parseInt(shift.start_time.split(':')[0], 10);
-        const endH = parseInt(shift.end_time.split(':')[0], 10);
+        const startH = parseInt(entry.shift.start_time.split(':')[0], 10);
+        const endH = parseInt(entry.shift.end_time.split(':')[0], 10);
         for (let h = startH; h < endH; h++) hourSet.add(h);
       }
       allSlots = Array.from(hourSet).sort((a, b) => a - b).map((h) => `${String(h).padStart(2, '0')}:00`);

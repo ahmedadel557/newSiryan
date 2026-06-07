@@ -33,4 +33,19 @@ export const cache = {
       console.error(`[cache] del [${keys.join(', ')}]:`, err);
     }
   },
+
+  // Deletes all keys matching a glob pattern (e.g. "slots:doctorId:*").
+  // Uses SCAN so it never blocks the Redis event loop.
+  async delPattern(pattern: string): Promise<void> {
+    if (!redisClient.isReady) return;
+    try {
+      const keys: string[] = [];
+      for await (const key of redisClient.scanIterator({ MATCH: pattern, COUNT: 200 })) {
+        keys.push(key);
+      }
+      if (keys.length > 0) await redisClient.del(keys);
+    } catch (err) {
+      console.error(`[cache] delPattern "${pattern}":`, err);
+    }
+  },
 };

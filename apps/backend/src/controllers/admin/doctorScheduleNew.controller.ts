@@ -35,13 +35,18 @@ export const listDoctorSchedules = async (_req: AuthRequest, res: Response, next
       .populate('user', 'username email')
       .lean();
 
-    const doctorIds = schedules.map((s) => (s.user as any)._id ?? s.user);
-    const profiles = await Profile.find({ user: { $in: doctorIds } })
-      .select('user first_name last_name department specialization')
-      .lean();
+    // Guard against orphaned schedules where the user was deleted
+    const validSchedules = schedules.filter((s) => s.user != null);
+
+    const doctorIds = validSchedules.map((s) => (s.user as any)._id ?? s.user);
+    const profiles = doctorIds.length
+      ? await Profile.find({ user: { $in: doctorIds } })
+          .select('user first_name last_name department specialization')
+          .lean()
+      : [];
     const profileMap = new Map(profiles.map((p) => [(p.user as any).toString(), p]));
 
-    const result = schedules.map((s) => {
+    const result = validSchedules.map((s) => {
       const uid = ((s.user as any)._id ?? s.user).toString();
       const prof = profileMap.get(uid);
       return {
@@ -54,6 +59,7 @@ export const listDoctorSchedules = async (_req: AuthRequest, res: Response, next
 
     sendSuccess(res, result);
   } catch (err) {
+    console.error('[listDoctorSchedules]', err);
     next(err);
   }
 };
@@ -115,6 +121,8 @@ export const upsertDoctorSchedule = async (req: AuthRequest, res: Response, next
     ).populate('entries.shift', 'name start_time end_time');
 
     cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.doctorId));
+    // Clear all per-date slot caches for this doctor so patients see fresh availability immediately
+    cache.delPattern(`slots:${req.params.doctorId}:*`);
 
     sendSuccess(res, schedule, 'Doctor schedule saved');
     logAudit({ performedBy: req.user!.id, action: 'upsert_doctor_schedule', resource: 'doctor_schedule', resourceId: req.params.doctorId, req });
@@ -150,6 +158,7 @@ export const deleteDoctorScheduleEntry = async (req: AuthRequest, res: Response,
     if (!schedule) return sendError(res, 'Doctor schedule not found', 404);
 
     cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.doctorId));
+    cache.delPattern(`slots:${req.params.doctorId}:*`);
     sendSuccess(res, schedule, 'Entry removed');
     logAudit({ performedBy: req.user!.id, action: 'delete_doctor_schedule_entry', resource: 'doctor_schedule', resourceId: req.params.doctorId, req });
   } catch (err: any) {
