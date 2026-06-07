@@ -50,6 +50,16 @@ export function usePatientVideoCall() {
   const endedRef = useRef(false);
   const deviceErrHandlerRef = useRef<((e: PromiseRejectionEvent) => void) | null>(null);
 
+  // De-dupes concurrent/repeat initCall() invocations. Patient-side has TWO
+  // triggers — the mount effect AND the `video:call:started` socket retry — on
+  // top of React StrictMode's mount→unmount→mount cycle. Any two firing before
+  // clientRef/callRef are assigned would each reach `c.call()` (which mints a NEW
+  // Call) and join it: two SFU sessions for the same user, so the older session
+  // appears as a remote participant and you hear your own audio. Holding the
+  // in-flight promise makes extra calls return the same join. Cleared on failure
+  // so the "Try again" button / socket retry can start fresh.
+  const initPromiseRef = useRef<Promise<void> | null>(null);
+
   // Store appointment id so the tokenProvider can refresh without prop drilling.
   const appointmentIdRef = useRef<string | null>(null);
 
@@ -62,6 +72,11 @@ export function usePatientVideoCall() {
   }, []);
 
   const initCall = useCallback(async (appointmentId: string, userId: string, userName: string) => {
+    // If a join is already in flight (or completed), reuse it instead of starting
+    // a second one. This is what prevents the duplicate-session bug.
+    if (initPromiseRef.current) return initPromiseRef.current;
+
+    const run = (async () => {
     setIsConnecting(true);
     setError(null);
     setMediaWarning(null);
@@ -92,7 +107,10 @@ export function usePatientVideoCall() {
         token: data.token,
         tokenProvider,
       });
-      const theCall = c.call(CALL_TYPE, data.callId);
+      // reuseInstance:true makes the SDK return the already-registered Call for
+      // this (type,id) instead of constructing a new one — defense-in-depth
+      // against a second Call ever being created/joined for the same call id.
+      const theCall = c.call(CALL_TYPE, data.callId, { reuseInstance: true });
 
       const probeWarn = await probeDevices(theCall);
       let pendingWarn = probeWarn;
@@ -134,12 +152,24 @@ export function usePatientVideoCall() {
       setToken(data.token);
       setApiKey(key);
       setIsConnected(true);
+
+      // [VALIDATION] Temporary — confirm exactly one session exists for this user.
+      // Expected when alone: remoteParticipants = []. Remove after diagnosis.
+      // eslint-disable-next-line no-console
+      console.log('[VALIDATION]', {
+        localUserId: theCall.state.localParticipant?.userId,
+        localSessionId: theCall.state.localParticipant?.sessionId,
+        remoteParticipants: theCall.state.remoteParticipants.map((p) => ({ userId: p.userId, sessionId: p.sessionId })),
+      });
     } catch (e: any) {
       // Disconnect the client if it was created before the failure so the next
       // retry (or page re-mount) starts from a clean state.
       if (c) {
         try { await c.disconnectUser(); } catch { /* best-effort */ }
       }
+      // Drop the cached promise so the "Try again" button / socket retry / page
+      // re-mount can start a fresh join after a genuine failure.
+      initPromiseRef.current = null;
       setError(
         e?.response?.data?.message ??
           'The call has not started yet. Please wait for your doctor to open the room, then try again.',
@@ -147,6 +177,10 @@ export function usePatientVideoCall() {
     } finally {
       setIsConnecting(false);
     }
+    })();
+
+    initPromiseRef.current = run;
+    return run;
   }, [tokenProvider]);
 
   const endCall = useCallback(async () => {
@@ -160,6 +194,7 @@ export function usePatientVideoCall() {
     try { await clientRef.current?.disconnectUser(); } catch { /* best-effort */ }
     clientRef.current = null;
     callRef.current = null;
+    initPromiseRef.current = null;
     setCall(null);
     setClient(null);
     setIsConnected(false);

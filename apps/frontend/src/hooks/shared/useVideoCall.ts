@@ -51,6 +51,16 @@ export function useVideoCall() {
   const endedRef = useRef(false);
   const deviceErrHandlerRef = useRef<((e: PromiseRejectionEvent) => void) | null>(null);
 
+  // De-dupes concurrent/repeat initCall() invocations. Without it, React
+  // StrictMode's mount→unmount→mount cycle (and any re-render that re-runs the
+  // effect) fires initCall twice before clientRef/callRef are assigned, so each
+  // run reaches `c.call()` — which mints a NEW Call object — and joins it. Two
+  // Call objects → two SFU sessions for the same user → the older session shows
+  // up as a remote participant and you hear your own audio. Holding the in-flight
+  // promise here makes every extra call return the same join instead of starting
+  // a second one. Cleared on failure so a real retry can start fresh.
+  const initPromiseRef = useRef<Promise<void> | null>(null);
+
   // Store appointment id so the tokenProvider can refresh without prop drilling.
   const appointmentIdRef = useRef<string | null>(null);
 
@@ -63,6 +73,11 @@ export function useVideoCall() {
   }, []);
 
   const initCall = useCallback(async (appointmentId: string, userId: string, userName: string) => {
+    // If a join is already in flight (or completed), reuse it instead of starting
+    // a second one. This is what prevents the duplicate-session bug.
+    if (initPromiseRef.current) return initPromiseRef.current;
+
+    const run = (async () => {
     setIsConnecting(true);
     setError(null);
     setMediaWarning(null);
@@ -95,7 +110,10 @@ export function useVideoCall() {
         token: data.token,
         tokenProvider,
       });
-      const theCall = c.call(CALL_TYPE, data.callId);
+      // reuseInstance:true makes the SDK return the already-registered Call for
+      // this (type,id) instead of constructing a new one — defense-in-depth
+      // against a second Call ever being created/joined for the same call id.
+      const theCall = c.call(CALL_TYPE, data.callId, { reuseInstance: true });
 
       // Probe devices and proactively disable absent ones so the SDK never calls
       // getUserMedia for a device that isn't there — prevents stray permission
@@ -144,16 +162,32 @@ export function useVideoCall() {
       setApiKey(key);
       setOtherUserId(patientId);
       setIsConnected(true);
+
+      // [VALIDATION] Temporary — confirm exactly one session exists for this user.
+      // Expected when alone: remoteParticipants = []. Remove after diagnosis.
+      // eslint-disable-next-line no-console
+      console.log('[VALIDATION]', {
+        localUserId: theCall.state.localParticipant?.userId,
+        localSessionId: theCall.state.localParticipant?.sessionId,
+        remoteParticipants: theCall.state.remoteParticipants.map((p) => ({ userId: p.userId, sessionId: p.sessionId })),
+      });
     } catch (e: any) {
       // If client was created but join failed, disconnect it so the singleton
       // map is clean and a retry can create a fresh instance.
       if (c) {
         try { await c.disconnectUser(); } catch { /* best-effort */ }
       }
+      // Drop the cached promise so the next attempt (page re-mount / manual
+      // retry) is allowed to start a fresh join after a genuine failure.
+      initPromiseRef.current = null;
       setError(e?.response?.data?.message ?? e?.message ?? 'Could not start the video call');
     } finally {
       setIsConnecting(false);
     }
+    })();
+
+    initPromiseRef.current = run;
+    return run;
   }, [tokenProvider]);
 
   const endCall = useCallback(async () => {
@@ -171,6 +205,7 @@ export function useVideoCall() {
     try { await c?.disconnectUser(); } catch { /* best-effort */ }
     clientRef.current = null;
     callRef.current = null;
+    initPromiseRef.current = null;
     setCall(null);
     setClient(null);
     setIsConnected(false);

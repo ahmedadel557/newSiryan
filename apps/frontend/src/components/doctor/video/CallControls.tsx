@@ -24,6 +24,21 @@ export function CallControls({ chatOpen, onToggleChat, onEndCall }: CallControls
   const isAutoplayBlocked = useIsAutoplayBlocked();
   const call = useCall();
 
+  // [DEBUG-STREAM] Issue #1 — mute reliability. Logs the SDK's actual `status`
+  // vs `optimisticStatus` on every render so we can see whether the button reads
+  // a lagging/stuck value. Remove after diagnosis.
+  const micState = useMicrophoneState();
+  // eslint-disable-next-line no-console
+  console.log('[DEBUG-STREAM] MIC STATE', {
+    status: micState.status,
+    optimisticStatus: micState.optimisticStatus,
+    isEnabled: micState.isEnabled,
+    isMute: micState.isMute,
+    optionsAwareIsMute: micState.optionsAwareIsMute,
+    isTogglePending: micState.isTogglePending,
+    'microphone.enabled': micState.microphone?.enabled,
+  });
+
   const roundBtn = 'inline-flex h-12 w-12 items-center justify-center rounded-full transition-colors';
 
   return (
@@ -46,7 +61,19 @@ export function CallControls({ chatOpen, onToggleChat, onEndCall }: CallControls
         style={{ background: 'color-mix(in oklab, var(--forest-950) 80%, transparent)' }}
       >
         <button
-          onClick={() => { microphone.toggle().catch(() => {}); }}
+          onClick={async () => {
+            // [DEBUG-STREAM] Issue #1 — prove whether toggle() flips state.
+            // eslint-disable-next-line no-console
+            console.log('[DEBUG-STREAM] BEFORE TOGGLE', { enabled: microphone?.enabled, status: micState.status, optimisticStatus: micState.optimisticStatus });
+            try {
+              await microphone.toggle();
+              // eslint-disable-next-line no-console
+              console.log('[DEBUG-STREAM] AFTER TOGGLE (resolved)', { enabled: microphone?.enabled, status: microphone?.state.status, optimisticStatus: microphone?.state.optimisticStatus });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.log('[DEBUG-STREAM] TOGGLE REJECTED', e);
+            }
+          }}
           disabled={micPending}
           className={roundBtn}
           style={{ background: micOn ? 'var(--bg-raised)' : 'var(--critical)', color: micOn ? 'var(--fg-1)' : 'var(--fg-on-brand)', opacity: micPending ? 0.6 : 1 }}
