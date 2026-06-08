@@ -19,6 +19,14 @@ import {
   resetPasswordSchema,
 } from '../../validations/auth.validation';
 import { AuthRequest } from '../../middlewares/auth';
+import { createControllerRateLimiter } from '../../middlewares/redisRateLimiter';
+
+const loginRL = createControllerRateLimiter({
+  keyPrefix: 'auth:login',
+  max: 10,
+  windowSeconds: 15 * 60,
+  getKey: (req) => `${req.ip ?? 'unknown'}:${(req.body?.email as string)?.toLowerCase() ?? 'unknown'}`,
+});
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -54,11 +62,20 @@ export const registerStaff = async (req: Request, res: Response, next: NextFunct
 };
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
+  const rlKey = loginRL.buildKey(req);
+
+  if (await loginRL.isBlocked(rlKey)) {
+    return sendError(res, 'Too many failed login attempts, please try again later.', 429);
+  }
+
   try {
     const parsed = loginSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
     const result = await authService.login({ ...parsed.data.body, force: parsed.data.body.force }, req);
+
+    // Successful login — clear the failed-attempts counter
+    loginRL.reset(rlKey).catch(() => {});
 
     const rememberMe = !!parsed.data.body.remember_me;
 
@@ -70,7 +87,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     setAuthCookies(res, result.accessToken, result.refreshToken!, rememberMe);
     sendSuccess(res, { user: result.user, profile: result.profile }, 'Login successful');
   } catch (err: any) {
-    if (err.message === 'Invalid credentials') return sendError(res, 'Invalid credentials', 401);
+    if (err.message === 'Invalid credentials') {
+      loginRL.increment(rlKey).catch(() => {});
+      return sendError(res, 'Invalid credentials', 401);
+    }
     if (err.message === 'Account pending approval')
       return sendError(res, 'Your account is pending admin approval. You will be notified by email once approved.', 403);
     if (err.message?.startsWith('Account rejected'))

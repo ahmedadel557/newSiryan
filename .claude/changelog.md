@@ -1,5 +1,29 @@
 # Changelog
 
+## [2026-06-08] Fix Login Rate Limiter — Failed-Attempts Only, IP+Email Scoping
+
+### Problem
+The Redis rate limiter for `POST /api/auth/login` was applied as middleware (before the controller),
+so it incremented the counter on every request — including successful logins. A legitimate user who
+logged in 10 times correctly would be blocked on the 11th attempt. The counter key was also
+IP-only, meaning all accounts tried from the same IP shared one counter. A debug `console.log`
+was leaking request metadata to the server log.
+
+### Fix
+
+**`apps/backend/src/middlewares/redisRateLimiter.ts`**
+- Removed `console.log({ ip, key, count })` debug block
+- Exported new `createControllerRateLimiter(opts)` returning `{ buildKey, isBlocked, increment, reset }`. Existing `createRedisRateLimiter` (middleware factory used by register) unchanged.
+
+**`apps/backend/src/routes/auth.routes.ts`**
+- Removed `loginRateLimiter` constant and its usage on the login route
+
+**`apps/backend/src/controllers/auth/index.ts`**
+- `loginRL` defined at module level with `getKey: req => '{ip}:{email.toLowerCase()}'`
+- `login` controller: `isBlocked` check before auth attempt (429 early return); increment only on `'Invalid credentials'`; `reset` on success
+
+---
+
 ## [2026-06-08] MyScheduleWidget — Multi-Shift Day Cell Support
 
 ### Problem

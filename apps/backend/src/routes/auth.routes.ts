@@ -22,12 +22,6 @@ import '../config/passport';
 const signToken = (payload: object, secret: string, expiresIn: string) =>
   jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 
-const loginRateLimiter = createRedisRateLimiter({
-  keyPrefix: 'auth:login',
-  max: 10,
-  windowSeconds: 15 * 60, // 15 minutes
-});
-
 const registerRateLimiter = createRedisRateLimiter({
   keyPrefix: 'auth:register',
   max: 5,
@@ -38,7 +32,7 @@ const router = Router();
 
 router.post('/register', registerRateLimiter, validateRequest(registerSchema), register);
 router.post('/register/staff', registerRateLimiter, registerStaff);
-router.post('/login', loginRateLimiter, validateRequest(loginSchema), login);
+router.post('/login', validateRequest(loginSchema), login);
 router.post('/logout', authenticate, logout);
 router.post('/refresh-token', refreshToken);
 router.post('/forgot-password', validateRequest(forgotPasswordSchema), forgotPassword);

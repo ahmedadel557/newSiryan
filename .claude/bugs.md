@@ -331,6 +331,32 @@
 - **Fix:** Added `isRootAdmin: Boolean (default false)` to the User model. Created `middlewares/protectRootAdmin.ts` which looks up the target user and returns 403 if `isRootAdmin` is true. Middleware is inserted before the controller on all five user-mutation routes in `admin.routes.ts`. The flag is never exposed in registration or create-staff flows — it must be set directly in the DB (or a seed script).
 - **Files:** `apps/backend/src/models/User.ts`, `apps/backend/src/middlewares/protectRootAdmin.ts`, `apps/backend/src/routes/admin.routes.ts`
 
+## [BUG-RATELIMIT-LOGIN] Login rate limiter incremented on all requests, IP-only key, debug log leak
+- **Status:** resolved (2026-06-08)
+
+### Findings (Phase 1 research)
+- **Where applied:** Middleware level — `auth.routes.ts:41` had `router.post('/login', loginRateLimiter, validateRequest(loginSchema), login)`. The middleware ran BEFORE the controller, so it incremented the counter on every request regardless of whether the login succeeded or failed.
+- **Key format:** IP-only — `ratelimit:auth:login:${req.ip}`. No email component; any IP could be rate-limited across all accounts it tried.
+- **Counter increments on success?** Yes — the old design incremented unconditionally for every login attempt (success AND failure). A user who correctly logged in 10 times would be blocked on the 11th.
+- **Limits:** `max: 10`, `windowSeconds: 15 * 60` (15 min). The check was `count > opts.max` (i.e., 11th request triggers block). Limit value is appropriate, but triggering on all attempts made it wrong.
+- **Other rate limiters:** Global `express-rate-limit` at 500/15min/IP; `registerRateLimiter` at 5/1h/IP. Neither overlaps with login.
+- **Redis client:** `redisClient` from `config/redis`. Uses `INCR` → set `EXPIRE` on first increment (count === 1).
+- **Debug logging:** `console.log({ ip, key, count })` at `redisRateLimiter.ts:35–39` — temporary investigation artifact, never removed.
+
+### Fixes Applied
+- **Fix 1 — Failed-attempts only:** Moved rate limiting logic INSIDE the `login` controller (`controllers/auth/index.ts`). Counter only increments when `authService.login` throws `'Invalid credentials'` (wrong password or user not found). On successful login the key is deleted via `loginRL.reset()`. Removed `loginRateLimiter` middleware from the route.
+- **Fix 2 — IP+email key scoping:** Key is now `ratelimit:auth:login:${req.ip}:${email.toLowerCase()}`. Each account has its own counter per IP, preventing cross-account bleed.
+- **Fix 3 — Limits unchanged:** `max: 10`, `windowSeconds: 15 * 60` — appropriate for failed-attempts-only semantics.
+- **Fix 4 — Debug log removed:** Deleted `console.log` block from `redisRateLimiter.ts`.
+- **New export:** Added `createControllerRateLimiter(opts)` to `redisRateLimiter.ts` returning `{ buildKey, isBlocked, increment, reset }` for controller-side use. Existing `createRedisRateLimiter` (used by `registerRateLimiter`) unchanged.
+
+### Files Changed
+- `apps/backend/src/middlewares/redisRateLimiter.ts` — removed console.log; added `createControllerRateLimiter` export
+- `apps/backend/src/routes/auth.routes.ts` — removed `loginRateLimiter` definition + middleware from login route
+- `apps/backend/src/controllers/auth/index.ts` — added `loginRL` + per-attempt logic inside `login`
+
+---
+
 ## Template
 
 ### [BUG-N] Title

@@ -32,11 +32,6 @@ export function createRedisRateLimiter(opts: RateLimitOptions) {
       if (count === 1) {
         await redisClient.expire(key, opts.windowSeconds);
       }
-      console.log({
-        ip: req.ip,
-        key,
-        count,
-      });
       if (count > opts.max) {
         sendError(res, "Too many requests, please try again later.", 429);
         return;
@@ -47,4 +42,38 @@ export function createRedisRateLimiter(opts: RateLimitOptions) {
 
     next();
   };
+}
+
+export function createControllerRateLimiter(opts: RateLimitOptions) {
+  const buildKey = (req: Request): string => {
+    const identifier = opts.getKey ? opts.getKey(req) : (req.ip ?? "unknown");
+    return `ratelimit:${opts.keyPrefix}:${identifier}`;
+  };
+
+  const isBlocked = async (key: string): Promise<boolean> => {
+    if (!redisClient.isReady) return false;
+    try {
+      const raw = await redisClient.get(key);
+      return raw !== null && parseInt(raw, 10) >= opts.max;
+    } catch {
+      return false;
+    }
+  };
+
+  const increment = async (key: string): Promise<void> => {
+    if (!redisClient.isReady) return;
+    try {
+      const count = await redisClient.incr(key);
+      if (count === 1) await redisClient.expire(key, opts.windowSeconds);
+    } catch {}
+  };
+
+  const reset = async (key: string): Promise<void> => {
+    if (!redisClient.isReady) return;
+    try {
+      await redisClient.del(key);
+    } catch {}
+  };
+
+  return { buildKey, isBlocked, increment, reset };
 }
