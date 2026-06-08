@@ -1,10 +1,31 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryKeys';
 import { doctorService } from '@/services/doctor.service';
+import { scheduleService } from '@/services/schedule.service';
 import { useToast } from '@/hooks/shared';
-import type { Appointment, BlockedSlot, DoctorScheduleRoomBooking, Profile } from '@/types';
+import type { BlockedSlot, ScheduleEntry } from '@/types';
+
+/** day_of_week (0=Sun … 6=Sat) → hour ranges of assigned shifts. */
+export type ShiftRanges = Record<number, Array<{ start: number; end: number }>>;
+
+// Fallback grid bounds when the doctor has no admin-assigned shift data.
+const FALLBACK_GRID_START = 8;
+const FALLBACK_GRID_END = 20;
+
+function shiftStartHour(t: string): number {
+  const h = Number(String(t).split(':')[0]);
+  return Number.isFinite(h) ? h : FALLBACK_GRID_START;
+}
+
+function shiftEndHour(t: string): number {
+  const [hStr, mStr] = String(t).split(':');
+  const h = Number(hStr);
+  const m = Number(mStr);
+  if (!Number.isFinite(h)) return FALLBACK_GRID_END;
+  return m > 0 ? h + 1 : h; // round a partial hour up so the row covering it is shown
+}
 
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
@@ -26,20 +47,6 @@ function isoDay(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
-}
-
-const SHIFT_RANGES: Record<'morning' | 'evening' | 'night' | '', { start: number; end: number }> = {
-  morning: { start: 8, end: 14 },
-  evening: { start: 14, end: 20 },
-  night:   { start: 20, end: 24 },
-  '':      { start: 8, end: 20 },
-};
-
-function slotsForShift(shift: 'morning' | 'evening' | 'night' | ''): string[] {
-  const { start, end } = SHIFT_RANGES[shift] ?? SHIFT_RANGES[''];
-  const out: string[] = [];
-  for (let h = start; h < end; h++) out.push(`${String(h).padStart(2, '0')}:00`);
-  return out;
 }
 
 export function useDoctorSchedule() {
@@ -74,6 +81,13 @@ export function useDoctorSchedule() {
   const { data: roomBookings = [] } = useQuery({
     queryKey: queryKeys.doctorRoomBookings(from, to),
     queryFn: () => doctorService.getRoomBookings({ from, to }),
+  });
+
+  // Admin-assigned schedule (DoctorSchedule entries → ShiftDefinition time ranges).
+  // Read-only here — the socket-driven refresh/toast lives in useMySchedule.
+  const { data: myScheduleData } = useQuery({
+    queryKey: queryKeys.scheduleMe(),
+    queryFn: () => scheduleService.getMySchedule().catch(() => null),
   });
 
   const shift: 'morning' | 'evening' | 'night' | '' = profileData?.shift ?? '';
@@ -123,7 +137,43 @@ export function useDoctorSchedule() {
   function goToday() { setCurrentWeekStart(getWeekStart(new Date())); }
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
-  const slots = slotsForShift(shift);
+
+  // Map each weekday (day_of_week) to its assigned shift hour ranges. Entries repeat
+  // weekly, so this is valid for any navigated week, not just the current one.
+  const shiftRanges = useMemo<ShiftRanges>(() => {
+    const map: ShiftRanges = {};
+    const entries: ScheduleEntry[] = myScheduleData?.schedule?.entries ?? [];
+    for (const e of entries) {
+      if (!e?.is_active) continue;
+      const s = e.shift;
+      if (!s || typeof s === 'string') continue; // unpopulated ref — skip
+      const start = shiftStartHour(s.start_time);
+      let end = shiftEndHour(s.end_time);
+      if (end <= start) end = 24; // overnight shift ending past/at midnight
+      (map[e.day_of_week] ??= []).push({ start, end });
+    }
+    for (const dow of Object.keys(map)) map[+dow].sort((a, b) => a.start - b.start);
+    return map;
+  }, [myScheduleData]);
+
+  const hasShiftData = Object.keys(shiftRanges).length > 0;
+
+  // Grid spans the widest shift window across the whole week so a second (e.g. evening)
+  // shift is never clipped; falls back to 08:00–20:00 when no shift data is available.
+  const { gridStart, gridEnd } = useMemo(() => {
+    const all = Object.values(shiftRanges).flat();
+    if (all.length === 0) return { gridStart: FALLBACK_GRID_START, gridEnd: FALLBACK_GRID_END };
+    return {
+      gridStart: Math.min(...all.map((r) => r.start)),
+      gridEnd: Math.max(...all.map((r) => r.end)),
+    };
+  }, [shiftRanges]);
+
+  const slots = useMemo(() => {
+    const out: string[] = [];
+    for (let h = gridStart; h < gridEnd; h++) out.push(`${String(h).padStart(2, '0')}:00`);
+    return out;
+  }, [gridStart, gridEnd]);
 
   const appointments = allAppointments.filter((a) => {
     const d = isoDay(new Date(a.scheduled_at));
@@ -138,6 +188,8 @@ export function useDoctorSchedule() {
     roomBookings,
     slots,
     shift,
+    shiftRanges,
+    hasShiftData,
     weekDays,
     currentWeekStart,
     isLoading: apptPending || patientsPending,

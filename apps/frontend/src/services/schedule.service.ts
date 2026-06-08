@@ -6,6 +6,7 @@ import type {
   DoctorScheduleRecord,
   StaffScheduleRecord,
   BlockedDateRecord,
+  MyScheduleResponse,
 } from '@/types';
 
 const norm = <T>(d: any): T => ({ ...d, id: d._id ?? d.id });
@@ -25,6 +26,12 @@ export interface ScheduleEntryInput {
 }
 
 export const scheduleService = {
+  // ── My Schedule (authenticated self-view) ───────────────────────
+  async getMySchedule(): Promise<MyScheduleResponse> {
+    const res = await apiClient.get<ApiResponse<MyScheduleResponse>>('/schedule/me');
+    return res.data.data;
+  },
+
   // ── Shift Definitions ───────────────────────────────────────────
   async getShifts(): Promise<ShiftDefinition[]> {
     const res = await apiClient.get<ApiResponse<any[]>>('/admin/schedule/shifts');

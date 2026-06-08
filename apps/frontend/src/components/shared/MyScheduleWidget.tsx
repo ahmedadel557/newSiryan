@@ -91,11 +91,25 @@ function TodayBanner({ entry, shifts, isLoading }: { entry: WeekViewDay | null; 
   );
 }
 
-function DayCell({ day, isToday }: { day: WeekViewDay; isToday: boolean }) {
+interface DayCellProps {
+  day: WeekViewDay;
+  /** Admin-assigned shifts for this day; empty array means no shift assigned or day off. */
+  shifts: ShiftEntry[];
+  isToday: boolean;
+}
+
+function DayCell({ day, shifts, isToday }: DayCellProps) {
   const dayName = SHORT_DAY[day.day_of_week];
   const dateLabel = formatDate(day.date);
   const isBlocked = !day.is_working;
-  const hasShift = day.is_working && day.shift != null;
+
+  // Prefer multi-shift data from schedule entries; fall back to the single shift in week_view
+  // so the cell still shows something useful while the schedule query is loading.
+  const displayShifts: Array<{ id?: string; name: string; start_time: string; end_time: string }> =
+    shifts.length > 0 ? shifts : day.shift ? [day.shift] : [];
+
+  const hasShifts = displayShifts.length > 0;
+  const multi = displayShifts.length > 1;
 
   return (
     <div
@@ -106,28 +120,67 @@ function DayCell({ day, isToday }: { day: WeekViewDay; isToday: boolean }) {
         minWidth: '72px',
       }}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: isToday ? 'rgba(255,255,255,0.85)' : 'var(--fg-3)' }}>
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+        style={{ color: isToday ? 'rgba(255,255,255,0.85)' : 'var(--fg-3)' }}
+      >
         {dayName}
       </p>
       <p className="text-[12px] font-medium" style={{ color: isToday ? 'white' : 'var(--fg-2)' }}>
         {dateLabel}
       </p>
-      <div className="mt-0.5 flex flex-col items-center gap-0.5 text-center">
+
+      <div className="mt-0.5 flex flex-col items-center gap-0.5 text-center w-full">
         {isBlocked ? (
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: isToday ? 'rgba(255,255,255,0.18)' : 'var(--sand-100)', color: isToday ? 'white' : 'var(--fg-3)' }}>
+          <span
+            className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+            style={{
+              background: isToday ? 'rgba(255,255,255,0.18)' : 'var(--sand-100)',
+              color: isToday ? 'white' : 'var(--fg-3)',
+            }}
+          >
             Day Off
           </span>
-        ) : hasShift ? (
+        ) : !hasShifts ? (
+          <span className="text-[11px]" style={{ color: isToday ? 'rgba(255,255,255,0.6)' : 'var(--fg-4)' }}>
+            Off
+          </span>
+        ) : !multi ? (
           <>
-            <span className="text-[11px] font-semibold" style={{ color: isToday ? 'white' : 'var(--brand)' }}>
-              {day.shift!.name}
+            <span
+              className="text-[11px] font-semibold truncate w-full"
+              style={{ color: isToday ? 'white' : 'var(--brand)' }}
+            >
+              {displayShifts[0].name}
             </span>
-            <span className="text-[10px] tabular-nums" style={{ color: isToday ? 'rgba(255,255,255,0.75)' : 'var(--fg-3)' }}>
-              {day.shift!.start_time}–{day.shift!.end_time}
+            <span
+              className="text-[10px] tabular-nums"
+              style={{ color: isToday ? 'rgba(255,255,255,0.75)' : 'var(--fg-3)' }}
+            >
+              {displayShifts[0].start_time}–{displayShifts[0].end_time}
             </span>
           </>
         ) : (
-          <span className="text-[11px]" style={{ color: isToday ? 'rgba(255,255,255,0.6)' : 'var(--fg-4)' }}>Off</span>
+          <>
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{
+                background: isToday ? 'rgba(255,255,255,0.2)' : 'var(--brand-soft-bg)',
+                color: isToday ? 'white' : 'var(--brand)',
+              }}
+            >
+              {displayShifts.length} shifts
+            </span>
+            {displayShifts.map((s) => (
+              <span
+                key={s.id || s.start_time}
+                className="text-[10px] tabular-nums"
+                style={{ color: isToday ? 'rgba(255,255,255,0.8)' : 'var(--fg-3)' }}
+              >
+                {s.start_time}–{s.end_time}
+              </span>
+            ))}
+          </>
         )}
       </div>
     </div>
@@ -138,7 +191,11 @@ function SkeletonRow() {
   return (
     <div className="flex gap-2 overflow-x-auto pb-1">
       {Array.from({ length: 7 }).map((_, i) => (
-        <div key={i} className="flex flex-col items-center gap-2 px-2 py-3 rounded-[var(--radius-md)] shrink-0 animate-pulse" style={{ minWidth: '72px', background: 'var(--bg-sunken)', border: '1px solid var(--border-1)' }}>
+        <div
+          key={i}
+          className="flex flex-col items-center gap-2 px-2 py-3 rounded-[var(--radius-md)] shrink-0 animate-pulse"
+          style={{ minWidth: '72px', background: 'var(--bg-sunken)', border: '1px solid var(--border-1)' }}
+        >
           <div className="h-3 w-8 rounded bg-[var(--sand-100)]" />
           <div className="h-3 w-10 rounded bg-[var(--sand-100)]" />
           <div className="h-4 w-12 rounded bg-[var(--sand-100)] mt-1" />
@@ -149,17 +206,23 @@ function SkeletonRow() {
 }
 
 export function MyScheduleWidget() {
-  const { weekView, todayEntry, todayShifts, department, hasSchedule, isLoading } = useMySchedule();
+  const { weekView, weekViewShifts, todayEntry, todayShifts, department, hasSchedule, isLoading } = useMySchedule();
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-[var(--radius-xl)]" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-1)', boxShadow: 'var(--shadow-sm)' }}>
+    <div
+      className="flex flex-col gap-4 p-5 rounded-[var(--radius-xl)]"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-1)', boxShadow: 'var(--shadow-sm)' }}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarDays size={16} strokeWidth={1.75} style={{ color: 'var(--brand)' }} />
           <span className="text-[15px] font-semibold text-[var(--fg-1)]">My schedule</span>
           {department && (
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--brand-soft-bg)', color: 'var(--brand-soft-fg)' }}>
+            <span
+              className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--brand-soft-bg)', color: 'var(--brand-soft-fg)' }}
+            >
               {department}
             </span>
           )}
@@ -175,7 +238,10 @@ export function MyScheduleWidget() {
       {isLoading ? (
         <SkeletonRow />
       ) : !hasSchedule || weekView.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-6 rounded-[var(--radius-lg)] text-center" style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border-1)' }}>
+        <div
+          className="flex flex-col items-center gap-2 py-6 rounded-[var(--radius-lg)] text-center"
+          style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border-1)' }}
+        >
           <CalendarDays size={24} strokeWidth={1.5} style={{ color: 'var(--fg-4)' }} />
           <p className="text-[13px] text-[var(--fg-3)]">No schedule configured yet</p>
           <p className="text-[12px] text-[var(--fg-4)]">Contact your admin to set up your weekly schedule.</p>
@@ -183,7 +249,12 @@ export function MyScheduleWidget() {
       ) : (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {weekView.map((day) => (
-            <DayCell key={day.date} day={day} isToday={day.date === today} />
+            <DayCell
+              key={day.date}
+              day={day}
+              shifts={weekViewShifts[day.date] ?? []}
+              isToday={day.date === today}
+            />
           ))}
         </div>
       )}

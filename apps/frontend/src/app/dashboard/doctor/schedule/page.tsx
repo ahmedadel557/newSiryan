@@ -13,6 +13,8 @@ export default function DoctorSchedulePage() {
     blockedSlots,
     roomBookings,
     slots,
+    shiftRanges,
+    hasShiftData,
     weekDays,
     currentWeekStart,
     blockModalOpen,
@@ -72,6 +74,8 @@ export default function DoctorSchedulePage() {
         blockedSlots={blockedSlots}
         roomBookings={roomBookings}
         patients={patients}
+        shiftRanges={shiftRanges}
+        hasShiftData={hasShiftData}
         onEmptyClick={() => setBlockModalOpen(true)}
         onUnblock={unblockSlot}
       />

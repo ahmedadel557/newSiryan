@@ -1,5 +1,66 @@
 # Changelog
 
+## [2026-06-08] MyScheduleWidget — Multi-Shift Day Cell Support
+
+### Problem
+`DayCell` in `MyScheduleWidget` read `day.shift` (a single shift from the API's `week_view` payload).
+A doctor or staff member with two admin-assigned shifts on the same day (e.g. morning + evening)
+only saw one shift in the weekly row.
+
+### Fix
+- **`hooks/shared/useMySchedule.ts`**
+  - Replaced all `any` casts with proper `ScheduleEntry` typing via the new `entriesToShifts()` helper.
+  - `weekView` and `entries` are now individually memoized to keep `useMemo` deps stable.
+  - Added `weekViewShifts: Record<string, ShiftEntry[]>` — per-date multi-shift map derived from
+    `schedule.entries`, respecting the `is_working` flag for each day (blocked days → empty array).
+  - `todayShifts` reuses the same helper (no behavioral change).
+- **`components/shared/MyScheduleWidget.tsx`**
+  - `DayCell` now receives `shifts: ShiftEntry[]` instead of reading `day.shift` directly.
+  - Single shift: renders name + time range (same as before).
+  - Multiple shifts: renders an "N shifts" count badge + each shift's time range stacked.
+  - Falls back to `day.shift` from `week_view` while the schedule query is still loading.
+  - `MyScheduleWidget` passes `weekViewShifts[day.date] ?? []` to each cell.
+
+---
+
+## [2026-06-08] Doctor My Schedule — Dynamic Time Grid From Shift Hours
+
+### Problem
+The weekly calendar grid derived its hour rows from the doctor's single `Profile.shift`
+(`SHIFT_RANGES` hardcoded 08–14 / 14–20 / 20–24 / 08–20). A doctor with two admin-assigned
+shifts on the same day (e.g. morning 08:00–13:00 + evening 17:00–21:00) had the evening slots
+clipped because the grid never extended past the single profile shift window.
+
+### Fix — grid range now computed from real shift data (`DoctorSchedule` entries)
+- **`hooks/doctor/useDoctorSchedule.ts`**
+  - Added a read-only `scheduleService.getMySchedule()` query (shares the `scheduleMe()` query
+    key with `useMySchedule`, so the socket-driven refresh/toast still lives only there).
+  - Builds `shiftRanges: Record<day_of_week, {start,end}[]>` from active schedule entries →
+    `ShiftDefinition` time ranges. Entries repeat weekly, so this is valid for any navigated week.
+  - `gridStart` = min start hour across ALL shifts that week; `gridEnd` = max end hour.
+    Partial end minutes round up; an end ≤ start (overnight) clamps to 24.
+  - Fallback to **08:00–20:00** with no dimming when the doctor has no assigned shift data.
+  - Removed the hardcoded `SHIFT_RANGES` / `slotsForShift` helpers. Exposes `shiftRanges` +
+    `hasShiftData`.
+- **`components/doctor/WeekCalendarGrid.tsx`**
+  - New `shiftRanges` + `hasShiftData` props. Renders all rows between gridStart/gridEnd.
+  - Cells outside any shift for that day (gaps / break time / outside hours) render a muted
+    dimmed block instead of the dashed "+"; the time-label cell dims when no day that week has a
+    shift covering that hour. Appointment / room / blocked rendering is unchanged and still shows
+    in any row.
+- **`app/dashboard/doctor/schedule/page.tsx`** — passes `shiftRanges` + `hasShiftData` through.
+
+### Supporting refactor
+- **`services/schedule.service.ts`** — added `getMySchedule()` (`GET /schedule/me`).
+- **`hooks/shared/useMySchedule.ts`** — now fetches via `scheduleService.getMySchedule()`
+  (single source) instead of an inline axios call.
+
+### Unchanged (per task constraints)
+- Appointments display logic, week navigation, stats/KPI cards, legend, and the Block time
+  button/modal. No new libraries; existing Tailwind + design tokens and RTL layout preserved.
+
+---
+
 ## [2026-06-07] Restore Doctor Schedule Page to Appointments View
 
 ### Problem

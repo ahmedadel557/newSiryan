@@ -8,8 +8,16 @@ interface WeekCalendarGridProps {
   blockedSlots: BlockedSlot[];
   roomBookings: DoctorScheduleRoomBooking[];
   patients: Profile[];
+  /** day_of_week (0=Sun … 6=Sat) → assigned shift hour ranges, for dimming off-shift cells. */
+  shiftRanges: Record<number, Array<{ start: number; end: number }>>;
+  /** When false (no admin-assigned shifts), the grid shows the fallback range with no dimming. */
+  hasShiftData: boolean;
   onEmptyClick: (day: Date, slot: string) => void;
   onUnblock: (id: string) => void;
+}
+
+function hourInRanges(ranges: Array<{ start: number; end: number }>, hour: number): boolean {
+  return ranges.some((r) => hour >= r.start && hour < r.end);
 }
 
 function formatDayHeader(date: Date): string {
@@ -62,6 +70,8 @@ export function WeekCalendarGrid({
   blockedSlots,
   roomBookings,
   patients,
+  shiftRanges,
+  hasShiftData,
   onEmptyClick,
   onUnblock,
 }: WeekCalendarGridProps) {
@@ -106,13 +116,24 @@ export function WeekCalendarGrid({
           ) : (
             slots.map((slot) => {
               const hour = parseInt(slot, 10);
+              // Gap row: no day this week has a shift covering this hour → dim the time label.
+              const rowInAnyShift =
+                !hasShiftData || weekDays.some((d) => hourInRanges(shiftRanges[d.getDay()] ?? [], hour));
               return (
                 <tr key={slot}>
-                  <td className="font-mono text-[12px] text-[var(--fg-3)] py-2 px-[14px] border-b border-[var(--border-1)]">{slot}</td>
+                  <td
+                    className={`font-mono text-[12px] py-2 px-[14px] border-b border-[var(--border-1)] ${
+                      rowInAnyShift ? 'text-[var(--fg-3)]' : 'text-[var(--fg-4)] bg-[var(--bg-sunken)]'
+                    }`}
+                  >
+                    {slot}
+                  </td>
                   {weekDays.map((day, di) => {
                     const appt = appointmentForCell(appointments, day, hour);
                     const block = !appt ? blockForCell(blockedSlots, day, hour) : undefined;
                     const room = !appt && !block ? roomForCell(roomBookings, day, hour) : undefined;
+                    // This specific day may not have a shift at this hour (break / outside hours).
+                    const cellInShift = !hasShiftData || hourInRanges(shiftRanges[day.getDay()] ?? [], hour);
                     return (
                       <td
                         key={di}
@@ -149,13 +170,20 @@ export function WeekCalendarGrid({
                               <div className="text-[10px] font-normal opacity-80 mt-0.5 truncate">{block.reason}</div>
                             )}
                           </button>
-                        ) : (
+                        ) : cellInShift ? (
                           <button
                             onClick={() => onEmptyClick(day, slot)}
                             className="h-[38px] w-full flex items-center justify-center text-[var(--fg-4)] text-[16px] border border-dashed border-[var(--border-1)] rounded-[8px] cursor-pointer hover:border-[var(--brand)] hover:text-[var(--brand)] hover:bg-[var(--bg-sunken)] transition-colors"
                           >
                             +
                           </button>
+                        ) : (
+                          <div
+                            title="Outside shift hours"
+                            className="h-[38px] w-full flex items-center justify-center rounded-[8px] bg-[var(--bg-sunken)] text-[var(--fg-4)] opacity-50 select-none"
+                          >
+                            <span className="text-[14px] leading-none">·</span>
+                          </div>
                         )}
                       </td>
                     );
