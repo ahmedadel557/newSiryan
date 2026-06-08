@@ -152,15 +152,6 @@ export function usePatientVideoCall() {
       setToken(data.token);
       setApiKey(key);
       setIsConnected(true);
-
-      // [VALIDATION] Temporary — confirm exactly one session exists for this user.
-      // Expected when alone: remoteParticipants = []. Remove after diagnosis.
-      // eslint-disable-next-line no-console
-      console.log('[VALIDATION]', {
-        localUserId: theCall.state.localParticipant?.userId,
-        localSessionId: theCall.state.localParticipant?.sessionId,
-        remoteParticipants: theCall.state.remoteParticipants.map((p) => ({ userId: p.userId, sessionId: p.sessionId })),
-      });
     } catch (e: any) {
       // Disconnect the client if it was created before the failure so the next
       // retry (or page re-mount) starts from a clean state.

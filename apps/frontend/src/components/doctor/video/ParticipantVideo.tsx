@@ -28,25 +28,7 @@ export function ParticipantVideo({ call, participant, muted, withAudio }: Partic
     if (!withAudio) return;
     const el = audioRef.current;
     if (!el) return;
-    // [DEBUG-STREAM] Issue #2 — log every audio binding with its classification,
-    // then dump the live DOM audio/video elements. Note: the SDK's bindAudioElement
-    // is a no-op for the local participant (returns early), so any audio you hear is
-    // from a participant the SDK considers REMOTE. Remove after diagnosis.
-    const isLocal = call.state.localParticipant?.sessionId === participant.sessionId;
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG-STREAM] bindAudioElement', {
-      userId: participant.userId,
-      sessionId: participant.sessionId,
-      classification: isLocal ? 'LOCAL (SDK will no-op)' : 'REMOTE (audio WILL play)',
-    });
-    const cleanup = call.bindAudioElement(el, participant.sessionId);
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG-STREAM] DOM media elements', {
-      audio: document.querySelectorAll('audio').length,
-      video: document.querySelectorAll('video').length,
-      audioHasStream: Array.from(document.querySelectorAll('audio')).map((a) => !!(a as HTMLAudioElement).srcObject),
-    });
-    return cleanup;
+    return call.bindAudioElement(el, participant.sessionId);
   }, [call, participant.sessionId, withAudio]);
 
   return (

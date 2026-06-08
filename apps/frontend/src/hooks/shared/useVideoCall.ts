@@ -162,15 +162,6 @@ export function useVideoCall() {
       setApiKey(key);
       setOtherUserId(patientId);
       setIsConnected(true);
-
-      // [VALIDATION] Temporary — confirm exactly one session exists for this user.
-      // Expected when alone: remoteParticipants = []. Remove after diagnosis.
-      // eslint-disable-next-line no-console
-      console.log('[VALIDATION]', {
-        localUserId: theCall.state.localParticipant?.userId,
-        localSessionId: theCall.state.localParticipant?.sessionId,
-        remoteParticipants: theCall.state.remoteParticipants.map((p) => ({ userId: p.userId, sessionId: p.sessionId })),
-      });
     } catch (e: any) {
       // If client was created but join failed, disconnect it so the singleton
       // map is clean and a retry can create a fresh instance.

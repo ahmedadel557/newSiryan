@@ -11,23 +11,9 @@ interface RemoteVideoTileProps {
 }
 
 export function RemoteVideoTile({ call, waitingLabel = 'Waiting for the other participant to join…' }: RemoteVideoTileProps) {
-  const { useRemoteParticipants, useLocalParticipant } = useCallStateHooks();
+  const { useRemoteParticipants } = useCallStateHooks();
   const remote = useRemoteParticipants();
-  const local = useLocalParticipant();
   const participant = remote[0];
-
-  // [DEBUG-STREAM] Issue #2 — prove who the SDK classifies as remote vs local.
-  // When truly alone, REMOTE PARTICIPANTS must be []. If it contains an entry
-  // whose userId === local.userId, that is a SECOND SESSION of yourself
-  // (different sessionId) → its audio gets bound → you hear yourself. Remove after diagnosis.
-  // eslint-disable-next-line no-console
-  console.log('[DEBUG-STREAM] LOCAL PARTICIPANT', local ? { userId: local.userId, sessionId: local.sessionId } : null);
-  // eslint-disable-next-line no-console
-  console.log('[DEBUG-STREAM] REMOTE PARTICIPANTS', remote.map((p) => ({
-    userId: p.userId,
-    sessionId: p.sessionId,
-    isSelf: p.userId === local?.userId,
-  })));
 
   if (!participant) {
     return (
