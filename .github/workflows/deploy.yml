@@ -12,6 +12,7 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -19,55 +20,90 @@ jobs:
             backend:
               - 'apps/backend/**'
               - 'deploy/docker-compose.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
+
             frontend:
               - 'apps/frontend/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
 
   deploy-backend:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy backend
         uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: ${{ secrets.EC2_BACKEND_HOST }}
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: GH_PAT,BACKEND_ENV
+
           script: |
+            set -e
+
             cd /home/ubuntu/siryan
-            git pull https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+
+            git fetch https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+            git reset --hard FETCH_HEAD
+
             echo "$BACKEND_ENV" > apps/backend/.env
+
             cd deploy
             docker compose up -d --build
+
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
 
   deploy-frontend:
     needs: [changes, deploy-backend]
+
     if: |
       always() &&
       needs.changes.outputs.frontend == 'true' &&
-      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped')
+      (
+        needs.deploy-backend.result == 'success' ||
+        needs.deploy-backend.result == 'skipped'
+      )
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy frontend
         uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: ${{ secrets.EC2_FRONTEND_HOST }}
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: GH_PAT,FRONTEND_ENV
-          command_timeout: 15m
+          command_timeout: 20m
+
           script: |
+            set -e
+
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
             cd /home/ubuntu/siryan
-            git pull https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+
+            git fetch https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
+            git reset --hard FETCH_HEAD
+
             echo "$FRONTEND_ENV" > apps/frontend/.env.production
-            NODE_OPTIONS="--max-old-space-size=1400" npx turbo build --filter=@siryan/frontend
+
+            NODE_OPTIONS="--max-old-space-size=1400" \
+            npx turbo build --filter=@siryan/frontend
+
             pm2 restart siryan-frontend
+
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
