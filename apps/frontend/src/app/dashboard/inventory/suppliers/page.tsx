@@ -274,7 +274,7 @@ export default function SuppliersPage() {
                 <td className={tdClass}>
                   {s.total_orders ? (
                     <Badge variant={scoreVariant(s.quality_score ?? 0)} dot>
-                      <Star size={10} className="inline mr-1" />{(s.quality_score ?? 0).toFixed(1)}
+                      <Star size={10} className="inline me-1" />{(s.quality_score ?? 0).toFixed(1)}
                     </Badge>
                   ) : <span className="text-[var(--fg-3)]">—</span>}
                 </td>

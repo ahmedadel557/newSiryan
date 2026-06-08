@@ -50,7 +50,7 @@ export default function NursePatientsPage() {
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-3)]" />
         <input
           type="text"
-          className="input pl-9 text-[13px]"
+          className="input ps-9 text-[13px]"
           placeholder="Search by name…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

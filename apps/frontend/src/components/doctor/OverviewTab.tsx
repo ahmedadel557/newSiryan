@@ -95,7 +95,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
           <button className="btn-ghost text-[12px] py-[4px]">Record vital</button>
         </div>
         {availableVitals.length > 0 ? (
-          <div className="grid grid-cols-3 gap-3 px-5 pb-[18px] pt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 pb-[18px] pt-3">
             {availableVitals.map(({ key, label, unit, getTone, getStatus }) => {
               const raw = vitals![key] as number;
               return <VitalTile key={key} label={label} value={raw} unit={unit} tone={getTone(raw)} status={getStatus(raw)} />;

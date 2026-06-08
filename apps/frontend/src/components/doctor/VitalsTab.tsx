@@ -79,7 +79,7 @@ export function VitalsTab({ vitals }: VitalsTabProps) {
         <HeartPulse size={16} style={{ color: 'var(--critical)' }} />
         <p className="text-[14px] font-semibold text-[var(--fg-1)]">Vitals · last recorded</p>
       </div>
-      <div className="grid grid-cols-3 gap-3 px-5 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 py-4">
         {available.map(({ key, label, unit, getTone, getStatus }) => {
           const val = vitals![key] as number;
           return <VitalTile key={key} label={label} value={val} unit={unit} tone={getTone(val)} status={getStatus(val)} />;

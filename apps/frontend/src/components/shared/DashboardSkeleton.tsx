@@ -15,7 +15,7 @@ export function DashboardSkeleton() {
           <div className="ml-auto h-8 w-8 rounded-full bg-[var(--bg-sunken)] animate-pulse" />
         </div>
         <div className="flex-1 p-7 flex flex-col gap-6">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-28 rounded-[var(--radius-lg)] bg-[var(--bg-surface)] border border-[var(--border-1)] animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
             ))}

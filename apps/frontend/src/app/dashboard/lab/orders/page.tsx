@@ -70,7 +70,7 @@ export default function LabOrdersPage() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-3)]" />
           <input
             type="text"
-            className="input pl-9 text-[13px] w-full"
+            className="input ps-9 text-[13px] w-full"
             placeholder="Search patient or test name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

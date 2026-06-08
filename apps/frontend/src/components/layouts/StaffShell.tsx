@@ -312,7 +312,7 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
                 }}
               />
 
-              <div className="flex items-center gap-[10px] pl-4 border-l border-[var(--border-1)] ml-2">
+              <div className="flex items-center gap-[10px] ps-4 border-s border-[var(--border-1)] ms-2">
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger asChild>
                     <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-1">

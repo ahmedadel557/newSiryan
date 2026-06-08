@@ -184,7 +184,7 @@ export default function DoctorSchedulePage() {
         </button>
         <input
           type="date"
-          className="input ml-2"
+          className="input ms-2"
           value={weekAnchor}
           onChange={(e) => e.target.value && setWeekAnchor(e.target.value)}
           style={{ width: 170 }}

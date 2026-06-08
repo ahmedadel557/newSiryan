@@ -80,7 +80,7 @@ export function DoctorRatingsCard() {
                       }
                     />
                   ))}
-                  <span className="text-[12px] text-[var(--fg-2)] ml-2">{r.patient_name ?? 'Patient'}</span>
+                  <span className="text-[12px] text-[var(--fg-2)] ms-2">{r.patient_name ?? 'Patient'}</span>
                 </div>
                 <span className="text-[11px] text-[var(--fg-4)]">
                   {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

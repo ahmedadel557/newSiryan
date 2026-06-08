@@ -36,7 +36,7 @@ export function VitalTile({ label, value, unit, status, tone, sparkPath }: Vital
 
       <div className="my-[6px] leading-none">
         <span className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">{value}</span>
-        <span className="text-[12px] text-[var(--fg-3)] font-normal ml-1">{unit}</span>
+        <span className="text-[12px] text-[var(--fg-3)] font-normal ms-1">{unit}</span>
       </div>
 
       <svg viewBox="0 0 200 50" className="w-full" style={{ height: 28 }} preserveAspectRatio="none">

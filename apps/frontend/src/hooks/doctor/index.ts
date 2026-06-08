@@ -4,3 +4,4 @@ export { useDoctorQueue } from './useDoctorQueue';
 export { useDoctorRatings } from './useDoctorRatings';
 export { useDoctorSchedule } from './useDoctorSchedule';
 export { useDoctorEmergencyFlags } from './useDoctorEmergencyFlags';
+export { useCompleteVisit } from './useCompleteVisit';

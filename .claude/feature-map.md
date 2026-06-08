@@ -24,6 +24,8 @@
  ├── notes (private per-patient notes)                              [backend ✓ P1 · frontend ✓ P2 NoteEditor in Notes tab]
  ├── ratings (my ratings page)                                     [backend pre-existing · frontend ✓ P2 /doctor/ratings]
  ├── notifications (doctor notifications page)                      [frontend ✓ P2 /doctor/notifications]
+ ├── complete visit (POST /api/doctor/appointments/:id/complete)     [backend ✓ 2026-06-08 · frontend ✓ 2026-06-08]
+ ├── patient record page redesign (PatientHeader + VisitSidebarCard, 70/30 layout, status badges) [✓ 2026-06-08]
  ├── video calls (Stream Video, custom UI, online appts)            [backend ✓ P1 · frontend ✓ P3]
  │     doctor /dashboard/doctor/video/[id] + patient /dashboard/patient/video/[id];
  │     mic/camera toggle, PiP local tile, end-for-both (doctor) / leave (patient)

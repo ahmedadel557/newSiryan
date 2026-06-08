@@ -273,7 +273,7 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { label: 'Total due', value: fmtEGP(invoice.total_due) },
               { label: 'Paid', value: fmtEGP(invoice.amount_paid) },

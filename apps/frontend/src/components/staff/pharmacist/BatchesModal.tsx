@@ -86,7 +86,7 @@ export function BatchesModal({ data, loading, onClose, onAddBatch }: Props) {
             className="px-6 py-4 border-b border-[var(--border-1)] flex flex-col gap-3 shrink-0 bg-[var(--bg-page)]"
           >
             <p className="text-[13px] font-medium text-[var(--fg-1)]">New batch</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="field">
                 <label className="field-label">Batch number</label>
                 <input className="input" placeholder="e.g. BN-2024-001" {...register('batch_number')} />

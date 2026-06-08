@@ -306,7 +306,7 @@ export default function AppointmentsPage() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="card p-4">
           <div className="text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)]">Upcoming</div>
           <div className="text-[22px] font-semibold tabular-nums text-[var(--fg-1)] mt-1">{upcomingTotal}</div>

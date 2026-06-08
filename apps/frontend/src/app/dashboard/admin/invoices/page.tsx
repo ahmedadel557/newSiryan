@@ -202,7 +202,7 @@ function InvoiceDetail({ invoice }: InvoiceDetailPanel) {
   const remaining = invoice.total_due - invoice.amount_paid;
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
           { label: 'Patient', value: invoice.patient_name },
           { label: 'Status', value: statusLabel(invoice.status) },
@@ -339,7 +339,7 @@ export default function AdminInvoicesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search patient…"
-            className="input h-9 pl-8 text-[13px] w-[180px]"
+            className="input h-9 ps-8 text-[13px] w-full sm:w-[180px]"
           />
         </div>
         <input
@@ -354,7 +354,7 @@ export default function AdminInvoicesPage() {
         )}
       </div>
 
-      <div className="flex gap-5">
+      <div className="flex flex-col md:flex-row gap-5">
         <div className="flex-1 min-w-0 card overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col divide-y divide-[var(--border-1)]">
@@ -412,7 +412,7 @@ export default function AdminInvoicesPage() {
         </div>
 
         {selected && (
-          <div className="w-[340px] shrink-0 card p-5 flex flex-col gap-4 self-start sticky top-5">
+          <div className="w-full md:w-[340px] md:shrink-0 card p-5 flex flex-col gap-4 md:self-start md:sticky md:top-5">
             <div className="flex items-center justify-between">
               <p className="text-[14px] font-semibold text-[var(--fg-1)]">Invoice detail</p>
               <button className="btn btn-ghost p-1" onClick={() => setSelected(null)}>

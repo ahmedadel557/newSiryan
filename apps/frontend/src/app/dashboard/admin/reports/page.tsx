@@ -147,7 +147,7 @@ export default function AdminReportsPage() {
               <span className="text-[12px] text-[var(--fg-3)] tabular-nums">{formatEGP(totalRevenue)} total</span>
             </div>
             {revenueLoading ? (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} height="72px" className="rounded" />)}
               </div>
             ) : byCategory.length === 0 ? (

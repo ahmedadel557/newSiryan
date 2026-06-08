@@ -86,7 +86,7 @@ export default function CashierInvoicesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by patient name"
-            className="border border-[var(--border-1)] rounded-[var(--radius-md)] pl-9 pr-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] w-[240px]"
+            className="border border-[var(--border-1)] rounded-[var(--radius-md)] ps-9 pe-3 py-2 text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] w-full sm:w-[240px]"
           />
         </div>
       </div>

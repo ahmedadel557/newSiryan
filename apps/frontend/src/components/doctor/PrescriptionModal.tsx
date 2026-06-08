@@ -95,7 +95,7 @@ export function PrescriptionModal({ open, onClose, medicalRecordId, medications,
                         </option>
                       ))}
                     </select>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <input
                         value={row.dose}
                         onChange={(e) => updateRow(idx, { dose: e.target.value })}

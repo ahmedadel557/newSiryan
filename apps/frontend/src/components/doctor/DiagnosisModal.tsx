@@ -118,7 +118,7 @@ export function DiagnosisModal({ open, onClose, appointmentId, onSubmit }: Diagn
 
               <div>
                 <p className={`${labelClass} mb-2`}>Vitals (optional)</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {vitalFields.map(({ key, label, placeholder }) => (
                     <div key={key} className="flex flex-col gap-1">
                       <label className="text-[11px] text-[var(--fg-3)]">{label}</label>

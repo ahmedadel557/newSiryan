@@ -49,8 +49,10 @@ export default function DoctorRecordSearchPage() {
   }, []);
 
   const lastVisitByPatient = useMemo(() => {
+    const now = new Date();
     const map = new Map<string, Appointment>();
     for (const appt of appointments) {
+      if (new Date(appt.scheduled_at) >= now) continue;
       const current = map.get(appt.patient_id);
       if (!current || appt.scheduled_at > current.scheduled_at) {
         map.set(appt.patient_id, appt);
@@ -98,7 +100,7 @@ export default function DoctorRecordSearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search patients…"
-          className="w-full pl-9 pr-3 h-10 rounded-[var(--radius-md)] border border-[var(--border-1)] bg-[var(--bg-surface)] text-[13px] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20 transition"
+          className="w-full ps-9 pe-3 h-10 rounded-[var(--radius-md)] border border-[var(--border-1)] bg-[var(--bg-surface)] text-[13px] text-[var(--fg-1)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20 transition"
           autoFocus
         />
       </div>

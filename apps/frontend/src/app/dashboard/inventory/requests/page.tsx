@@ -171,7 +171,7 @@ function CreateSupplyRequestModal({ open, onClose, onSubmit, suppliers, items, m
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className={labelClass}>Supplier</label>
               <select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className={inputClass}>
@@ -395,7 +395,7 @@ function ReceiveShipmentModal({ request, onClose, onSubmit }: ReceiveShipmentMod
             rows.map((item, idx) => (
               <div key={idx} className="border border-[var(--border-1)] rounded-[var(--radius-md)] p-3 flex flex-col gap-2">
                 <p className="text-[13px] font-semibold text-[var(--fg-1)]">{item.item_name || '—'}</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className={labelClass}>Qty ordered</label>
                     <input value={item.quantity_ordered} disabled className={`${inputClass} opacity-60`} />
@@ -497,7 +497,7 @@ function SupplierModal({ open, supplier, onClose, onSubmit }: SupplierModalProps
             <label className={labelClass}>Name *</label>
             <input required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Supplier name" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className={labelClass}>Contact person</label>
               <input value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} className={inputClass} />

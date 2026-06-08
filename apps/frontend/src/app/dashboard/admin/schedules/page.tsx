@@ -156,7 +156,7 @@ function ShiftDefsTab() {
     <div className="flex flex-col gap-5">
       {/* KPI strip + action */}
       <div className="flex items-center gap-4">
-        <div className="grid grid-cols-3 gap-3 flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
           {[
             { label: 'Total shifts', value: shifts.length },
             { label: 'Active', value: activeCount },
@@ -235,7 +235,7 @@ function ShiftDefsTab() {
                 <label className="text-[12px] font-medium text-[var(--fg-2)]">Shift name *</label>
                 <input value={modal.name} onChange={(e) => setModal((m) => ({ ...m, name: e.target.value }))} required className="input h-9 w-full" placeholder="e.g. Morning, Evening, Night" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[12px] font-medium text-[var(--fg-2)]">Start time *</label>
                   <input type="time" value={modal.start_time} onChange={(e) => setModal((m) => ({ ...m, start_time: e.target.value }))} required className="input h-9 w-full" />

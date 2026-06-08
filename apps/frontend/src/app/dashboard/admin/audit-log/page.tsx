@@ -98,7 +98,7 @@ export default function AdminAuditLogPage() {
           <div className="relative flex items-center">
             <Search size={13} className="absolute left-3 text-[var(--fg-3)]" />
             <input
-              className="input pl-8 h-9 text-[13px] w-[200px]"
+              className="input ps-8 h-9 text-[13px] w-full sm:w-[200px]"
               type="text"
               placeholder="Action, resource, user…"
               value={searchQuery}
@@ -113,7 +113,7 @@ export default function AdminAuditLogPage() {
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="input h-9 text-[13px] pr-8"
+            className="input h-9 text-[13px] pe-8"
             style={{ minWidth: 160 }}
           >
             <option value="">All users</option>
@@ -129,7 +129,7 @@ export default function AdminAuditLogPage() {
           <select
             value={actionCat}
             onChange={(e) => setActionCat(e.target.value as ActionCategory)}
-            className="input h-9 text-[13px] pr-8"
+            className="input h-9 text-[13px] pe-8"
             style={{ minWidth: 140 }}
           >
             {ACTION_CATEGORIES.map((c) => (

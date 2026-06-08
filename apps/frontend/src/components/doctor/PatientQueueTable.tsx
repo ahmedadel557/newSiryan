@@ -53,7 +53,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
     <div className="card">
       <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border-1)]">
         <p className="text-[14px] font-semibold text-[var(--fg-1)]">Patients</p>
-        <div className="flex gap-[2px] bg-[var(--sand-100)] p-[3px] rounded-[8px] ml-3">
+        <div className="flex gap-[2px] bg-[var(--sand-100)] p-[3px] rounded-[8px] ms-3">
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
@@ -74,7 +74,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Filter by name or MR-ID…"
-            className="w-full pl-8 pr-3 py-[7px] border border-[var(--border-1)] rounded-[var(--radius-md)] text-[13px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
+            className="w-full ps-8 pe-3 py-[7px] border border-[var(--border-1)] rounded-[var(--radius-md)] text-[13px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
           />
         </div>
       </div>

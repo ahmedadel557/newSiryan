@@ -62,7 +62,7 @@ export function PrescriptionDetailModal({ prescription, onClose }: Props) {
               <p className="text-[14px] font-semibold text-[var(--fg-1)]">
                 {item.medication_name ?? 'Medication'}
               </p>
-              <div className="grid grid-cols-2 gap-2 mt-2 text-[13px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-[13px]">
                 <div>
                   <span className="text-[var(--fg-3)]">Dosage: </span>
                   <span className="text-[var(--fg-1)]">{item.dosage}</span>

@@ -60,7 +60,7 @@ export function SecuritySection() {
             <input
               type={showPw[key] ? 'text' : 'password'}
               {...pwForm.register(key, { required: true })}
-              className="w-full dark:text-black/80 h-9 pl-3 pr-9 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
+              className="w-full dark:text-black/80 h-9 ps-3 pe-9 rounded-[var(--radius-md)] bg-[var(--sand-100)] text-[13px] text-[var(--fg-1)] border border-transparent focus:border-[var(--brand)] outline-none"
             />
             <button
               type="button"

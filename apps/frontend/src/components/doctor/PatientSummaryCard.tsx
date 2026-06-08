@@ -62,10 +62,10 @@ export function PatientSummaryCard({ patient, record, prescriptions }: Props) {
       <div className="px-5 py-3 border-b border-[var(--border-1)] flex items-center gap-2">
         <ClipboardList size={15} className="text-[var(--brand)]" />
         <p className="text-[13px] font-semibold text-[var(--fg-1)]">Pre-visit summary</p>
-        <span className="text-[11px] text-[var(--fg-4)] ml-1">At-a-glance context before starting the visit</span>
+        <span className="text-[11px] text-[var(--fg-4)] ms-1">At-a-glance context before starting the visit</span>
       </div>
 
-      <div className="grid gap-4 p-5 md:grid-cols-4">
+      <div className="grid gap-4 p-5 grid-cols-2 md:grid-cols-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1 text-[11px] uppercase tracking-[0.06em] font-medium text-[var(--fg-3)]">
             <TriangleAlert size={12} className="text-[var(--critical)]" /> Allergies

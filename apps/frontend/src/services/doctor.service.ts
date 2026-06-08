@@ -357,6 +357,10 @@ export const doctorService = {
     await apiClient.post(`/doctor/video/call/${callId}/end`);
   },
 
+  async completeVisit(appointmentId: string): Promise<void> {
+    await apiClient.post(`/doctor/appointments/${appointmentId}/complete`);
+  },
+
   // --- Emergency flags (Part 2 backend: /doctor/emergency-flags) ---
   async getDoctorEmergencyFlags(): Promise<{ flags: EmergencyFlag[] }> {
     const res = await apiClient.get<ApiResponse<{ flags: any[] }>>('/doctor/emergency-flags');

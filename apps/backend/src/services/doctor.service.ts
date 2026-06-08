@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import Appointment from '../models/Appointment';
 import Profile from '../models/Profile';
+import User from '../models/User';
+import MedicalRecord from '../models/MedicalRecord';
+import Notification from '../models/Notification';
 import VideoCall, { IVideoCall } from '../models/VideoCall';
 import DoctorNote, { IDoctorNote } from '../models/DoctorNote';
 import { getStreamClient, STREAM_API_KEY } from '../config/stream';
 import { emitToUser } from '../config/socket';
+import { sendEmail } from '../utils/mailer';
 import type { DoctorQueueItem, VideoCallToken } from '../types';
 
 /** Build an Error carrying an HTTP status — surfaced by the global errorHandler. */
@@ -210,6 +214,82 @@ async function getTodayQueue(doctorId: string): Promise<DoctorQueueItem[]> {
     status: a.status,
     scheduled_at: a.scheduled_at,
   }));
+}
+
+/* -------------------------------------------------------- Visit completion */
+
+/**
+ * Fire-and-forget after a visit is marked complete.
+ * Sends a visit summary email to the patient and creates a persistent in-app notification.
+ */
+export async function notifyVisitCompleted(opts: {
+  appointmentId: string;
+  doctorId: string;
+  patientId: string;
+  scheduledAt: Date;
+}): Promise<void> {
+  const { appointmentId, doctorId, patientId, scheduledAt } = opts;
+  try {
+    const [patientUser, patientProfile, doctorProfile, record] = await Promise.all([
+      User.findById(patientId).select('email').lean(),
+      Profile.findOne({ user: patientId }).select('first_name last_name').lean(),
+      Profile.findOne({ user: doctorId }).select('first_name last_name department').lean(),
+      MedicalRecord.findOne({ appointment: appointmentId })
+        .select('diagnosis')
+        .populate({ path: 'prescriptions', populate: { path: 'items.medication', select: 'name' } })
+        .lean(),
+    ]);
+
+    const patientName = patientProfile
+      ? `${patientProfile.first_name ?? ''} ${patientProfile.last_name ?? ''}`.trim() || 'Patient'
+      : 'Patient';
+    const doctorName = doctorProfile
+      ? `Dr. ${doctorProfile.first_name ?? ''} ${doctorProfile.last_name ?? ''}`.trim()
+      : 'Your doctor';
+    const department = (doctorProfile as any)?.department ?? '';
+    const dateStr = scheduledAt.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    });
+
+    if (patientUser?.email) {
+      const diagnosisLine = (record as any)?.diagnosis
+        ? `<p><strong>Diagnosis:</strong> ${(record as any).diagnosis}</p>`
+        : '';
+      const prescriptions: any[] = (record as any)?.prescriptions ?? [];
+      const prescriptionLines = prescriptions.flatMap((p: any) =>
+        (p.items ?? []).map(
+          (i: any) => `${i.medication?.name ?? 'Medication'} — ${i.dosage ?? ''} ${i.frequency ?? ''}`.trim(),
+        ),
+      ).filter(Boolean);
+      const prescriptionSection = prescriptionLines.length
+        ? `<p><strong>Active prescriptions:</strong></p><ul>${prescriptionLines.map((l: string) => `<li>${l}</li>`).join('')}</ul>`
+        : '';
+
+      const html = `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+          <h2 style="color:#235347;margin-bottom:8px;">Your visit summary — Siryan</h2>
+          <p>Hi ${patientName},</p>
+          <p>Your visit with <strong>${doctorName}</strong>${department ? ` (${department})` : ''} on <strong>${dateStr}</strong> has been completed.</p>
+          ${diagnosisLine}
+          ${prescriptionSection}
+          <p>You can view your full medical record in the Siryan patient portal.</p>
+          <p style="color:#6b7280;font-size:12px;margin-top:32px;">Siryan Health Platform</p>
+        </div>
+      `;
+      sendEmail(patientUser.email, 'Your visit summary — Siryan', html).catch(() => {});
+    }
+
+    const notif = await Notification.create({
+      user: patientId,
+      type: 'general',
+      title: 'Visit completed',
+      message: `Your visit with ${doctorName} is complete. Check your medical record.`,
+      metadata: { appointment_id: appointmentId },
+    });
+    emitToUser(patientId, 'notification:new', notif.toJSON());
+  } catch {
+    /* non-fatal */
+  }
 }
 
 export const doctorService = {

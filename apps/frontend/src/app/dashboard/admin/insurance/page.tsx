@@ -135,7 +135,7 @@ function CompanyModal({
                       : 'bg-transparent text-[var(--fg-2)] border-[var(--border-1)] hover:border-[var(--brand)]'
                   }`}
                 >
-                  {form.covered_services.includes(s) && <Check size={10} className="inline mr-1" />}
+                  {form.covered_services.includes(s) && <Check size={10} className="inline me-1" />}
                   {s}
                 </button>
               ))}

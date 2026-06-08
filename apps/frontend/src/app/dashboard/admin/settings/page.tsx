@@ -123,7 +123,7 @@ function PricingTab() {
       {/* Appointment Fees */}
       <div className="card p-4 space-y-3">
         <h3 className="t-h4">Appointment Fees (EGP)</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="t-small block mb-1" style={{ color: 'var(--fg-2)' }}>Physical</label>
             <input type="number" className="input w-full" value={appt.physical_fee} onChange={(e) => setAppt((a) => ({ ...a, physical_fee: +e.target.value }))} />
@@ -141,7 +141,7 @@ function PricingTab() {
       {/* Room Pricing */}
       <div className="card p-4 space-y-3">
         <h3 className="t-h4">Room Pricing (EGP / day)</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {(['general_per_day', 'icu_per_day', 'operation_per_day', 'radiology_per_day'] as const).map((key) => (
             <div key={key}>
               <label className="t-small block mb-1 capitalize" style={{ color: 'var(--fg-2)' }}>{key.replace(/_/g, ' ')}</label>

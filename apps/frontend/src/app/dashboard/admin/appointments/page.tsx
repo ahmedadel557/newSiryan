@@ -175,7 +175,7 @@ export default function AdminAppointmentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search patient or doctor…"
-            className="input h-9 pl-8 text-[13px] w-[220px]"
+            className="input h-9 ps-8 text-[13px] w-full sm:w-[220px]"
           />
         </div>
         <input

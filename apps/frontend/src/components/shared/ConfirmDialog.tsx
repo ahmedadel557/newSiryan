@@ -38,7 +38,7 @@ export function ConfirmDialog({ open, title, description, confirmLabel = 'Confir
               <p className="text-[13px] text-[var(--fg-3)] mt-[4px]">{description}</p>
             </div>
           </div>
-          <button onClick={onClose} className="btn btn-ghost p-[6px] ml-2 shrink-0">
+          <button onClick={onClose} className="btn btn-ghost p-[6px] ms-2 shrink-0">
             <X size={15} />
           </button>
         </div>

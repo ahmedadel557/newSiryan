@@ -69,7 +69,7 @@ export default function AdminOverviewPage() {
 
       <DoctorKPIStrip cards={kpiCards} />
 
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="card p-5 flex flex-col gap-4">
           <p className="text-[14px] font-semibold text-[var(--fg-1)]">Revenue (last 7 days)</p>
           <RevenueChart />
@@ -80,7 +80,7 @@ export default function AdminOverviewPage() {
           <OccupancySection />
         </div>
 
-        <div className="card p-5 flex flex-col gap-3 col-span-2">
+        <div className="card p-5 flex flex-col gap-3 md:col-span-2">
           <div className="flex items-center justify-between">
             <p className="text-[14px] font-semibold text-[var(--fg-1)]">Recent activity</p>
             <button

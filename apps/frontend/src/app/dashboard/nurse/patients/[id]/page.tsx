@@ -271,7 +271,7 @@ export default function NursePatientDetailPage() {
           </div>
           {patient.allergies && patient.allergies.length > 0 && (
             <div className="flex items-center gap-1 mt-2 flex-wrap">
-              <span className="text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)] font-medium mr-1">Allergies:</span>
+              <span className="text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)] font-medium me-1">Allergies:</span>
               {patient.allergies.map((a) => (
                 <Badge key={a} variant="caution">{a}</Badge>
               ))}
@@ -291,15 +291,15 @@ export default function NursePatientDetailPage() {
       <Tabs.Root defaultValue="vitals">
         <Tabs.List className="flex gap-1 bg-[var(--sand-100)] p-1 rounded-[var(--radius-md)] w-fit mb-1">
           <Tabs.Trigger value="vitals" className={tabTriggerCls}>
-            <HeartPulse size={14} className="inline mr-1" />
+            <HeartPulse size={14} className="inline me-1" />
             Vitals
           </Tabs.Trigger>
           <Tabs.Trigger value="medications" className={tabTriggerCls}>
-            <Pill size={14} className="inline mr-1" />
+            <Pill size={14} className="inline me-1" />
             Medications
           </Tabs.Trigger>
           <Tabs.Trigger value="emergency" className={tabTriggerCls}>
-            <AlertTriangle size={14} className="inline mr-1" />
+            <AlertTriangle size={14} className="inline me-1" />
             Emergency
           </Tabs.Trigger>
         </Tabs.List>

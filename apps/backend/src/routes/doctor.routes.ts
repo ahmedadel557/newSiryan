@@ -41,6 +41,7 @@ import {
   listSharedRecords,
   getSharedRecord,
   scheduleFollowUp,
+  completeVisit,
 } from "../controllers/doctor";
 import { getStaffProfile, updateStaffProfile } from "../controllers/staff/profile";
 import { updateStaffProfileSchema } from "../validations/staff.validation";
@@ -105,6 +106,7 @@ router.delete("/schedule/blocks/:id", unblockScheduleSlot);
 router.get("/room-bookings", getDoctorRoomBookings);
 router.post("/appointments/:id/reschedule-request", rescheduleRequest);
 router.post("/appointments/:id/cancel-request", validateRequest(cancelRequestSchema), cancelRequest);
+router.post("/appointments/:appointmentId/complete", completeVisit);
 router.get("/queue/today", getTodayQueue);
 router.post("/video/call/:appointmentId", createVideoCall);
 router.post("/video/call/:callId/end", endVideoCall);

@@ -40,7 +40,7 @@ export function MedicationCatalog({ medications, searchQuery, onSearchChange, on
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search medications…"
-            className="w-full pl-9 pr-3 py-2 border border-[var(--border-1)] rounded-[var(--radius-md)] text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
+            className="w-full ps-9 pe-3 py-2 border border-[var(--border-1)] rounded-[var(--radius-md)] text-[14px] bg-[var(--bg-surface)] text-[var(--fg-1)] outline-none focus:border-[var(--brand)]"
           />
         </div>
         <div className="flex gap-1">

@@ -91,7 +91,7 @@ function RequestCard({ req, onConfirmCancel, onRejectCancel, onConfirmReschedule
       </div>
 
       {/* Details */}
-      <div className="grid grid-cols-2 gap-3 text-[13px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px]">
         {req.from_time && (
           <div>
             <p className="text-[11px] uppercase tracking-[0.06em] font-semibold text-[var(--fg-3)] mb-0.5">Original date</p>
@@ -105,7 +105,7 @@ function RequestCard({ req, onConfirmCancel, onRejectCancel, onConfirmReschedule
           </div>
         )}
         {req.reason && (
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <p className="text-[11px] uppercase tracking-[0.06em] font-semibold text-[var(--fg-3)] mb-0.5">Reason</p>
             <p className="text-[var(--fg-1)]">{req.reason}</p>
           </div>
@@ -157,7 +157,7 @@ function RequestCard({ req, onConfirmCancel, onRejectCancel, onConfirmReschedule
           {/* Step 2: If reschedule request, pick new date/time first */}
           {contacted && !isCancel && (
             <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="field">
                   <label className="field-label flex items-center gap-1">
                     <Calendar size={12} /> New date

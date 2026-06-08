@@ -241,7 +241,7 @@ function ConsumptionReport({ data }: { data: any }) {
 function WasteReport({ data }: { data: any }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: 'Total entries', value: data.total_entries ?? 0 },
           { label: 'Total quantity', value: data.total_quantity ?? 0 },

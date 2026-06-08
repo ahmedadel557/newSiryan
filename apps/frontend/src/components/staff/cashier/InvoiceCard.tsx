@@ -81,7 +81,7 @@ export function InvoiceCard({ invoice, expanded, onToggle, onProcessPayment }: I
             <div key={i} className="flex items-center justify-between gap-3 py-[2px]">
               <div className="min-w-0">
                 <span className="text-[13px] text-[var(--fg-2)]">{item.description}</span>
-                <span className="text-[11px] text-[var(--fg-3)] ml-2 uppercase tracking-[0.04em]">{item.category}</span>
+                <span className="text-[11px] text-[var(--fg-3)] ms-2 uppercase tracking-[0.04em]">{item.category}</span>
               </div>
               <p className="text-[13px] text-[var(--fg-1)] tabular-nums">{fmtLBP(item.amount)}</p>
             </div>

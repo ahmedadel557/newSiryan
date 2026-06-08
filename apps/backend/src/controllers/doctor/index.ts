@@ -31,6 +31,7 @@ import Rating from '../../models/Rating';
 import MedicalRecordShare from '../../models/MedicalRecordShare';
 import { detectAbnormalVitals, summarizeAbnormalities, topSeverity } from '../../utils/vitals';
 import { notifyCashiersOfPendingPayment } from '../../services/notification.service';
+import { notifyVisitCompleted } from '../../services/doctor.service';
 import { blockSlotSchema, requestRoomSchema, scheduleFollowUpSchema } from '../../validations/doctor.validation';
 import { cache } from '../../utils/cache';
 import { CACHE_KEYS, CACHE_TTL } from '../../config/cacheTtl';
@@ -1188,6 +1189,38 @@ export const getSharedRecord = async (req: AuthRequest, res: Response, next: Nex
     });
   } catch (err: any) {
     if (err.name === 'CastError') return sendError(res, 'Invalid share ID', 400);
+    next(err);
+  }
+};
+
+export const completeVisit = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { appointmentId } = req.params;
+
+    const appointment = await Appointment.findOne({ _id: appointmentId, doctor: req.user!.id });
+    if (!appointment) return sendError(res, 'Appointment not found', 404);
+
+    if (appointment.status === 'completed') {
+      return sendError(res, 'Visit already completed', 400);
+    }
+    if (appointment.status !== 'in_progress') {
+      return sendError(res, 'Visit cannot be completed before it starts', 400);
+    }
+
+    appointment.status = 'completed';
+    appointment.completed_at = new Date();
+    await appointment.save();
+
+    sendSuccess(res, appointment, 'Visit completed');
+
+    notifyVisitCompleted({
+      appointmentId: appointment._id.toString(),
+      doctorId: req.user!.id,
+      patientId: appointment.patient.toString(),
+      scheduledAt: appointment.scheduled_at,
+    });
+  } catch (err: any) {
+    if (err.name === 'CastError') return sendError(res, 'Invalid appointment ID', 400);
     next(err);
   }
 };

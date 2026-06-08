@@ -68,7 +68,7 @@ export default function ReceptionistPatientsPage() {
     `${p.first_name?.[0] ?? ''}${p.last_name?.[0] ?? ''}`.toUpperCase() || '?';
 
   return (
-    <div className="flex gap-5 h-full">
+    <div className="flex flex-col md:flex-row gap-5 h-full">
       {/* Left: patient list */}
       <div className="flex flex-col gap-4 flex-1 min-w-0">
         <div>
@@ -140,7 +140,7 @@ export default function ReceptionistPatientsPage() {
 
       {/* Right: patient detail panel */}
       {selected && (
-        <div className="w-[380px] shrink-0 flex flex-col gap-4">
+        <div className="w-full md:w-[380px] md:shrink-0 flex flex-col gap-4">
           {/* Header */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] p-5">
             <div className="flex items-start gap-3">

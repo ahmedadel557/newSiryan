@@ -1,5 +1,170 @@
 # Changelog
 
+## [2026-06-08] Mobile-First Responsive Fix — Phase 2 (Full Sweep)
+
+### What changed (CSS/layout only — no data logic or hooks touched)
+
+**Fix Group 1 — Critical: grids without mobile base (11 instances fixed)**
+- `components/doctor/OverviewTab.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `components/doctor/VitalsTab.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `components/doctor/PrescriptionModal.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `components/doctor/DiagnosisModal.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `app/dashboard/admin/page.tsx` — `grid-cols-2` → `grid-cols-1 md:grid-cols-2`; `col-span-2` → `md:col-span-2`
+- `app/dashboard/admin/schedules/page.tsx` — KPI strip `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `app/dashboard/admin/reports/page.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `app/dashboard/cashier/invoices/[id]/page.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `app/dashboard/inventory/reports/page.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `app/dashboard/patient/appointments/page.tsx` — `grid-cols-3` → `grid-cols-1 sm:grid-cols-3`
+- `components/shared/DashboardSkeleton.tsx` — `grid-cols-4` → `grid-cols-2 md:grid-cols-4`
+
+**Fix Group 2 — Critical: fixed-width panels (2 instances fixed)**
+- `app/dashboard/receptionist/patients/page.tsx` — outer flex `flex-col md:flex-row`; panel `w-full md:w-[380px] md:shrink-0`
+- `app/dashboard/admin/invoices/page.tsx` — outer flex `flex-col md:flex-row`; sidebar `w-full md:w-[340px] md:shrink-0 md:sticky md:top-5`
+
+**Fix Group 3 — Warning: pl-/pr- → ps-/pe- (14 instances)**
+- `components/layouts/StaffShell.tsx` — `pl-4 border-l ml-2` → `ps-4 border-s ms-2`
+- `components/layouts/PatientShell.tsx` — `pl-9 pr-3` → `ps-9 pe-3`
+- `components/doctor/PatientQueueTable.tsx` — `pl-8 pr-3` → `ps-8 pe-3`
+- `components/shared/SecuritySection.tsx` — `pl-3 pr-9` → `ps-3 pe-9`
+- `components/staff/pharmacist/PharmacistFilterBar.tsx` — `pl-9 pr-3` → `ps-9 pe-3`
+- `components/patient/MedicationCatalog.tsx` — `pl-9 pr-3` → `ps-9 pe-3`
+- `app/dashboard/admin/invoices/page.tsx` — `pl-8` → `ps-8`
+- `app/dashboard/admin/audit-log/page.tsx` — `pl-8`, `pr-8`×2 → `ps-8`, `pe-8`×2
+- `app/dashboard/admin/appointments/page.tsx` — `pl-8` → `ps-8`
+- `app/dashboard/doctor/record/page.tsx` — `pl-9 pr-3` → `ps-9 pe-3`
+- `app/dashboard/cashier/invoices/page.tsx` — `pl-9 pr-3` → `ps-9 pe-3`
+- `app/dashboard/radiology/orders/page.tsx` — `pl-9` → `ps-9`
+- `app/dashboard/lab/orders/page.tsx` — `pl-9` → `ps-9`
+- `app/dashboard/nurse/patients/page.tsx` — `pl-9` → `ps-9`
+
+**Fix Group 4 — Warning: ml-/mr- → ms-/me- (9 instances)**
+- `components/doctor/VitalTile.tsx` — `ml-1` → `ms-1`
+- `components/staff/cashier/InvoiceCard.tsx` — `ml-2` → `ms-2`
+- `components/doctor/PatientQueueTable.tsx` — `ml-3` → `ms-3`
+- `components/doctor/DoctorRatingsCard.tsx` — `ml-2` → `ms-2`
+- `components/shared/ConfirmDialog.tsx` — `ml-2` → `ms-2`
+- `app/dashboard/admin/schedules/[doctorId]/page.tsx` — `ml-2` → `ms-2`
+- `app/dashboard/nurse/patients/[id]/page.tsx` — `mr-1`×4 → `me-1`×4
+- `app/dashboard/admin/insurance/page.tsx` — `mr-1` → `me-1`
+- `app/dashboard/inventory/suppliers/page.tsx` — `mr-1` → `me-1`
+
+**Fix Group 5 — Warning: fixed-width search inputs (5 instances)**
+- `app/dashboard/admin/invoices/page.tsx` — `w-[180px]` → `w-full sm:w-[180px]`
+- `app/dashboard/admin/audit-log/page.tsx` — `w-[200px]` → `w-full sm:w-[200px]`
+- `app/dashboard/admin/appointments/page.tsx` — `w-[220px]` → `w-full sm:w-[220px]`
+- `app/dashboard/cashier/invoices/page.tsx` — `w-[240px]` → `w-full sm:w-[240px]`
+- `components/staff/pharmacist/PharmacistFilterBar.tsx` — `w-[280px]` → `w-full sm:w-[280px]`
+
+**Warning: grid-cols-2 without mobile base (7 components, 10 grid instances)**
+- `app/dashboard/receptionist/requests/page.tsx` — 2× `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`; `col-span-2` → `sm:col-span-2`
+- `app/dashboard/admin/settings/page.tsx` — 2× `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+- `app/dashboard/admin/schedules/page.tsx` — `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+- `app/dashboard/admin/invoices/page.tsx` — `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+- `app/dashboard/inventory/requests/page.tsx` — 3× `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+- `components/staff/pharmacist/BatchesModal.tsx` — `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+- `components/staff/pharmacist/PrescriptionDetailModal.tsx` — `grid-cols-2` → `grid-cols-1 sm:grid-cols-2`
+
+### Verification
+- `npx tsc --noEmit` (frontend) → 0 errors
+- Info items skipped per task scope
+
+---
+
+## [2026-06-08] Doctor Patient Record Page — Mobile Responsive Fixes
+
+### What changed (CSS/layout only — no data logic touched)
+
+**`apps/frontend/src/components/doctor/PatientHeader.tsx`**
+- Outer flex: added `flex-wrap` so action buttons row wraps below avatar+info on mobile
+- Action buttons container: `flex-col md:flex-row w-full md:w-auto` — stacks vertically on mobile, horizontal on desktop
+- Each button: `w-full md:w-auto justify-center` — full-width + centered on mobile
+- Demographics row: `gap-x-4 gap-y-1` → `gap-2` for consistent natural wrapping
+
+**`apps/frontend/src/components/doctor/PatientSummaryCard.tsx`**
+- Pre-visit summary grid: added `grid-cols-2` base — 2 columns on mobile, 4 on desktop (`md:grid-cols-4`)
+- Fixed RTL: `ml-1` → `ms-1` on subheading
+
+**`apps/frontend/src/app/dashboard/doctor/patients/[id]/page.tsx`**
+- 70/30 content grid: replaced inline `style={{ gridTemplateColumns: "1fr 320px" }}` with `grid-cols-1 md:grid-cols-[1fr_320px]` — single column on mobile (sidebar below content), two columns on desktop
+
+---
+
+## [2026-06-08] Doctor Patient Record Page Redesign
+
+### What changed (layout/visual only — all functionality preserved)
+
+**`apps/frontend/src/components/doctor/PatientHeader.tsx`** (rewritten)
+- Card wrapper (`card p-5`), flex row: Avatar | info column | action buttons
+- MR-ID badge labeled `MR · {national_id}` in pill/mono style
+- Demographics horizontal row with Droplets + Phone icons
+- Allergy badges with TriangleAlert icon
+- Button area: "Start video visit" + conditional "Complete visit"/"Visit completed" + "Add diagnosis"
+
+**`apps/frontend/src/components/doctor/VisitSidebarCard.tsx`** (new file)
+- Visit summary card: Date, Reason, Status badge (Badge component), Type
+- Status → Badge variant map: `confirmed→info`, `in_progress→caution`, `completed→positive`, `checked_in→brand`, others→neutral/critical
+- Quick note textarea + "Save draft" / "Sign & save" buttons
+- Collapsible past visits: shows last 3 by default, "Show N more" / "Show less" toggle
+
+**`apps/frontend/src/app/dashboard/doctor/patients/[id]/page.tsx`** (rewritten)
+- `gap-5` spacing throughout
+- Vitals alert uses `border-s-4` + `borderInlineStartColor` (RTL logical CSS)
+- 70/30 grid (`1fr 320px`), sidebar uses `<VisitSidebarCard>` component
+- All modals, confirmation dialog, hooks unchanged
+
+---
+
+## [2026-06-08] Complete Visit Button (Frontend)
+
+### What was added
+
+**`apps/frontend/src/services/doctor.service.ts`**
+- Added `completeVisit(appointmentId)` → `POST /doctor/appointments/:id/complete`
+
+**`apps/frontend/src/hooks/doctor/useCompleteVisit.ts`** (new file)
+- `useMutation` wrapping `doctorService.completeVisit`
+- `onSuccess`: invalidates `doctorAppointments` query + shows success toast
+- `onError`: shows error toast
+- Exported from `hooks/doctor/index.ts` barrel
+
+**`apps/frontend/src/components/doctor/PatientHeader.tsx`**
+- Added `onCompleteVisit?: () => void` and `appointmentStatus?: AppointmentStatus` props
+- `in_progress` → enabled "Complete Visit" button (brand dark green)
+- `confirmed` → disabled button with tooltip "Waiting for patient check-in"
+- `completed` → green "Visit Completed" badge replacing the button
+
+**`apps/frontend/src/app/dashboard/doctor/patients/[id]/page.tsx`**
+- Imports `useCompleteVisit` + `ModalSheet`
+- Adds `showCompleteConfirm` state and `completeVisitMutation`
+- Passes `appointmentStatus` and `onCompleteVisit` to `PatientHeader`
+- Renders a `ModalSheet` confirmation dialog: "Mark this visit as complete? This will notify the patient." → on confirm calls `completeVisitMutation.mutate`
+
+---
+
+## [2026-06-08] Complete Visit Endpoint (Backend)
+
+### What was added
+`POST /api/doctor/appointments/:appointmentId/complete` — doctor marks an in-progress visit as done.
+
+**`apps/backend/src/models/Appointment.ts`**
+- Added `in_progress` to the `status` enum (interface + schema)
+- Added `completed_at?: Date` field
+
+**`apps/backend/src/services/doctor.service.ts`**
+- Added imports: `User`, `MedicalRecord`, `Notification`, `sendEmail`
+- New exported function `notifyVisitCompleted(opts)` — fire-and-forget after status update:
+  - Fetches patient email/name, doctor name/department, medical record (diagnosis + prescriptions)
+  - Sends visit summary HTML email via Resend
+  - Creates a `Notification` document and emits `notification:new` to the patient via socket
+
+**`apps/backend/src/controllers/doctor/index.ts`**
+- Added `completeVisit` controller: verifies ownership → status guards (`completed` → 400, `!= in_progress` → 400) → sets status + `completed_at` → responds → fire-and-forget `notifyVisitCompleted`
+
+**`apps/backend/src/routes/doctor.routes.ts`**
+- Registered `POST /appointments/:appointmentId/complete` under the `authenticate + requireCompleteProfile + authorize('doctor')` middleware stack
+
+---
+
 ## [2026-06-08] Fix Login Rate Limiter — Failed-Attempts Only, IP+Email Scoping
 
 ### Problem

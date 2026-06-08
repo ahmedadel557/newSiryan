@@ -1,8 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, TriangleAlert, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useCompleteVisit } from "@/hooks/doctor";
+import { ModalSheet } from "@/components/ui/ModalSheet";
 import { usePatientRecord } from "@/hooks/patient";
 import { PatientHeader } from "@/components/doctor/PatientHeader";
 import { PatientSummaryCard } from "@/components/doctor/PatientSummaryCard";
@@ -18,6 +20,7 @@ import { LabOrderModal } from "@/components/doctor/LabOrderModal";
 import { RadiologyOrderModal } from "@/components/doctor/RadiologyOrderModal";
 import { RoomRequestModal } from "@/components/doctor/RoomRequestModal";
 import { FollowUpModal } from "@/components/doctor/FollowUpModal";
+import { VisitSidebarCard } from "@/components/doctor/VisitSidebarCard";
 import type { RecordTab } from "@/hooks/patient";
 
 const TABS: { id: RecordTab; label: string }[] = [
@@ -33,6 +36,8 @@ export default function PatientRecordPage() {
   const { id: patientId } = useParams<{ id: string }>();
   const router = useRouter();
   const [quickNote, setQuickNote] = useState<string>("");
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const completeVisitMutation = useCompleteVisit();
 
   const {
     patient,
@@ -73,7 +78,7 @@ export default function PatientRecordPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <button
         onClick={() => router.push("/dashboard/doctor")}
         className="btn btn-ghost text-[13px] flex items-center gap-1 self-start"
@@ -84,21 +89,32 @@ export default function PatientRecordPage() {
       <PatientHeader
         patient={patient}
         appointment={latestAppointment}
+        appointmentStatus={latestAppointment?.status}
         onAddDiagnosis={() => setOpenModal("diagnosis")}
         onStartVideo={
-          latestAppointment?.visit_type === 'online' &&
-          !['cancelled', 'completed'].includes(latestAppointment.status) &&
-          Date.now() >= new Date(latestAppointment.scheduled_at).getTime() - 5 * 60 * 1000
-            ? () => router.push(`/dashboard/doctor/video/${latestAppointment!.id}`)
+          latestAppointment?.visit_type === "online" &&
+          !["cancelled", "completed"].includes(latestAppointment.status) &&
+          Date.now() >=
+            new Date(latestAppointment.scheduled_at).getTime() - 5 * 60 * 1000
+            ? () =>
+                router.push(
+                  `/dashboard/doctor/video/${latestAppointment!.id}`
+                )
+            : undefined
+        }
+        onCompleteVisit={
+          latestAppointment &&
+          ["in_progress", "confirmed"].includes(latestAppointment.status)
+            ? () => setShowCompleteConfirm(true)
             : undefined
         }
       />
 
       {vitalsAlert && (
         <div
-          className="card flex items-start gap-3 p-4 border-l-4"
+          className="card flex items-start gap-3 p-4 border-s-4"
           style={{
-            borderLeftColor:
+            borderInlineStartColor:
               vitalsAlert.severity === "critical"
                 ? "var(--critical)"
                 : "var(--caution-soft-fg)",
@@ -175,8 +191,8 @@ export default function PatientRecordPage() {
         ))}
       </div>
 
-      {/* Content grid */}
-      <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 360px" }}>
+      {/* 70/30 content grid */}
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-[1fr_320px]">
         {/* Main content */}
         <div className="min-w-0">
           {activeTab === "overview" && (
@@ -219,122 +235,16 @@ export default function PatientRecordPage() {
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar (30%) */}
         <div className="flex flex-col gap-4">
-          {/* Visit summary */}
-          <div className="card p-5">
-            <p className="text-[13px] font-semibold text-[var(--fg-1)] mb-3">
-              Visit summary
-            </p>
-            {latestAppointment ? (
-              <div
-                className="grid gap-[6px_12px] text-[13px]"
-                style={{ gridTemplateColumns: "90px 1fr" }}
-              >
-                <span className="text-[var(--fg-3)]">Date</span>
-                <span className="text-[var(--fg-1)]">
-                  {new Date(latestAppointment.scheduled_at).toLocaleDateString(
-                    "en-US",
-                    {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    },
-                  )}
-                </span>
-                <span className="text-[var(--fg-3)]">Reason</span>
-                <span className="text-[var(--fg-1)]">
-                  {latestAppointment.reason}
-                </span>
-                <span className="text-[var(--fg-3)]">Status</span>
-                <span className="text-[var(--fg-1)] capitalize">
-                  {latestAppointment.status.replace("_", " ")}
-                </span>
-                {latestAppointment.visit_type && (
-                  <>
-                    <span className="text-[var(--fg-3)]">Type</span>
-                    <span className="text-[var(--fg-1)] capitalize">
-                      {latestAppointment.visit_type}
-                    </span>
-                  </>
-                )}
-              </div>
-            ) : (
-              <p className="text-[13px] text-[var(--fg-3)]">
-                No active appointment.
-              </p>
-            )}
-
-            <div className="border-t border-[var(--border-1)] mt-4 pt-4 flex flex-col gap-2">
-              <textarea
-                placeholder="Quick note…"
-                rows={3}
-                value={quickNote}
-                onChange={(e) => setQuickNote(e.target.value)}
-                className="w-full resize-none rounded-[var(--radius-md)] border border-[var(--border-1)] bg-[var(--bg-surface)] px-3 py-2 text-[13px] text-[var(--fg-1)] placeholder:text-[var(--fg-4)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    saveNote(quickNote);
-                    setActiveTab("notes");
-                  }}
-                  className="btn btn-secondary text-[12px] py-[4px] px-3 flex-1"
-                >
-                  Save draft
-                </button>
-                <button
-                  onClick={() => {
-                    saveNote(quickNote);
-                    setActiveTab("notes");
-                  }}
-                  className="btn btn-primary text-[12px] py-[4px] px-3 flex-1"
-                >
-                  Sign & save
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Past visits */}
-          <div className="card p-5">
-            <p className="text-[13px] font-semibold text-[var(--fg-1)] mb-3">
-              Past visits
-            </p>
-            {records.length === 0 ? (
-              <p className="text-[13px] text-[var(--fg-3)]">
-                No past visits on record.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {records.slice(0, 5).map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="flex gap-3 py-2 border-b border-[var(--border-1)] last:border-0"
-                  >
-                    <p className="font-mono text-[11px] text-[var(--fg-3)] shrink-0 pt-[2px]">
-                      {new Date(rec.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <div className="flex-1 min-w-0">
-                      {rec.chief_complaint && (
-                        <p className="text-[12px] font-medium text-[var(--fg-1)] truncate">
-                          {rec.chief_complaint}
-                        </p>
-                      )}
-                      {rec.diagnosis && (
-                        <p className="text-[11px] text-[var(--fg-3)] truncate mt-[1px]">
-                          {rec.diagnosis}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <VisitSidebarCard
+            appointment={latestAppointment}
+            records={records}
+            quickNote={quickNote}
+            onQuickNoteChange={setQuickNote}
+            onSaveNote={saveNote}
+            onGoToNotes={() => setActiveTab("notes")}
+          />
         </div>
       </div>
 
@@ -377,6 +287,44 @@ export default function PatientRecordPage() {
         onClose={() => setOpenModal(null)}
         onSubmit={submitFollowUp}
       />
+
+      {/* Complete Visit Confirmation */}
+      <ModalSheet
+        open={showCompleteConfirm}
+        onOpenChange={setShowCompleteConfirm}
+        maxWidth="md:w-[420px]"
+      >
+        <div className="p-6 flex flex-col gap-4">
+          <div>
+            <p className="text-[15px] font-semibold text-[var(--fg-1)]">
+              Complete this visit?
+            </p>
+            <p className="text-[13px] text-[var(--fg-3)] mt-1">
+              Mark this visit as complete? This will notify the patient.
+            </p>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowCompleteConfirm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              disabled={completeVisitMutation.isPending}
+              onClick={() => {
+                if (!latestAppointment?.id) return;
+                completeVisitMutation.mutate(latestAppointment.id, {
+                  onSuccess: () => setShowCompleteConfirm(false),
+                });
+              }}
+            >
+              {completeVisitMutation.isPending ? "Completing…" : "Complete Visit"}
+            </button>
+          </div>
+        </div>
+      </ModalSheet>
     </div>
   );
 }
