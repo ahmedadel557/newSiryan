@@ -10,6 +10,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,12 +22,14 @@ jobs:
               - 'apps/backend/**'
               - 'deploy/docker-compose.yml'
               - 'package.json'
+              - 'package-lock.json'
               - 'pnpm-lock.yaml'
               - 'turbo.json'
 
             frontend:
               - 'apps/frontend/**'
               - 'package.json'
+              - 'package-lock.json'
               - 'pnpm-lock.yaml'
               - 'turbo.json'
 
@@ -52,6 +55,8 @@ jobs:
 
             git fetch https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
             git reset --hard FETCH_HEAD
+
+            npm ci
 
             echo "$BACKEND_ENV" > apps/backend/.env
 
@@ -96,6 +101,8 @@ jobs:
 
             git fetch https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
             git reset --hard FETCH_HEAD
+
+            npm ci
 
             echo "$FRONTEND_ENV" > apps/frontend/.env.production
 
