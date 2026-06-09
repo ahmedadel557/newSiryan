@@ -5,7 +5,12 @@ const isDev = process.env.NODE_ENV === 'development';
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
+  environment: process.env.NODE_ENV,
+
   sendDefaultPii: true,
+
+  enableLogs: true,
+  enableMetrics: true,
 
   tracesSampleRate: isDev ? 0 : 0.1,
 
@@ -13,7 +18,12 @@ Sentry.init({
   replaysSessionSampleRate: isDev ? 0 : 0.1,
   replaysOnErrorSampleRate: isDev ? 0 : 1.0,
 
-  integrations: isDev ? [] : [Sentry.replayIntegration()],
+  integrations: isDev
+    ? []
+    : [
+        Sentry.replayIntegration(),
+        Sentry.consoleLoggingIntegration({ levels: ['error', 'warn'] }),
+      ],
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
