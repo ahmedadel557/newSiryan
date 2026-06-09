@@ -54,7 +54,7 @@ export default function PatientVideoCallPage() {
 
   return (
     <div
-      className="h-[calc(100vh-130px)] min-h-[520px] w-full overflow-hidden rounded-[var(--radius-xl)]"
+      className="h-[calc(100dvh-136px)] md:h-[calc(100dvh-120px)] min-h-0 w-full overflow-hidden rounded-[var(--radius-xl)]"
       style={{ background: 'var(--forest-950)' }}
     >
       {error ? (
@@ -102,7 +102,6 @@ export default function PatientVideoCallPage() {
                 userName={userName}
                 otherUserId={otherUserId}
                 tokenProvider={tokenProvider}
-                remoteWaitingLabel="Waiting for the doctor to join…"
               />
             </StreamCall>
           </StreamVideo>

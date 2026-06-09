@@ -22,29 +22,39 @@ export function QueueItem({ item, onOpen, onStartVideo }: QueueItemProps) {
   return (
     <div
       onClick={() => onOpen(item.patient_id)}
-      className="flex items-center gap-3 px-5 py-3 border-b border-[var(--border-1)] last:border-0 cursor-pointer hover:bg-[var(--sand-50)] transition-colors"
+      className="flex items-center gap-3 px-4 sm:px-5 py-3 border-b border-[var(--border-1)] last:border-0 cursor-pointer hover:bg-[var(--sand-50)] transition-colors"
     >
-      <span className="font-mono text-[12px] text-[var(--fg-3)] w-[64px] shrink-0">{time}</span>
+      <span className="font-mono text-[12px] text-[var(--fg-3)] w-[56px] sm:w-[64px] shrink-0">{time}</span>
       <Avatar name={item.patient_name} size="sm" />
-      <p className="font-semibold text-[13px] text-[var(--fg-1)] flex-1 min-w-0 truncate">{item.patient_name}</p>
-      <Badge variant={item.type === 'online' ? 'info' : 'neutral'}>{item.type}</Badge>
-      <Badge variant={getStatusVariant(item.status)} dot>
-        {item.status.replace('_', ' ')}
-      </Badge>
+
+      {/* Mobile: name + badges stacked; Desktop: name + badges inline */}
+      <div className="flex-1 min-w-0 flex flex-col gap-[3px] sm:flex-row sm:items-center sm:gap-3">
+        <p className="font-semibold text-[13px] text-[var(--fg-1)] truncate sm:flex-1">{item.patient_name}</p>
+        <div className="flex items-center gap-[6px]">
+          <Badge variant={item.type === 'online' ? 'info' : 'neutral'}>{item.type}</Badge>
+          <Badge variant={getStatusVariant(item.status)} dot>
+            {item.status.replace('_', ' ')}
+          </Badge>
+        </div>
+      </div>
+
       {showVideo && (
         <button
           onClick={(e) => { e.stopPropagation(); onStartVideo(item.appointment_id); }}
-          className="btn btn-primary text-[12px] py-[5px] px-3 inline-flex items-center gap-1"
+          className="btn btn-primary text-[12px] py-[5px] px-3 inline-flex items-center gap-1 shrink-0"
         >
-          <Video size={14} /> Start video call
+          <Video size={14} />
+          <span className="hidden sm:inline">Start video call</span>
+          <span className="sm:hidden">Video</span>
         </button>
       )}
       <button
         onClick={(e) => { e.stopPropagation(); onOpen(item.patient_id); }}
-        className="btn-ghost text-[12px] py-[4px] inline-flex items-center gap-1"
+        className="hidden sm:inline-flex rounded-md px-[14px] h-[36px] btn-ghost text-[12px] py-[4px] items-center gap-1 shrink-0"
       >
         Open <ArrowRight size={14} />
       </button>
+      <ArrowRight size={14} className="sm:hidden shrink-0 text-[var(--fg-3)]" />
     </div>
   );
 }

@@ -137,8 +137,9 @@ async function getVideoAccess(userId: string, appointmentId: string): Promise<Vi
   const callId = appt._id.toString();
   const videoCall = await VideoCall.findOne({ appointment: appt._id }).select('status').lean();
   const token = await generateStreamToken(userId, await getDisplayName(userId));
+  const otherUserId = appt.doctor.toString() === userId ? appt.patient.toString() : appt.doctor.toString();
 
-  return { callId, token, apiKey: STREAM_API_KEY, status: videoCall?.status ?? 'waiting' };
+  return { callId, token, apiKey: STREAM_API_KEY, status: videoCall?.status ?? 'waiting', otherUserId };
 }
 
 /* ------------------------------------------------------------------ Notes */

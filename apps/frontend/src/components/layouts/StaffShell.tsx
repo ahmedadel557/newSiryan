@@ -403,22 +403,22 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-transform',
-                  active ? 'text-white' : 'text-[rgba(255,255,255,0.5)]'
+                  'flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-transform ',
+                  active ? 'text-white font-medium' : 'text-white/70'
                 )}
               >
                 <span className="relative flex items-center justify-center w-9 h-7">
-                  {active && <span className="absolute inset-0 rounded-full bg-[rgba(255,255,255,0.15)]" />}
-                  <span className="relative [&>svg]:w-5 [&>svg]:h-5">{item.icon}</span>
+                 {active ? (<span className="absolute inset-0 rounded-full bg-[rgba(255,255,255,0.15)]" />) : null}
+                  <span className="relative text-white/50 [&>svg]:w-5 [&>svg]:h-5">{item.icon}</span>
                 </span>
-                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                <span className="text-[10px] text-white/50 font-medium leading-none">{item.label}</span>
               </Link>
             );
           })}
           {drawerNavItems.length > 0 && (
             <button
               onClick={() => setDrawerOpen(true)}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[rgba(255,255,255,0.5)] active:scale-90 transition-transform"
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 text-white active:scale-90 transition-transform"
             >
               <MoreHorizontal size={20} />
               <span className="text-[10px] font-medium leading-none">More</span>
@@ -442,7 +442,7 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.1)]">
               <span className="text-[15px] font-semibold text-white">More</span>
-              <button onClick={() => setDrawerOpen(false)} className="text-[rgba(255,255,255,0.6)] p-1">
+              <button onClick={() => setDrawerOpen(false)} className="text-white/60 p-1">
                 <X size={18} />
               </button>
             </div>
@@ -453,12 +453,12 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
                   href={item.href}
                   onClick={() => setDrawerOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-5 py-3 text-[14px]',
-                    isActive(item.href) ? 'text-white font-medium' : 'text-[rgba(255,255,255,0.7)]'
+                    'flex items-center gap-3 px-5 py-3 text-[14px] ',
+                    isActive(item.href) ? 'text-white font-medium' : 'text-white'
                   )}
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  {item.icon && <span className="text-white/70">{item.icon}</span>}
+                  <span className="text-white/70">{item.label}</span>
                 </Link>
               ))}
             </nav>

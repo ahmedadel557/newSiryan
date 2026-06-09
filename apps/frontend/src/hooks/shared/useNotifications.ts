@@ -19,9 +19,10 @@ export function useNotifications() {
     'notification:new',
     useCallback(
       (incoming) => {
+        const normalized: Notification = { ...incoming, id: (incoming as any)._id ?? incoming.id };
         queryClient.setQueryData<Notification[]>(queryKeys.notifications(), (prev = []) => {
-          if (prev.some((n) => n.id === incoming.id)) return prev;
-          return [incoming, ...prev];
+          if (prev.some((n) => n.id === normalized.id)) return prev;
+          return [normalized, ...prev];
         });
       },
       [queryClient]

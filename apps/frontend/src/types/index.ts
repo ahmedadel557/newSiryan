@@ -695,6 +695,7 @@ export interface VideoCallToken {
   token: string;
   apiKey: string;
   status?: 'waiting' | 'active' | 'ended';
+  otherUserId?: string;
 }
 
 /* ----------------------------------------------------------------

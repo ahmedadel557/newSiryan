@@ -40,6 +40,7 @@ export function usePatientVideoCall() {
   const [callId, setCallId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [otherUserId, setOtherUserId] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,6 +152,7 @@ export function usePatientVideoCall() {
       setCallId(data.callId);
       setToken(data.token);
       setApiKey(key);
+      setOtherUserId(data.otherUserId ?? null);
       setIsConnected(true);
     } catch (e: any) {
       // Disconnect the client if it was created before the failure so the next
@@ -195,5 +197,5 @@ export function usePatientVideoCall() {
     return () => { if (callRef.current) endCall(); };
   }, [endCall]);
 
-  return { client, call, callId, token, apiKey, otherUserId: null as string | null, isConnecting, isConnected, error, mediaWarning, initCall, endCall, tokenProvider };
+  return { client, call, callId, token, apiKey, otherUserId, isConnecting, isConnected, error, mediaWarning, initCall, endCall, tokenProvider };
 }

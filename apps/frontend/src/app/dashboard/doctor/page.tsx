@@ -107,16 +107,16 @@ export default function DoctorQueuePage() {
         </div>
       )}
 
-      <div className="flex items-start gap-4">
-        <div className="flex-1">
-          <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">My patients</h1>
-          <p className="text-[14px] text-[var(--fg-3)] mt-[2px]">
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[24px] sm:text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">My patients</h1>
+          <p className="text-[13px] text-[var(--fg-3)] mt-[2px]">
             {today} · {totalToday} visits scheduled
           </p>
         </div>
-        <div className="flex gap-2">
-          <button className="btn btn-ghost text-[13px]">Filters</button>
-          <button className="btn btn-ghost text-[13px]">Export</button>
+        <div className="flex gap-2 shrink-0">
+          <button className="btn btn-ghost text-[13px] hidden sm:inline-flex">Filters</button>
+          <button className="btn btn-ghost text-[13px] hidden sm:inline-flex">Export</button>
           <button className="btn btn-primary text-[13px]">+ Add visit note</button>
         </div>
       </div>
