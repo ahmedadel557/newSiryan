@@ -6,15 +6,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import Image from 'next/image';
 import * as Sentry from '@sentry/nextjs';
 
-<button
-  onClick={() => {
-    Sentry.captureException(
-      new Error('Production Frontend Test')
-    );
-  }}
->
-  Test Sentry
-</button>
+
 export function LandingNav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -54,6 +46,15 @@ export function LandingNav() {
           >
             {open ? <X size={22} strokeWidth={1.75} /> : <Menu size={22} strokeWidth={1.75} />}
           </button>
+          <button
+  onClick={() => {
+    Sentry.captureException(
+      new Error('Production Frontend Test')
+    );
+  }}
+>
+  Test Sentry
+</button>
         </div>
       </div>
       {open && (
