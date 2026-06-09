@@ -4,7 +4,17 @@ import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import Image from 'next/image';
+import * as Sentry from '@sentry/nextjs';
 
+<button
+  onClick={() => {
+    Sentry.captureException(
+      new Error('Production Frontend Test')
+    );
+  }}
+>
+  Test Sentry
+</button>
 export function LandingNav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

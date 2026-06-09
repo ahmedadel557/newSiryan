@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import * as Sentry from "@sentry/node";
 import InventoryItem from "../models/InventoryItem";
 import Notification from "../models/Notification";
 import User from "../models/User";
@@ -112,7 +113,13 @@ export const startInventoryExpiryJob = () => {
   _started = true;
   const task = cron.schedule(
     "0 7 * * *",
-    runInventoryExpiryCheck,
+    () =>
+      Sentry.withMonitor("inventory-expiry", runInventoryExpiryCheck, {
+        schedule: { type: "crontab", value: "0 7 * * *" },
+        checkinMargin: 10,
+        maxRuntime: 15,
+        timezone: "Africa/Cairo",
+      }),
     { timezone: "Africa/Cairo" }
   );
 

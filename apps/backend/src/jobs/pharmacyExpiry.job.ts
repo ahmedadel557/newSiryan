@@ -1,4 +1,5 @@
 import cron from 'node-cron';
+import * as Sentry from '@sentry/node';
 import Medication from '../models/Medication';
 import MedicationBatch from '../models/MedicationBatch';
 import Notification from '../models/Notification';
@@ -82,7 +83,17 @@ export const getPharmacyExpiryJobStatus = (): 'running' | 'stopped' => _started 
 
 export const startPharmacyExpiryJob = () => {
   _started = true;
-  const task = cron.schedule('0 8 * * *', runExpiryCheck, { timezone: 'Africa/Cairo' });
+  const task = cron.schedule(
+    '0 8 * * *',
+    () =>
+      Sentry.withMonitor('pharmacy-expiry', runExpiryCheck, {
+        schedule: { type: 'crontab', value: '0 8 * * *' },
+        checkinMargin: 10,
+        maxRuntime: 15,
+        timezone: 'Africa/Cairo',
+      }),
+    { timezone: 'Africa/Cairo' },
+  );
   console.log('Pharmacy expiry alert job started');
   return task;
 };
