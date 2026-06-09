@@ -920,6 +920,11 @@ export interface CreateUserDto {
   role: Role;
   first_name?: string;
   last_name?: string;
+  phone?: string;
+  department?: string;
+  specialization?: string;
+  shift?: 'morning' | 'evening' | 'night';
+  national_id?: string;
 }
 
 export interface UpdateUserDto {

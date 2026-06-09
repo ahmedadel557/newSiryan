@@ -96,14 +96,14 @@ export const createStaff = async (req: AuthRequest, res: Response, next: NextFun
     const parsed = createStaffSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
-    const { username, email, role, first_name, last_name, phone, specialization, department, shift } = parsed.data.body;
+    const { username, email, role, first_name, last_name, phone, specialization, department, shift, national_id } = parsed.data.body;
     const tempPassword = crypto.randomBytes(8).toString('hex');
 
     const user = await User.create({ username, email, password: tempPassword, role, password_changed: false });
 
     let profile;
     try {
-      profile = await Profile.create({ user: user._id, first_name, last_name, phone, specialization, department, shift, hired_at: new Date() });
+      profile = await Profile.create({ user: user._id, first_name, last_name, phone, specialization, department, shift, national_id, hired_at: new Date() });
     } catch (profileErr) {
       await User.deleteOne({ _id: user._id });
       throw profileErr;

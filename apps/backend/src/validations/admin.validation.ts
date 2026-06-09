@@ -44,6 +44,7 @@ export const createStaffSchema = z.object({
     specialization: z.string().optional(),
     department: z.string().optional(),
     shift: z.enum(['morning', 'evening', 'night']).optional(),
+    national_id: z.string().optional(),
   }),
 });
 
