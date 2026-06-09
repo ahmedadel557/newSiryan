@@ -56,8 +56,6 @@ jobs:
             git fetch https://x-access-token:$GH_PAT@github.com/ahmedadel557/newSiryan.git master
             git reset --hard FETCH_HEAD
 
-            npm ci
-
             echo "$BACKEND_ENV" > apps/backend/.env
 
             cd deploy

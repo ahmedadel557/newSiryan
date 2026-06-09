@@ -24,7 +24,7 @@ const signToken = (payload: object, secret: string, expiresIn: string) =>
 
 const registerRateLimiter = createRedisRateLimiter({
   keyPrefix: 'auth:register',
-  max: 5,
+  max: 7,
   windowSeconds: 60 * 60, // 1 hour
 });
 

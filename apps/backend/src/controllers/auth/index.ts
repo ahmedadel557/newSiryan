@@ -23,7 +23,7 @@ import { createControllerRateLimiter } from '../../middlewares/redisRateLimiter'
 
 const loginRL = createControllerRateLimiter({
   keyPrefix: 'auth:login',
-  max: 10,
+  max: 15,
   windowSeconds: 15 * 60,
   getKey: (req) => `${req.ip ?? 'unknown'}:${(req.body?.email as string)?.toLowerCase() ?? 'unknown'}`,
 });
