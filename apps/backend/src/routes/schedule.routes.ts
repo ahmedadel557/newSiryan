@@ -5,6 +5,8 @@ import { getMySchedule } from '../controllers/schedule.controller';
 
 const router = Router();
 
+
+
 // Any authenticated staff member can view their own schedule
 router.get('/me', authenticate, requireCompleteProfile, getMySchedule);
 

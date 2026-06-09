@@ -28,6 +28,8 @@ export function HeroSection() {
   const rafRef = useRef<number | null>(null);
   const lastEventRef = useRef<MouseEvent | null>(null);
 
+  
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     lastEventRef.current = e;
     if (rafRef.current !== null) return;

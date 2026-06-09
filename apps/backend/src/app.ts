@@ -4,7 +4,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
-import "dotenv-flow/config";
 import passport from "passport";
 import "./config/passport";
 
@@ -70,6 +69,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/shifts", shiftsRoutes);
 app.use("/api/insurance-providers", insuranceProvidersRoutes);
+
 
 Sentry.setupExpressErrorHandler(app);
 app.use(errorHandler);

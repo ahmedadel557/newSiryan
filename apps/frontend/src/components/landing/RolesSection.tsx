@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { UserRound, Stethoscope, Building2, Check, ArrowRight } from 'lucide-react';
 import { Reveal } from './Reveal';
 
+
 const MockPlaceholder = () => (
   <div className="h-64 rounded-xl animate-pulse" style={{ background: 'var(--bg-sunken)' }} />
 );

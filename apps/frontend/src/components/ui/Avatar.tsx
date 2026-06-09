@@ -23,6 +23,7 @@ function getInitials(name: string | undefined | null): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
+
 export function Avatar({ name, size = 'md', src, className }: Omit<AvatarProps, 'name'> & { name?: string }) {
   const [imgError, setImgError] = useState(false);
   const base = cn('inline-flex shrink-0 items-center justify-center rounded-full font-semibold', sizeClasses[size], className);

@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./config/env";
 import "./instrument";
 import http from "http";
 import mongoose from "mongoose";
