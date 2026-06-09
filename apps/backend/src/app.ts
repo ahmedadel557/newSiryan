@@ -26,6 +26,7 @@ import settingsRoutes from "./routes/settings.routes";
 import scheduleRoutes from "./routes/schedule.routes";
 import shiftsRoutes from "./routes/shifts.routes";
 import insuranceProvidersRoutes from "./routes/insuranceProviders.routes";
+import * as Sentry from "@sentry/node";
 import { errorHandler } from "./middlewares/errorHandler";
 import { rateLimiter } from "./middlewares/rateLimiter";
 import { maintenanceGuard } from "./middlewares/maintenanceMode";
@@ -70,6 +71,7 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/shifts", shiftsRoutes);
 app.use("/api/insurance-providers", insuranceProvidersRoutes);
 
+Sentry.setupExpressErrorHandler(app);
 app.use(errorHandler);
 
 export default app;

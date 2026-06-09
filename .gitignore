@@ -14,6 +14,7 @@ apps/backend/.env.local
 apps/backend/.env.*.local
 apps/frontend/.env*.local
 apps/frontend/.env.production
+apps/frontend/.env.sentry-build-plugin
 
 # Logs
 logs/
