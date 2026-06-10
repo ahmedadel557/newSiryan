@@ -30,6 +30,7 @@ export interface IUser extends Document {
   reset_token_expires?: Date;
   is_email_verified?: boolean;
   isRootAdmin?: boolean;
+  is_test_account?: boolean;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -50,6 +51,7 @@ const UserSchema = new Schema<IUser>(
     reset_token_expires:  { type: Date },
     is_email_verified:    { type: Boolean, default: false },
     isRootAdmin:          { type: Boolean, default: false },
+    is_test_account:      { type: Boolean, default: false },
   },
   { timestamps: true }
 );
