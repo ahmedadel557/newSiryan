@@ -57,7 +57,9 @@
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({video:p.dependencies['@stream-io/video-react-sdk'],chat:p.dependencies['stream-chat'],react:p.dependencies.react,next:p.dependencies.next},null,2\\)\\)\")",
       "Bash(xargs grep -l \"DeviceManager\\\\|InputMediaDevice\")",
       "PowerShell(Measure-Command *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "mcp__claude_ai_sentry__find_organizations",
+      "mcp__claude_ai_sentry__find_projects"
     ]
   }
 }
