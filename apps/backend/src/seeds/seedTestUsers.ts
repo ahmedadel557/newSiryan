@@ -1,15 +1,7 @@
-import dotenvFlow from 'dotenv-flow';
-import path from 'path';
-
-dotenvFlow.config({
-  path: path.resolve(__dirname, '..'),
-  default_node_env: 'development',
-});
-
 import mongoose from 'mongoose';
-import User, { Role } from '../src/models/User';
-import Profile from '../src/models/Profile';
-import Department from '../src/models/Department';
+import User, { Role } from '../models/User';
+import Profile from '../models/Profile';
+import Department from '../models/Department';
 
 const TEST_PASSWORD = 'Test@12345';
 
@@ -105,10 +97,10 @@ async function seedAccount(account: TestAccount): Promise<ResultRow> {
 
 // ─── Table renderer ────────────────────────────────────────────────────────────
 
-const C1 = 30; // Role column inner width (including surrounding spaces)
-const C2 = 37; // Email column inner width
-const C3 = 13; // Password column inner width
-const C4 = 30; // Status column inner width
+const C1 = 30;
+const C2 = 37;
+const C3 = 13;
+const C4 = 30;
 
 function pad(str: string, width: number): string {
   return str.length >= width ? str.slice(0, width) : str + ' '.repeat(width - str.length);
@@ -131,19 +123,9 @@ function printTable(rows: ResultRow[]): void {
   console.log(bottom + '\n');
 }
 
-// ─── Main ──────────────────────────────────────────────────────────────────────
+// ─── Exported seed function (called by server.ts or standalone runner) ─────────
 
-async function main(): Promise<void> {
-  const mongoUri = process.env.MONGO_URI;
-  if (!mongoUri) {
-    console.error('❌  MONGO_URI is not set. Check apps/backend/.env');
-    process.exitCode = 1;
-    return;
-  }
-
-  await mongoose.connect(mongoUri);
-  console.log('✔  MongoDB connected\n');
-
+export const seedTestUsers = async (): Promise<void> => {
   const results: ResultRow[] = [];
 
   for (const account of TEST_ACCOUNTS) {
@@ -159,13 +141,39 @@ async function main(): Promise<void> {
   }
 
   printTable(results);
-}
+};
 
-main()
-  .catch((err) => {
-    console.error('Fatal:', err);
-    process.exitCode = 1;
-  })
-  .finally(() => {
-    mongoose.disconnect().catch(console.error);
+// ─── Standalone entry point ────────────────────────────────────────────────────
+
+if (require.main === module) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const dotenvFlow = require('dotenv-flow') as typeof import('dotenv-flow');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const path = require('path') as typeof import('path');
+
+  dotenvFlow.config({
+    path: path.resolve(__dirname, '../..'),
+    default_node_env: 'development',
   });
+
+  const mongoUri = process.env.MONGO_URI;
+  if (!mongoUri) {
+    console.error('❌  MONGO_URI is not set. Check apps/backend/.env');
+    process.exitCode = 1;
+    process.exit(1);
+  }
+
+  mongoose
+    .connect(mongoUri)
+    .then(() => {
+      console.log('✔  MongoDB connected\n');
+      return seedTestUsers();
+    })
+    .catch((err: unknown) => {
+      console.error('Fatal:', err);
+      process.exitCode = 1;
+    })
+    .finally(() => {
+      mongoose.disconnect().catch(console.error);
+    });
+}
