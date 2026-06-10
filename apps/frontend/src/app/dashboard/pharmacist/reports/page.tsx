@@ -77,6 +77,7 @@ export default function PharmacistReportsPage() {
             {report.breakdown.length === 0 ? (
               <p className="text-[13px] text-[var(--fg-3)] px-5 py-8 text-center">No breakdown data</p>
             ) : (
+              <div className="overflow-x-auto">
               <table className="tbl w-full">
                 <thead>
                   <tr>
@@ -102,6 +103,7 @@ export default function PharmacistReportsPage() {
                   </tr>
                 </tfoot>
               </table>
+              </div>
             )}
           </div>
         </>

@@ -504,7 +504,8 @@ export const rejectStaff = async (req: AuthRequest, res: Response, next: NextFun
     );
     if (!user) return sendError(res, 'User not found', 404);
 
-    await sendEmail(
+    // fire-and-forget: non-fatal
+    sendEmail(
       user.email,
       'Your registration request was not approved',
       `<p>We regret to inform you that your registration request for Siryan was not approved.${reason ? ` Reason: ${reason}` : ''}</p><p>If you believe this is an error, please contact support.</p>`,
@@ -920,6 +921,9 @@ export const cancelAdminAppointment = async (req: AuthRequest, res: Response, ne
     appointment.cancel_reason = parsed.data.body.reason;
     await appointment.save();
 
+    // Cancelled appointments free the slot — flush the cached availability for that day
+    cache.del(CACHE_KEYS.SLOTS(appointment.doctor.toString(), new Date(appointment.scheduled_at).toISOString().slice(0, 10)));
+
     const notifPayload = {
       type: 'general' as const,
       title: 'Appointment cancelled',
@@ -964,6 +968,13 @@ export const updateUserProfileAdmin = async (req: AuthRequest, res: Response, ne
       { new: true }
     );
     if (!profile) return sendError(res, 'Profile not found', 404);
+
+    cache.del(CACHE_KEYS.PATIENT_PROFILE(req.params.id));
+    if (shift !== undefined) {
+      // Legacy availability falls back to Profile.shift — flush schedule + slot caches
+      cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.id));
+      cache.delPattern(`slots:${req.params.id}:*`);
+    }
 
     sendSuccess(res, profile, 'Profile updated');
     logAudit({ performedBy: req.user!.id, action: 'update_staff_profile', resource: 'profile', resourceId: req.params.id, req });
@@ -1220,6 +1231,7 @@ export const overrideDoctorSchedule = async (req: AuthRequest, res: Response, ne
     }
 
     cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.id));
+    cache.delPattern(`slots:${req.params.id}:*`);
 
     const { weekStart, weekEnd, weekDates } = currentWeek();
     const slots = await buildDoctorWeekSlots(req.params.id, weekStart, weekEnd, weekDates);
@@ -1263,7 +1275,7 @@ export const deleteDoctorScheduleSlot = async (req: AuthRequest, res: Response, 
     const slot = await BlockedSlot.findOneAndDelete({ _id: slot_id, doctor: req.params.id });
     if (!slot) return sendError(res, 'Slot not found', 404);
 
-    cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.id));
+    cache.del(CACHE_KEYS.DOCTOR_SCHEDULE(req.params.id), CACHE_KEYS.SLOTS(req.params.id, slot.date));
     sendSuccess(res, null, 'Slot removed');
     logAudit({ performedBy: req.user!.id, action: 'delete_schedule_slot', resource: 'blocked_slot', resourceId: slot_id, req });
   } catch (err: any) {

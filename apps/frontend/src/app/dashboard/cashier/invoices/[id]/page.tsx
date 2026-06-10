@@ -169,7 +169,7 @@ export default function CashierInvoiceDetailPage({ params }: { params: Promise<{
   return (
     <div className="flex flex-col gap-5">
       <Link href="/dashboard/cashier/invoices" className="btn-ghost text-[13px] flex items-center gap-1 self-start">
-        <ArrowLeft size={14} /> Back to invoices
+        <ArrowLeft className="rtl:rotate-180" size={14} /> Back to invoices
       </Link>
 
       {loading ? (

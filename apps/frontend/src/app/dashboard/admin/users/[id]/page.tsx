@@ -238,7 +238,7 @@ export default function AdminUserDetailPage() {
             href="/dashboard/admin/users"
             className="inline-flex items-center gap-1.5 text-[13px] text-[var(--fg-3)] hover:text-[var(--fg-1)] transition-colors mb-2"
           >
-            <ArrowLeft size={13} /> Back to users
+            <ArrowLeft className="rtl:rotate-180" size={13} /> Back to users
           </Link>
           <h1 className="text-2xl sm:text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">{fullName || user.username}</h1>
           <div className="flex items-center gap-2 mt-1">

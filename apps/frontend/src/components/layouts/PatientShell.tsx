@@ -241,7 +241,7 @@ export function PatientShell({ children, navItems = patientNav }: PatientShellPr
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ms-auto flex items-center gap-3">
               <ThemeToggle />
               <NotificationBell
                 notifications={notifications}

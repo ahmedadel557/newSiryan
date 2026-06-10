@@ -159,7 +159,7 @@ export default function ReceptionistAppointmentsPage() {
                 <Skeleton height="14px" width="80px" />
                 <Skeleton height="14px" width="140px" />
                 <Skeleton height="14px" width="120px" />
-                <Skeleton height="22px" width="80px" className="rounded-full ml-auto" />
+                <Skeleton height="22px" width="80px" className="rounded-full ms-auto" />
               </div>
             ))}
           </div>

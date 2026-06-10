@@ -61,7 +61,7 @@ export default function ReceptionistRadiologyPage() {
                 <Skeleton height="14px" width="80px" />
                 <Skeleton height="14px" width="120px" />
                 <Skeleton height="14px" width="100px" />
-                <Skeleton height="22px" width="60px" className="rounded-full ml-auto" />
+                <Skeleton height="22px" width="60px" className="rounded-full ms-auto" />
               </div>
             ))}
           </div>

@@ -17,6 +17,10 @@ const MOUNT_MAP: Record<string, string> = {
   'notification.routes.ts': '/api/notifications',
   'upload.routes.ts':       '/api/upload',
   'settings.routes.ts':     '/api/settings',
+  'department.routes.ts':   '/api/departments',
+  'schedule.routes.ts':     '/api/schedule',
+  'shifts.routes.ts':       '/api/shifts',
+  'insuranceProviders.routes.ts': '/api/insurance-providers',
 };
 
 interface RouteEntry {

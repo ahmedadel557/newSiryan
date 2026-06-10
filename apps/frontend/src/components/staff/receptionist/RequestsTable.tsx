@@ -52,6 +52,7 @@ export function RequestsTable({ requests, filter, onFilterChange, onApprove, onR
           <EmptyState icon={<GitPullRequest />} title="No requests" description="No requests match the current filter." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -112,6 +113,7 @@ export function RequestsTable({ requests, filter, onFilterChange, onApprove, onR
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ export function DashboardSkeleton() {
       <div className="flex flex-col flex-1 min-w-0">
         <div className="h-16 shrink-0 bg-[var(--bg-surface)] border-b border-[var(--border-1)] flex items-center px-6 gap-4">
           <div className="h-5 w-40 rounded bg-[var(--bg-sunken)] animate-pulse" />
-          <div className="ml-auto h-8 w-8 rounded-full bg-[var(--bg-sunken)] animate-pulse" />
+          <div className="ms-auto h-8 w-8 rounded-full bg-[var(--bg-sunken)] animate-pulse" />
         </div>
         <div className="flex-1 p-7 flex flex-col gap-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

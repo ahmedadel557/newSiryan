@@ -136,8 +136,12 @@ async function deductStockForOrder(
   const insufficient: string[] = [];
   const lowStockMeds: Array<{ medication: any; severity: 'warning' | 'critical' }> = [];
 
+  const medIds = (order.items as any[]).map((item: any) => item.medication?._id ?? item.medication);
+  const meds = await Medication.find({ _id: { $in: medIds } }).select('name stock_quantity low_stock_threshold');
+  const medMap = new Map(meds.map((m) => [m._id.toString(), m]));
+
   for (const item of order.items as any[]) {
-    const med = await Medication.findById(item.medication?._id ?? item.medication).select('name stock_quantity low_stock_threshold');
+    const med = medMap.get((item.medication?._id ?? item.medication).toString());
     if (!med) { insufficient.push('unknown medication'); continue; }
     if ((med.stock_quantity ?? 0) < item.quantity) {
       insufficient.push(`${med.name} (need ${item.quantity}, have ${med.stock_quantity ?? 0})`);

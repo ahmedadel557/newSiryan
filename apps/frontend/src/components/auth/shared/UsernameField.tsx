@@ -31,7 +31,7 @@ export default function UsernameField({ registration, status, error }: UsernameF
         <p
           style={{
             fontSize: 12,
-            color: '#16a34a',
+            color: 'var(--positive)',
             marginTop: 4,
             display: 'flex',
             alignItems: 'center',
@@ -42,7 +42,7 @@ export default function UsernameField({ registration, status, error }: UsernameF
         </p>
       )}
       {status === 'taken' && (
-        <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>
+        <p style={{ fontSize: 12, color: 'var(--critical)', marginTop: 4 }}>
           Username already taken
         </p>
       )}

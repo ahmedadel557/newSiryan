@@ -52,9 +52,9 @@ export function QueueItem({ item, onOpen, onStartVideo }: QueueItemProps) {
         onClick={(e) => { e.stopPropagation(); onOpen(item.patient_id); }}
         className="hidden sm:inline-flex rounded-md px-[14px] h-[36px] btn-ghost text-[12px] py-[4px] items-center gap-1 shrink-0"
       >
-        Open <ArrowRight size={14} />
+        Open <ArrowRight className="rtl:rotate-180" size={14} />
       </button>
-      <ArrowRight size={14} className="sm:hidden shrink-0 text-[var(--fg-3)]" />
+      <ArrowRight size={14} className="rtl:rotate-180 sm:hidden shrink-0 text-[var(--fg-3)]" />
     </div>
   );
 }

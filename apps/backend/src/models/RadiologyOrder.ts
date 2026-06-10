@@ -36,4 +36,8 @@ const RadiologyOrderSchema = new Schema<IRadiologyOrder>({
   completed_at:   { type: Date },
 }, { timestamps: true });
 
+RadiologyOrderSchema.index({ doctor: 1, status: 1 });
+RadiologyOrderSchema.index({ patient: 1, ordered_at: -1 });
+RadiologyOrderSchema.index({ status: 1, ordered_at: -1 });
+
 export default mongoose.model<IRadiologyOrder>('RadiologyOrder', RadiologyOrderSchema);

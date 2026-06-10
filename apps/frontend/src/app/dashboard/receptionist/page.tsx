@@ -131,7 +131,7 @@ export default function ReceptionistDashboardPage() {
             <span className="text-[15px] font-semibold text-[var(--fg-1)]">Today's timeline</span>
           </div>
           <Link href="/dashboard/receptionist/appointments" className="flex items-center gap-1 text-[13px] text-[var(--brand)] hover:underline">
-            View all <ArrowRight size={13} />
+            View all <ArrowRight className="rtl:rotate-180" size={13} />
           </Link>
         </div>
 
@@ -142,7 +142,7 @@ export default function ReceptionistDashboardPage() {
                 <Skeleton height="14px" width="60px" />
                 <Skeleton height="14px" width="140px" />
                 <Skeleton height="14px" width="100px" />
-                <Skeleton height="22px" width="70px" className="rounded-full ml-auto" />
+                <Skeleton height="22px" width="70px" className="rounded-full ms-auto" />
               </div>
             ))}
           </div>
@@ -215,7 +215,7 @@ export default function ReceptionistDashboardPage() {
               )}
             </div>
             <Link href="/dashboard/receptionist/requests" className="flex items-center gap-1 text-[13px] text-[var(--brand)] hover:underline">
-              Manage <ArrowRight size={13} />
+              Manage <ArrowRight className="rtl:rotate-180" size={13} />
             </Link>
           </div>
 
@@ -225,7 +225,7 @@ export default function ReceptionistDashboardPage() {
                 <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[var(--border-1)] last:border-0">
                   <Skeleton height="14px" width="50px" />
                   <Skeleton height="14px" width="160px" />
-                  <Skeleton height="22px" width="70px" className="rounded-full ml-auto" />
+                  <Skeleton height="22px" width="70px" className="rounded-full ms-auto" />
                 </div>
               ))}
             </div>
@@ -246,7 +246,7 @@ export default function ReceptionistDashboardPage() {
                   </div>
                   <Link href="/dashboard/receptionist/requests">
                     <button className="btn btn-ghost text-[12px] px-3 py-1 flex items-center gap-1">
-                      Review <ArrowRight size={11} />
+                      Review <ArrowRight className="rtl:rotate-180" size={11} />
                     </button>
                   </Link>
                 </div>
@@ -257,7 +257,7 @@ export default function ReceptionistDashboardPage() {
       )}
 
       {/* Orders summary */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link href="/dashboard/receptionist/orders" className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] p-5 flex items-center gap-4 hover:bg-[var(--bg-sunken)] transition-colors">
           <div className="h-[44px] w-[44px] rounded-[var(--radius-md)] flex items-center justify-center shrink-0" style={{ background: 'var(--brand-soft-bg)' }}>
             <FlaskConical size={20} strokeWidth={1.75} style={{ color: 'var(--brand)' }} />

@@ -314,6 +314,9 @@ export const cancelAppointment = async (req: AuthRequest, res: Response, next: N
     appointment.cancel_reason = parsed.data.body.cancel_reason || "";
     await appointment.save();
 
+    // Cancelled appointments free the slot — flush the cached availability for that day
+    cache.del(CACHE_KEYS.SLOTS(appointment.doctor.toString(), new Date(appointment.scheduled_at).toISOString().slice(0, 10)));
+
     sendSuccess(res, appointment, "Appointment cancelled");
 
     try {

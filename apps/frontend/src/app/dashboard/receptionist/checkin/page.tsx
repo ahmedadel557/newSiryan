@@ -165,7 +165,7 @@ export default function ReceptionistCheckinPage() {
                       </p>
                     </div>
                     {selectedPatient?.id === p.id && (
-                      <Badge variant="brand" className="ml-auto">
+                      <Badge variant="brand" className="ms-auto">
                         Selected
                       </Badge>
                     )}

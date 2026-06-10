@@ -267,6 +267,7 @@
 - **Fix:** Added a null-safe `refId(ref)` helper, filtered nulls out of the id list passed to `buildProfileMap`, and guarded the name lookups. Orphaned appointments now render with empty patient/doctor names instead of crashing the whole list.
 - **File:** `apps/backend/src/controllers/receptionist/index.ts` (`getAllAppointments`)
 - **Note:** The same `?? ref.toString()` pattern repeats in `confirmAppointment`/`cancelAppointment`/etc. on a single found appointment — lower risk (the acted-on appointment is rarely orphaned) but worth an eventual audit. See [TODO].
+- **Follow-up resolved (2026-06-10, full audit):** `refId()` hoisted to module scope; all 7 remaining unsafe sites converted (`getPatients`, `confirmAppointment` incl. guarded emits/email lookup, `cancelAppointment`, `rescheduleAppointment`, `getRequests`, `getPendingLabOrders`, `getPendingRadiologyOrders`).
 
 ## [BUG-MAIL-AWAIT] Admin approve/create-staff hang ~30–120s on SMTP (await sendEmail)
 - **Status:** resolved (2026-06-03, found during full integration sweep — same class as [BUG-AUTH-1])
@@ -278,20 +279,22 @@
 - **Verify:** `POST /admin/users` with a fresh email now returns **201 in 0s**; staff approval returns immediately.
 
 ## [BUG-RT-NOTIFYROLES] Staff notifications via notifyRoles are DB-only (no real-time socket) — NON-BLOCKING
-- **Status:** open (documented 2026-06-03)
+- **Status:** resolved (2026-06-10, full audit)
+- **Fix:** `notifyRoles` now captures the docs returned by `Notification.insertMany` and emits `emitToUser(doc.user, 'notification:new', doc.toJSON())` for each. Covers all 3 call sites (createPrescription/createLabOrder/createRadiologyOrder) with no call-site changes.
 - **Reproduction:** Doctor creates a prescription / lab order / radiology order. The pharmacist / lab_technician / radiology_technician get the DB notification (visible on next poll or refresh) but **no live socket push** — so it appears only after the `useNotifications` 30s `refetchInterval`, not instantly.
 - **Root Cause:** `notifyRoles()` in `apps/backend/src/controllers/doctor/index.ts` (line ~40) only does `Notification.insertMany` — it never calls `emitToUser`/`emitToRole`. This is the same shape as the resolved [BUG-3] (`notifyReceptionists`), which was extended to emit sockets; `notifyRoles` was not.
 - **Impact:** Non-blocking — notifications still arrive within 30s and on page load. Real-time toast/badge is just delayed for these specific staff events.
 - **Suggested fix:** Extend `notifyRoles` to accept an optional socket payload and loop `emitToUser(u._id, 'notification:new', …)` like `notifyReceptionists` does.
 
 ## [BUG-RT-PRESC-PATIENT] Prescription creation doesn't push patient socket notification — NON-BLOCKING
-- **Status:** open (documented 2026-06-03)
+- **Status:** resolved (2026-06-10, full audit)
+- **Fix:** `createPrescription` now emits `emitToUser(patientId, 'notification:new', patientNotif.toJSON())` after creating the patient notification.
 - **Reproduction:** Doctor creates a prescription. The patient's `Notification` doc is created (`'New prescription'`) but `createPrescription` does **not** `emitToUser(patientId, 'notification:new', …)`. By contrast `createLabOrder`/`createRadiologyOrder` (same file) DO emit `lab:order:created`/`radiology:order:created` to the patient.
 - **Impact:** Non-blocking — patient sees the prescription notification within 30s (TanStack refetch) / on load, just not as a live push.
 - **File:** `apps/backend/src/controllers/doctor/index.ts` (`createPrescription`, ~line 459–475).
 
 ## [BUG-SEC-STAFFREQ] Admin staff-requests response leaks bcrypt password hash — NON-BLOCKING
-- **Status:** open (documented 2026-06-03)
+- **Status:** resolved (verified fixed in source 2026-06-10 — `getStaffRequests` selects `-password -reset_token -reset_token_expires`)
 - **Reproduction:** `GET /api/admin/staff-requests?status=pending` returns each user object **including** the `password` field (bcrypt hash). Pending staff users are returned without a `-password` projection.
 - **Impact:** Non-blocking for functionality but a security hygiene issue — password hashes should never leave the backend. (The `User` model strips `password` in its `toJSON`, but this endpoint appears to return lean/raw docs that bypass that transform.)
 - **File:** `apps/backend/src/controllers/admin/index.ts` (`getStaffRequests`) — add `.select('-password')` (and to the populated profile if needed).
@@ -354,6 +357,33 @@
 - `apps/backend/src/middlewares/redisRateLimiter.ts` — removed console.log; added `createControllerRateLimiter` export
 - `apps/backend/src/routes/auth.routes.ts` — removed `loginRateLimiter` definition + middleware from login route
 - `apps/backend/src/controllers/auth/index.ts` — added `loginRL` + per-attempt logic inside `login`
+
+---
+
+## Full Audit 2026-06-10 — new bugs (all fixed same day; details in .claude/AUDIT_REPORT.md)
+
+### [BUG-NEW-1] Slot caches not invalidated by several availability-changing mutations
+- **Status:** resolved (2026-06-10)
+- **Root Cause:** Same class as [BUG-SLOTS-1] — `slots:{doctorId}:{date}` (5-min TTL, future dates) was only flushed on booking, doctor block/unblock and new-DoctorSchedule writes. Not flushed by: patient/receptionist/admin appointment cancel, receptionist reschedule/create, legacy `overrideDoctorSchedule`/`deleteDoctorScheduleSlot` (BlockedSlot writes), BlockedDate create/delete, and `Profile.shift` edits via `updateUserProfileAdmin`.
+- **Fix:** Added `cache.del`/`cache.delPattern` at all 8 mutation sites (`controllers/{patient,receptionist,admin}/index.ts`, `admin/blockedDates.controller.ts`). Receptionist got a `flushSlotCache()` helper; blockedDates got `invalidateSlotCaches()` (user scope → `slots:{user}:*`, department scope → `slots:*`).
+
+### [BUG-NEW-2] `profile:{userId}` cache stale after admin profile edit / avatar change
+- **Status:** resolved (2026-06-10)
+- **Fix:** `cache.del(CACHE_KEYS.PATIENT_PROFILE(id))` added to `updateUserProfileAdmin` and both avatar controllers (`controllers/upload/index.ts`); shift edits additionally flush schedule + slot caches.
+
+### [BUG-NEW-3] POST /auth/complete-profile 500s on missing username/password
+- **Status:** resolved (2026-06-10)
+- **Root Cause:** Inline route handler (no zod) called `username.trim()` on undefined.
+- **Fix:** Explicit type/presence guard → 400 (`routes/auth.routes.ts`).
+
+### [BUG-NEW-4] UsernameField used undefined `var(--error)` token + hardcoded green
+- **Status:** resolved (2026-06-10)
+- **Fix:** `var(--critical)` / `var(--positive)`. Also added missing `--critical-hover` token referenced by `.btn-danger:hover`.
+
+### [BUG-NEW-5] Dead `rejectPatientOrder` service method would always 422
+- **Status:** resolved (2026-06-10)
+- **Root Cause:** PATCHed `/pharmacy/orders/:id/reject` with no body; backend `rejectOrderSchema` requires `rejection_reason`. Zero call sites (live path is `rejectOrder(id, reason)`).
+- **Fix:** Removed it and its dead twin `approvePatientOrder` from `pharmacy.service.ts`.
 
 ---
 

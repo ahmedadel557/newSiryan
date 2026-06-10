@@ -154,7 +154,7 @@ export default function BillingPage() {
               </div>
               <button
                 onClick={() => setCashModalOpen(false)}
-                className="btn btn-ghost p-[6px] shrink-0 ml-auto"
+                className="btn btn-ghost p-[6px] shrink-0 ms-auto"
               >
                 <X size={16} />
               </button>

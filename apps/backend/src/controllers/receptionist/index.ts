@@ -12,6 +12,8 @@ import Appointment from '../../models/Appointment';
 import LabOrder from '../../models/LabOrder';
 import RadiologyOrder from '../../models/RadiologyOrder';
 import Notification from '../../models/Notification';
+import { cache } from '../../utils/cache';
+import { CACHE_KEYS } from '../../config/cacheTtl';
 
 /* ─── shared helper ─── */
 
@@ -33,6 +35,15 @@ async function buildProfileMap(userIds: string[]): Promise<Map<string, { name: s
 
 function formatDate(d: Date): string {
   return d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// Null-safe ref → id: a populated ref resolves to null when the referenced user was deleted (orphaned doc)
+const refId = (ref: any): string | null => ref?._id?.toString() ?? (ref ? ref.toString() : null);
+
+// A slot opened or filled — flush the cached availability for that doctor + day
+function flushSlotCache(doctorId: string | null, scheduledAt: Date) {
+  if (!doctorId) return;
+  cache.del(CACHE_KEYS.SLOTS(doctorId, new Date(scheduledAt).toISOString().slice(0, 10)));
 }
 
 /* ─── GET /patients ─── */
@@ -81,7 +92,7 @@ export const getPatients = async (req: AuthRequest, res: Response, next: NextFun
     const nextMap = new Map(nextAppts.map((a) => [a._id.toString(), a.next_appointment]));
 
     const items = patients.map((p) => {
-      const uid = (p.user as any)?._id?.toString() ?? p.user.toString();
+      const uid = refId(p.user) ?? '';
       const obj = p.toJSON() as any;
       obj.last_appointment = lastMap.get(uid) ?? null;
       obj.next_appointment = nextMap.get(uid) ?? null;
@@ -135,8 +146,6 @@ export const getAllAppointments = async (req: AuthRequest, res: Response, next: 
       Appointment.countDocuments(query),
     ]);
 
-    // Null-safe: a populated ref resolves to null when the referenced user was deleted (orphaned appointment)
-    const refId = (ref: any): string | null => (ref as any)?._id?.toString() ?? (ref ? ref.toString() : null);
     const patientIds = appointments.map((a) => refId(a.patient)).filter((x): x is string => !!x);
     const doctorIds  = appointments.map((a) => refId(a.doctor)).filter((x): x is string => !!x);
     const profileMap = await buildProfileMap([...patientIds, ...doctorIds]);
@@ -174,8 +183,8 @@ export const confirmAppointment = async (req: AuthRequest, res: Response, next: 
       return sendError(res, `Cannot confirm a ${exists.status} appointment`, 400);
     }
 
-    const patientId = (appointment.patient as any)?._id?.toString() ?? appointment.patient.toString();
-    const doctorId  = (appointment.doctor as any)?._id?.toString()  ?? appointment.doctor.toString();
+    const patientId = refId(appointment.patient) ?? '';
+    const doctorId  = refId(appointment.doctor) ?? '';
     const profileMap = await buildProfileMap([patientId, doctorId]);
     const patientName = profileMap.get(patientId)?.name ?? 'Patient';
     const doctorName  = profileMap.get(doctorId)?.name  ?? 'Doctor';
@@ -199,10 +208,10 @@ export const confirmAppointment = async (req: AuthRequest, res: Response, next: 
         }),
       ]);
 
-      emitToUser(patientId, 'notification:new', patientNotif.toJSON());
-      emitToUser(doctorId, 'notification:new', doctorNotif.toJSON());
+      if (patientId) emitToUser(patientId, 'notification:new', patientNotif.toJSON());
+      if (doctorId) emitToUser(doctorId, 'notification:new', doctorNotif.toJSON());
 
-      const patientUser = await User.findById(patientId).select('email').lean();
+      const patientUser = patientId ? await User.findById(patientId).select('email').lean() : null;
       if (patientUser?.email) {
         const html = `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
@@ -302,8 +311,8 @@ export const cancelAppointment = async (req: AuthRequest, res: Response, next: N
       .populate('doctor', '_id');
     if (!appointment) return sendError(res, 'Appointment not found', 404);
 
-    const patientId = (appointment.patient as any)?._id?.toString() ?? appointment.patient.toString();
-    const doctorId  = (appointment.doctor as any)?._id?.toString()  ?? appointment.doctor.toString();
+    const patientId = refId(appointment.patient) ?? '';
+    const doctorId  = refId(appointment.doctor) ?? '';
     const profileMap = await buildProfileMap([patientId, doctorId]);
     const patientName = profileMap.get(patientId)?.name ?? 'Patient';
     const doctorName  = profileMap.get(doctorId)?.name  ?? 'Doctor';
@@ -334,6 +343,8 @@ export const cancelAppointment = async (req: AuthRequest, res: Response, next: N
       if (cancel_reason) appointment.cancel_reason = cancel_reason;
       appointment.initiated_by = 'receptionist';
       await appointment.save();
+
+      flushSlotCache(doctorId || null, appointment.scheduled_at);
 
       try {
         const notifPromises = [
@@ -392,8 +403,8 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response, nex
       .populate('doctor', '_id');
     if (!appointment) return sendError(res, 'Appointment not found', 404);
 
-    const patientId = (appointment.patient as any)?._id?.toString() ?? appointment.patient.toString();
-    const doctorId  = (appointment.doctor as any)?._id?.toString()  ?? appointment.doctor.toString();
+    const patientId = refId(appointment.patient) ?? '';
+    const doctorId  = refId(appointment.doctor) ?? '';
     const profileMap = await buildProfileMap([patientId, doctorId]);
     const patientName = profileMap.get(patientId)?.name ?? 'Patient';
     const doctorName  = profileMap.get(doctorId)?.name  ?? 'Doctor';
@@ -427,6 +438,7 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response, nex
       sendSuccess(res, appointment, 'Patient rejected reschedule; appointment restored');
     } else {
       // Confirmed or simple reschedule
+      const oldScheduledAt = appointment.scheduled_at;
       if (newScheduledAt) {
         if (newScheduledAt <= new Date()) return sendError(res, 'Scheduled time must be in the future', 400);
         appointment.scheduled_at = newScheduledAt;
@@ -434,6 +446,10 @@ export const rescheduleAppointment = async (req: AuthRequest, res: Response, nex
       appointment.status = 'confirmed';
       appointment.initiated_by = 'receptionist';
       await appointment.save();
+
+      // Old slot freed + new slot taken — flush both days
+      flushSlotCache(doctorId || null, oldScheduledAt);
+      if (newScheduledAt) flushSlotCache(doctorId || null, newScheduledAt);
 
       const newDateStr = formatDate(appointment.scheduled_at);
 
@@ -492,13 +508,13 @@ export const getRequests = async (_req: AuthRequest, res: Response, next: NextFu
       .populate('doctor', '_id username')
       .sort({ updatedAt: -1 });
 
-    const patientIds = appointments.map((a) => (a.patient as any)?._id?.toString() ?? a.patient.toString());
-    const doctorIds  = appointments.map((a) => (a.doctor as any)?._id?.toString()  ?? a.doctor.toString());
+    const patientIds = appointments.map((a) => refId(a.patient)).filter((x): x is string => !!x);
+    const doctorIds  = appointments.map((a) => refId(a.doctor)).filter((x): x is string => !!x);
     const profileMap = await buildProfileMap([...patientIds, ...doctorIds]);
 
     const result = appointments.map((a) => {
-      const pid = (a.patient as any)?._id?.toString() ?? a.patient.toString();
-      const did = (a.doctor as any)?._id?.toString()  ?? a.doctor.toString();
+      const pid = refId(a.patient) ?? '';
+      const did = refId(a.doctor) ?? '';
       return {
         id:               a._id.toString(),
         appointment_id:   a._id.toString(),
@@ -551,6 +567,8 @@ export const createAppointment = async (req: AuthRequest, res: Response, next: N
       reason: reason ?? '',
       status: 'confirmed',
     });
+
+    flushSlotCache(doctor_id, scheduled_at);
 
     sendSuccess(res, appointment, 'Appointment created', 201);
     logAudit({ performedBy: req.user!.id, action: 'create_appointment', resource: 'appointment', resourceId: appointment._id.toString(), req });
@@ -605,14 +623,14 @@ export const getPendingLabOrders = async (_req: AuthRequest, res: Response, next
       .populate('doctor', '_id username')
       .sort({ ordered_at: -1 });
 
-    const patientIds = orders.map((o) => (o.patient as any)?._id?.toString() ?? o.patient.toString());
-    const doctorIds  = orders.map((o) => (o.doctor as any)?._id?.toString()  ?? o.doctor.toString());
+    const patientIds = orders.map((o) => refId(o.patient)).filter((x): x is string => !!x);
+    const doctorIds  = orders.map((o) => refId(o.doctor)).filter((x): x is string => !!x);
     const profileMap = await buildProfileMap([...patientIds, ...doctorIds]);
 
     const result = orders.map((o) => {
       const obj = o.toJSON() as any;
-      const pid = (o.patient as any)?._id?.toString() ?? o.patient.toString();
-      const did = (o.doctor as any)?._id?.toString()  ?? o.doctor.toString();
+      const pid = refId(o.patient) ?? '';
+      const did = refId(o.doctor) ?? '';
       return {
         ...obj,
         patient_name: profileMap.get(pid)?.name ?? (o.patient as any)?.username ?? '',
@@ -635,14 +653,14 @@ export const getPendingRadiologyOrders = async (_req: AuthRequest, res: Response
       .populate('doctor', '_id username')
       .sort({ ordered_at: -1 });
 
-    const patientIds = orders.map((o) => (o.patient as any)?._id?.toString() ?? o.patient.toString());
-    const doctorIds  = orders.map((o) => (o.doctor as any)?._id?.toString()  ?? o.doctor.toString());
+    const patientIds = orders.map((o) => refId(o.patient)).filter((x): x is string => !!x);
+    const doctorIds  = orders.map((o) => refId(o.doctor)).filter((x): x is string => !!x);
     const profileMap = await buildProfileMap([...patientIds, ...doctorIds]);
 
     const result = orders.map((o) => {
       const obj = o.toJSON() as any;
-      const pid = (o.patient as any)?._id?.toString() ?? o.patient.toString();
-      const did = (o.doctor as any)?._id?.toString()  ?? o.doctor.toString();
+      const pid = refId(o.patient) ?? '';
+      const did = refId(o.doctor) ?? '';
       return {
         ...obj,
         patient_name: profileMap.get(pid)?.name ?? (o.patient as any)?.username ?? '',

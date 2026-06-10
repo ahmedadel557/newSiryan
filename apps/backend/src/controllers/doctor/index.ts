@@ -44,7 +44,10 @@ async function getDoctorName(userId: string): Promise<string> {
 async function notifyRoles(roles: string[], type: string, title: string, message: string) {
   const users = await User.find({ role: { $in: roles }, is_active: true }).select('_id');
   if (users.length > 0) {
-    await Notification.insertMany(users.map(u => ({ user: u._id, type, title, message })));
+    const docs = await Notification.insertMany(users.map(u => ({ user: u._id, type, title, message })));
+    for (const doc of docs) {
+      emitToUser(doc.user.toString(), 'notification:new', doc.toJSON());
+    }
   }
 }
 
@@ -555,7 +558,8 @@ export const createPrescription = async (req: AuthRequest, res: Response, next: 
 
     try {
       const drName = await getDoctorName(req.user!.id);
-      await Notification.create({ user: patientId, type: 'prescription', title: 'New prescription', message: `${drName} has written a prescription for you.` });
+      const patientNotif = await Notification.create({ user: patientId, type: 'prescription', title: 'New prescription', message: `${drName} has written a prescription for you.` });
+      emitToUser(patientId, 'notification:new', patientNotif.toJSON());
       await notifyRoles(['pharmacist'], 'prescription', 'New prescription', `${drName} has written a new prescription.`);
     } catch { /* non-fatal */ }
   } catch (err: any) {

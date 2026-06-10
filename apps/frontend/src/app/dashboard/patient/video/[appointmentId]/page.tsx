@@ -72,7 +72,7 @@ export default function PatientVideoCallPage() {
               className="btn btn-ghost inline-flex items-center gap-1 text-[13px]"
               style={{ color: 'var(--fg-on-inverse)' }}
             >
-              <ArrowLeft size={14} /> Back
+              <ArrowLeft className="rtl:rotate-180" size={14} /> Back
             </button>
           </div>
         </div>

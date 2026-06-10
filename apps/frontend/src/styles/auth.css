@@ -168,7 +168,7 @@
 /* Only the direct-child icon (left side, e.g. Lock/Mail) gets absolute positioning */
 .auth-input-wrap > .lucide {
   position: absolute;
-  left: 12px;
+  inset-inline-start: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: 16px;
@@ -177,16 +177,16 @@
   pointer-events: none;
 }
 .auth-input-wrap .input {
-  padding-left: 38px;
+  padding-inline-start: 38px;
 }
 /* When a toggle button is present, make room on the right */
 .auth-input-wrap .input:has(~ button) {
-  padding-right: 38px;
+  padding-inline-end: 38px;
 }
 /* Show/hide password toggle button */
 .auth-input-wrap > button {
   position: absolute;
-  right: 0;
+  inset-inline-end: 0;
   top: 0;
   bottom: 0;
   display: flex;

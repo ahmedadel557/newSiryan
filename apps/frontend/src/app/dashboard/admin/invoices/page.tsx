@@ -361,7 +361,7 @@ export default function AdminInvoicesPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4 px-5 py-4">
                   <Skeleton height="14px" width="140px" className="rounded" />
-                  <Skeleton height="14px" width="90px" className="rounded ml-auto" />
+                  <Skeleton height="14px" width="90px" className="rounded ms-auto" />
                   <Skeleton height="20px" width="60px" className="rounded" />
                 </div>
               ))}

@@ -79,7 +79,7 @@ export default function PharmacistMedicationsPage() {
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[var(--border-1)] last:border-0 animate-pulse">
                 <div className="h-4 bg-[var(--bg-page)] rounded w-40" />
-                <div className="h-4 bg-[var(--bg-page)] rounded w-20 ml-auto" />
+                <div className="h-4 bg-[var(--bg-page)] rounded w-20 ms-auto" />
               </div>
             ))}
           </div>
@@ -88,6 +88,7 @@ export default function PharmacistMedicationsPage() {
             <p className="text-[14px] text-[var(--fg-3)]">No medications found</p>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="tbl w-full">
             <thead>
               <tr>
@@ -162,6 +163,7 @@ export default function PharmacistMedicationsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

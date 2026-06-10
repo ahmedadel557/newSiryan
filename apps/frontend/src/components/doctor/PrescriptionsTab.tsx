@@ -29,6 +29,7 @@ export function PrescriptionsTab({ prescriptions, onNew }: PrescriptionsTabProps
           <EmptyState icon={<Pill />} title="No prescriptions" description="No active prescriptions for this patient." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -57,6 +58,7 @@ export function PrescriptionsTab({ prescriptions, onNew }: PrescriptionsTabProps
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

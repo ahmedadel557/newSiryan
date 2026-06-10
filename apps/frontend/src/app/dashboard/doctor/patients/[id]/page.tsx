@@ -83,7 +83,7 @@ export default function PatientRecordPage() {
         onClick={() => router.push("/dashboard/doctor")}
         className="btn btn-ghost text-[13px] flex items-center gap-1 self-start"
       >
-        <ArrowLeft size={14} /> Patients
+        <ArrowLeft className="rtl:rotate-180" size={14} /> Patients
       </button>
 
       <PatientHeader

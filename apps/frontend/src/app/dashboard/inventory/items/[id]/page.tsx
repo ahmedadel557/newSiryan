@@ -113,7 +113,7 @@ export default function ItemDetailPage() {
     return (
       <div className="flex flex-col gap-4">
         <Link href="/dashboard/inventory/items" className="flex items-center gap-1 text-[13px] text-[var(--fg-3)] hover:text-[var(--fg-1)]">
-          <ArrowLeft size={14} /> Back to Items
+          <ArrowLeft className="rtl:rotate-180" size={14} /> Back to Items
         </Link>
         <p className="text-[14px] text-[var(--fg-3)]">Item not found.</p>
       </div>
@@ -127,7 +127,7 @@ export default function ItemDetailPage() {
   return (
     <div className="flex flex-col gap-5">
       <Link href="/dashboard/inventory/items" className="flex items-center gap-1 text-[13px] text-[var(--fg-3)] hover:text-[var(--fg-1)] w-fit">
-        <ArrowLeft size={14} /> Back to Items
+        <ArrowLeft className="rtl:rotate-180" size={14} /> Back to Items
       </Link>
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -173,6 +173,7 @@ export default function ItemDetailPage() {
           {locations.length === 0 ? (
             <p className="text-[13px] text-[var(--fg-3)] py-4 text-center">No department locations set</p>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -209,6 +210,7 @@ export default function ItemDetailPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
@@ -218,6 +220,7 @@ export default function ItemDetailPage() {
           {prices.length === 0 ? (
             <p className="text-[13px] text-[var(--fg-3)] py-4 text-center">No price data available</p>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
@@ -230,7 +233,7 @@ export default function ItemDetailPage() {
                     <td className={`${tdClass} font-medium text-[var(--fg-1)]`}>
                       {p.supplier?.name ?? '—'}
                       {i === 0 && prices.length > 1 && (
-                        <Badge variant="positive" className="ml-2 text-[10px]">Cheapest</Badge>
+                        <Badge variant="positive" className="ms-2 text-[10px]">Cheapest</Badge>
                       )}
                     </td>
                     <td className={`${tdClass} font-semibold text-[var(--fg-1)]`}>EGP {p.unit_price.toFixed(2)}</td>
@@ -239,6 +242,7 @@ export default function ItemDetailPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

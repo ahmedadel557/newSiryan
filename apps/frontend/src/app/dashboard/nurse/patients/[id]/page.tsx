@@ -244,7 +244,7 @@ export default function NursePatientDetailPage() {
         onClick={() => router.push('/dashboard/nurse/patients')}
         className="inline-flex items-center gap-1 text-[13px] text-[var(--fg-3)] hover:text-[var(--fg-1)] transition-colors w-fit"
       >
-        <ArrowLeft size={14} /> Patients
+        <ArrowLeft className="rtl:rotate-180" size={14} /> Patients
       </button>
 
       {/* Patient header card */}

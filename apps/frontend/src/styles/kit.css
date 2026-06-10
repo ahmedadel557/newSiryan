@@ -58,6 +58,17 @@ button {
   background: var(--brand-press);
   transform: scale(0.98);
 }
+/* Dark mode: --brand (forest-400) is tuned for text-on-dark and only hits ~3.9:1
+   under white button labels — use forest-500/600/700 here to keep AA (≥4.5:1). */
+.dark .btn-primary {
+  background: var(--forest-500);
+}
+.dark .btn-primary:hover {
+  background: var(--forest-600);
+}
+.dark .btn-primary:active {
+  background: var(--forest-700);
+}
 .btn-secondary {
   background: var(--bg-surface);
   color: var(--fg-1);
@@ -253,7 +264,7 @@ textarea.input:focus {
 .auth-input-wrap > .lucide,
 .auth-input-wrap > svg.lucide {
   position: absolute;
-  left: 12px;
+  inset-inline-start: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: 16px;
@@ -262,7 +273,7 @@ textarea.input:focus {
   pointer-events: none;
 }
 .auth-input-wrap .input {
-  padding-left: 38px;
+  padding-inline-start: 38px;
 }
 
 /* ---------- LAYOUT helpers ---------- */
@@ -347,7 +358,7 @@ textarea.input:focus {
   font-size: 13px;
 }
 .tbl th {
-  text-align: left;
+  text-align: start;
   font-weight: 500;
   color: var(--fg-3);
   font-size: 11px;

@@ -112,14 +112,6 @@ export const pharmacyService = {
     return (res.data.data ?? []).map(normalizePatientOrder);
   },
 
-  async approvePatientOrder(id: string): Promise<void> {
-    await apiClient.patch(`/pharmacy/orders/${id}/approve`);
-  },
-
-  async rejectPatientOrder(id: string): Promise<void> {
-    await apiClient.patch(`/pharmacy/orders/${id}/reject`);
-  },
-
   async getOrder(id: string): Promise<PharmacyOrder> {
     const res = await apiClient.get<ApiResponse<PharmacyOrder>>(`/pharmacy/orders/${id}`);
     return normalize<PharmacyOrder>(res.data.data);

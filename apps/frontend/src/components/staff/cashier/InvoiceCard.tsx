@@ -69,7 +69,7 @@ export function InvoiceCard({ invoice, expanded, onToggle, onProcessPayment }: I
         </button>
         <Link
           href={`/dashboard/cashier/invoices/${invoice.id}`}
-          className="btn-ghost text-[13px] flex items-center gap-1 ml-auto"
+          className="btn-ghost text-[13px] flex items-center gap-1 ms-auto"
         >
           Open <ArrowUpRight size={14} />
         </Link>

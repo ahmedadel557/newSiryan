@@ -123,6 +123,7 @@ export function BatchesModal({ data, loading, onClose, onAddBatch }: Props) {
           ) : data.batches.length === 0 ? (
             <p className="text-[13px] text-[var(--fg-3)] text-center py-12">No batches found</p>
           ) : (
+            <div className="overflow-x-auto">
             <table className="tbl w-full">
               <thead>
                 <tr>
@@ -149,6 +150,7 @@ export function BatchesModal({ data, loading, onClose, onAddBatch }: Props) {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 

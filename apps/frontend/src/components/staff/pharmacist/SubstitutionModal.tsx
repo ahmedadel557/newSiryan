@@ -53,7 +53,7 @@ export function SubstitutionModal({ data, onClose, onProceedToReject }: Props) {
             onClick={onProceedToReject}
           >
             Proceed to Reject
-            <ArrowRight size={13} />
+            <ArrowRight className="rtl:rotate-180" size={13} />
           </button>
         </div>
       </div>

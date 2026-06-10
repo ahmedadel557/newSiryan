@@ -1,32 +1,33 @@
-Route-Diff Report — 2026-06-04T09:58:42.445Z
+Route-Diff Report — 2026-06-10T09:12:48.117Z
 ────────────────────────────────────────────────────────────────
-Backend routes:  297
-Frontend calls:  280 parsed, 5 unparseable
+Backend routes:  322
+Frontend calls:  306 parsed, 8 unparseable
 
 ❌  FE CALLS WITH NO MATCHING BACKEND ROUTE — none ✓
 
-⚠️   BACKEND ROUTES NOTHING CALLS  (40)
+⚠️   BACKEND ROUTES NOTHING CALLS  (41)
 ────────────────────────────────────────────────────────────────
+  DELETE  /api/admin/department-schedules/:param/entries/:param  [admin.routes.ts]
+  DELETE  /api/admin/doctor-schedules/:param/entries/:param  [admin.routes.ts]
   DELETE  /api/admin/insurance/:param  [admin.routes.ts]
   DELETE  /api/upload/avatar  [upload.routes.ts]
+  GET     /api/admin/department-schedules  [admin.routes.ts]
   GET     /api/admin/insurance  [admin.routes.ts]
   GET     /api/admin/profile  [admin.routes.ts]
+  GET     /api/admin/staff-schedules/:param  [admin.routes.ts]
   GET     /api/cashier/patients/:param/history  [cashier.routes.ts]
   GET     /api/cashier/profile  [cashier.routes.ts]
   GET     /api/doctor/:param/availability  [doctor.routes.ts]
   GET     /api/doctor/:param/schedule-info  [doctor.routes.ts]
-  GET     /api/doctor/list  [doctor.routes.ts]
   GET     /api/inventory/profile  [inventory.routes.ts]
-  GET     /api/lab/orders  [lab.routes.ts]
   GET     /api/lab/profile  [lab.routes.ts]
   GET     /api/nurse/profile  [nurse.routes.ts]
   GET     /api/patient/notifications  [patient.routes.ts]
   GET     /api/pharmacy/orders/:param/delivery  [pharmacist.routes.ts]
   GET     /api/pharmacy/profile  [pharmacist.routes.ts]
-  GET     /api/radiology/orders  [radiology.routes.ts]
   GET     /api/radiology/profile  [radiology.routes.ts]
   GET     /api/receptionist/profile  [receptionist.routes.ts]
-  GET     /api/settings/pricing  [settings.routes.ts]
+  GET     /api/shifts  [shifts.routes.ts]
   PATCH   /api/patient/notifications/:param/read  [patient.routes.ts]
   PATCH   /api/patient/notifications/read-all  [patient.routes.ts]
   POST    /api/admin/cleanup-profiles  [admin.routes.ts]
@@ -48,13 +49,15 @@ Frontend calls:  280 parsed, 5 unparseable
   PUT     /api/radiology/profile  [radiology.routes.ts]
   PUT     /api/receptionist/profile  [receptionist.routes.ts]
 
-✅  MATCHED  (257)
+✅  MATCHED  (281)
 ────────────────────────────────────────────────────────────────
   DELETE  /api/admin/announcements/:param
   DELETE  /api/admin/appointments/:param
+  DELETE  /api/admin/blocked-dates/:param
   DELETE  /api/admin/departments/:param
   DELETE  /api/admin/doctors/:param/schedule/slot
   DELETE  /api/admin/insurance-companies/:param
+  DELETE  /api/admin/schedule/shifts/:param
   DELETE  /api/admin/settings/pricing/lab/:param
   DELETE  /api/admin/settings/pricing/radiology/:param
   DELETE  /api/admin/shifts/:param
@@ -75,9 +78,13 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/admin/announcements
   GET     /api/admin/appointments
   GET     /api/admin/audit-log
+  GET     /api/admin/blocked-dates
   GET     /api/admin/deletion-requests
+  GET     /api/admin/department-schedules/:param
   GET     /api/admin/departments
   GET     /api/admin/departments/:param/staff
+  GET     /api/admin/doctor-schedules
+  GET     /api/admin/doctor-schedules/:param
   GET     /api/admin/doctors/:param/schedule
   GET     /api/admin/email-templates
   GET     /api/admin/insurance-companies
@@ -87,11 +94,13 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/admin/reports/pharmacy
   GET     /api/admin/reports/ratings
   GET     /api/admin/reports/revenue
+  GET     /api/admin/schedule/shifts
   GET     /api/admin/schedules
   GET     /api/admin/settings/pricing
   GET     /api/admin/shifts
   GET     /api/admin/shifts/today
   GET     /api/admin/staff-requests
+  GET     /api/admin/staff-schedules
   GET     /api/admin/stats
   GET     /api/admin/system/health
   GET     /api/admin/system/logs
@@ -106,8 +115,10 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/cashier/patients/:param/unbilled
   GET     /api/cashier/pending
   GET     /api/cashier/reports/daily
+  GET     /api/departments/by-role
   GET     /api/doctor/:param/ratings
   GET     /api/doctor/emergency-flags
+  GET     /api/doctor/list
   GET     /api/doctor/me/ratings
   GET     /api/doctor/notes/:param
   GET     /api/doctor/patients
@@ -125,6 +136,7 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/doctor/shared-records
   GET     /api/doctor/shared-records/:param
   GET     /api/doctor/video/token/:param
+  GET     /api/insurance-providers
   GET     /api/inventory/analytics/consumption
   GET     /api/inventory/budget
   GET     /api/inventory/budget/history
@@ -148,6 +160,7 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/inventory/supply-requests
   GET     /api/inventory/warehouse
   GET     /api/inventory/waste
+  GET     /api/lab/orders
   GET     /api/lab/orders/:param
   GET     /api/lab/schedule
   GET     /api/notifications
@@ -180,6 +193,7 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/pharmacy/prescriptions/:param
   GET     /api/pharmacy/refill-requests
   GET     /api/pharmacy/reports/daily
+  GET     /api/radiology/orders
   GET     /api/radiology/orders/:param
   GET     /api/radiology/schedule
   GET     /api/receptionist/appointments
@@ -188,8 +202,10 @@ Frontend calls:  280 parsed, 5 unparseable
   GET     /api/receptionist/patients/:param/appointments
   GET     /api/receptionist/radiology-orders
   GET     /api/receptionist/requests
+  GET     /api/schedule/me
   GET     /api/settings
   GET     /api/settings/maintenance
+  GET     /api/settings/pricing
   PATCH   /api/admin/deletion-requests/:param/approve
   PATCH   /api/admin/deletion-requests/:param/reject
   PATCH   /api/admin/insurance-companies/:param
@@ -228,12 +244,15 @@ Frontend calls:  280 parsed, 5 unparseable
   PATCH   /api/receptionist/appointments/:param/confirm
   PATCH   /api/receptionist/appointments/:param/reschedule
   POST    /api/admin/announcements
+  POST    /api/admin/blocked-dates
   POST    /api/admin/departments
   POST    /api/admin/insurance-companies
   POST    /api/admin/invoices
+  POST    /api/admin/schedule/shifts
   POST    /api/admin/settings/pricing/lab
   POST    /api/admin/settings/pricing/radiology
   POST    /api/admin/shifts
+  POST    /api/admin/staff-schedules/department-template
   POST    /api/admin/system/maintenance
   POST    /api/admin/users
   POST    /api/auth/complete-profile
@@ -248,6 +267,7 @@ Frontend calls:  280 parsed, 5 unparseable
   POST    /api/cashier/invoices
   POST    /api/cashier/patients/:param/generate-invoice
   POST    /api/doctor/appointments/:param/cancel-request
+  POST    /api/doctor/appointments/:param/complete
   POST    /api/doctor/appointments/:param/reschedule-request
   POST    /api/doctor/notes
   POST    /api/doctor/patients/:param/diagnosis
@@ -291,10 +311,15 @@ Frontend calls:  280 parsed, 5 unparseable
   POST    /api/receptionist/appointments
   POST    /api/receptionist/checkin/:param
   POST    /api/receptionist/patients
+  PUT     /api/admin/department-schedules/:param
+  PUT     /api/admin/departments/:param
+  PUT     /api/admin/doctor-schedules/:param
   PUT     /api/admin/doctors/:param/schedule
   PUT     /api/admin/email-templates/:param
+  PUT     /api/admin/schedule/shifts/:param
   PUT     /api/admin/settings/pricing
   PUT     /api/admin/shifts/:param
+  PUT     /api/admin/staff-schedules/:param
   PUT     /api/admin/staff/:param/department
   PUT     /api/doctor/notes/:param
   PUT     /api/doctor/profile
@@ -308,10 +333,13 @@ Frontend calls:  280 parsed, 5 unparseable
   PUT     /api/settings/notifications
   PUT     /api/settings/password
 
-⚠️   UNPARSEABLE TEMPLATE LITERALS  (5)
+⚠️   UNPARSEABLE TEMPLATE LITERALS  (8)
 ────────────────────────────────────────────────────────────────
   admin.service.ts: GET `/admin/reports/revenue${qs ? `
   admin.service.ts: GET `/admin/appointments${qs ? `
   admin.service.ts: GET `/admin/schedules${qs ? `
   admin.service.ts: GET `/admin/shifts${qs ? `
+  lab.service.ts: GET `/lab/orders${qs ? `
   nurse.service.ts: GET `/nurse/emergency-flags${status ? `
+  radiology.service.ts: GET `/radiology/orders${qs ? `
+  receptionist.service.ts: GET `/receptionist/patients${qs ? `

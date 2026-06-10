@@ -97,7 +97,7 @@ export default function PersonalInfoStep({
         onClick={onNext}
         className="btn btn-primary btn-lg auth-submit auth-submit-dark"
       >
-        Continue <ArrowRight size={15} strokeWidth={2} />
+        Continue <ArrowRight className="rtl:rotate-180" size={15} strokeWidth={2} />
       </button>
       <AuthDivider />
       <button

@@ -82,7 +82,7 @@
 
   --fg-1: var(--sand-900); /* primary text */
   --fg-2: var(--sand-700); /* secondary text */
-  --fg-3: var(--sand-500); /* tertiary / meta */
+  --fg-3: var(--sand-600); /* tertiary / meta — sand-500 was 3.97:1 on --bg-sunken (below AA) */
   --fg-4: var(--sand-400); /* placeholder, disabled */
   --fg-on-brand: #ffffff;
   --fg-on-inverse: var(--sand-50);
@@ -107,6 +107,7 @@
   --warning: var(--caution); /* alias — kept for callers that reference --warning */
 
   --critical: var(--coral-400);
+  --critical-hover: var(--coral-500);
   --critical-soft-bg: var(--coral-50);
   --critical-soft-fg: var(--coral-500);
 
@@ -237,6 +238,7 @@
   --caution-soft-bg: rgba(193, 133, 26, 0.15);
   --caution-soft-fg: #f1c878;
 
+  --critical-hover: var(--coral-300);
   --critical-soft-bg: rgba(198, 74, 50, 0.15);
   --critical-soft-fg: #efa593;
 

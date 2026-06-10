@@ -75,7 +75,7 @@ export default function MockPaymentPage() {
   return (
     <div className="flex flex-col gap-5 max-w-[640px]">
       <button onClick={() => router.back()} className="btn btn-ghost text-[13px] self-start flex items-center gap-1">
-        <ArrowLeft size={14} /> Back
+        <ArrowLeft className="rtl:rotate-180" size={14} /> Back
       </button>
 
       <div>

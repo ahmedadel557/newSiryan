@@ -46,6 +46,7 @@ export function RadiologyOrdersTable({ orders, isLoading, onUpload, onUpdateStat
             ))}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -68,6 +69,7 @@ export function RadiologyOrdersTable({ orders, isLoading, onUpload, onUpdateStat
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     );

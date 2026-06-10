@@ -19,7 +19,7 @@ export function CtaSection() {
         <p className="cta-sub">Create a free patient account today. No credit card needed.</p>
         <div className="cta-actions">
           <Link href="/auth/register" className="btn btn-lg cta-primary">
-            <ArrowRight size={16} strokeWidth={1.75} /> Get started free
+            <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} /> Get started free
           </Link>
           <Link href="/auth/login" className="btn btn-lg cta-secondary">
             Sign in

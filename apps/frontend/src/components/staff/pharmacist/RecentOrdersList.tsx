@@ -18,7 +18,7 @@ export function RecentOrdersList({ orders, loading }: Props) {
         {[...Array(4)].map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-5 py-3 border-b border-[var(--border-1)] last:border-0 animate-pulse">
             <div className="h-4 bg-[var(--bg-page)] rounded w-32" />
-            <div className="h-4 bg-[var(--bg-page)] rounded w-20 ml-auto" />
+            <div className="h-4 bg-[var(--bg-page)] rounded w-20 ms-auto" />
           </div>
         ))}
       </div>

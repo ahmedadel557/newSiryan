@@ -58,6 +58,7 @@ export function InventoryTable({ items, isLoading, onEdit, onDelete, onTransfer,
             ))}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -80,6 +81,7 @@ export function InventoryTable({ items, isLoading, onEdit, onDelete, onTransfer,
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     );

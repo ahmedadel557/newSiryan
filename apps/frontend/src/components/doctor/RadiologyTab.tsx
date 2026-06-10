@@ -29,6 +29,7 @@ export function RadiologyTab({ imaging, onNew }: RadiologyTabProps) {
           <EmptyState icon={<Scan />} title="No imaging orders" description="No radiology orders placed for this patient." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -61,6 +62,7 @@ export function RadiologyTab({ imaging, onNew }: RadiologyTabProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

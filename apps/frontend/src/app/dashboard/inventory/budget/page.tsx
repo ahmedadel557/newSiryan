@@ -181,6 +181,7 @@ export default function BudgetPage() {
             </div>
 
             <div className="border-t border-[var(--border-1)] pt-3">
+              <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -202,6 +203,7 @@ export default function BudgetPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </>
         )}

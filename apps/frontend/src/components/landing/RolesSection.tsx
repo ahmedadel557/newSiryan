@@ -123,7 +123,7 @@ export function RolesSection() {
               className="btn btn-primary roles-cta"
             >
               {active === 'patient' ? 'Try the patient app' : 'Explore the staff portal'}
-              <ArrowRight size={14} strokeWidth={1.75} />
+              <ArrowRight className="rtl:rotate-180" size={14} strokeWidth={1.75} />
             </Link>
           </div>
 

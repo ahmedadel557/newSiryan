@@ -12,7 +12,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] active:scale-[0.98] active:bg-[var(--brand-press)]',
+  primary:
+    'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] active:scale-[0.98] active:bg-[var(--brand-press)] ' +
+    // dark --brand (forest-400) is ~3.9:1 under white labels — darken for AA
+    'dark:bg-[var(--forest-500)] dark:hover:bg-[var(--forest-600)] dark:active:bg-[var(--forest-700)]',
   secondary: 'border border-[var(--border-2)] bg-transparent text-[var(--fg-1)] hover:bg-[var(--bg-sunken)]',
   ghost: 'bg-transparent text-[var(--fg-1)] hover:bg-[var(--bg-sunken)]',
   danger: 'bg-[var(--critical)] text-white hover:brightness-90',

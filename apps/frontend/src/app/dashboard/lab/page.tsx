@@ -53,7 +53,7 @@ export default function LabDashboardPage() {
             className="btn btn-primary text-[13px] flex items-center gap-1"
             onClick={() => router.push('/dashboard/lab/orders')}
           >
-            All orders <ArrowRight size={14} />
+            All orders <ArrowRight className="rtl:rotate-180" size={14} />
           </button>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function LabDashboardPage() {
             className="text-[13px] text-[var(--brand)] hover:opacity-75 transition-opacity flex items-center gap-1"
             onClick={() => router.push('/dashboard/lab/orders')}
           >
-            View all <ArrowRight size={13} />
+            View all <ArrowRight className="rtl:rotate-180" size={13} />
           </button>
         </div>
 

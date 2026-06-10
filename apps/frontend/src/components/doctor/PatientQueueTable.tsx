@@ -125,7 +125,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
                     <Badge variant="critical"><TriangleAlert size={10} /> Emergency</Badge>
                   )}
                 </div>
-                <ArrowRight size={14} className="shrink-0 text-[var(--fg-3)]" />
+                <ArrowRight size={14} className="rtl:rotate-180 shrink-0 text-[var(--fg-3)]" />
               </button>
             );
           })
@@ -206,7 +206,7 @@ export function PatientQueueTable({ rows, filter, onFilterChange, searchQuery, o
                         }}
                         className="btn btn-ghost text-[12px] py-[4px] inline-flex items-center gap-1"
                       >
-                        Open <ArrowRight size={14} />
+                        Open <ArrowRight className="rtl:rotate-180" size={14} />
                       </button>
                     </td>
                   </tr>

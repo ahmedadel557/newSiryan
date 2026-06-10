@@ -8,7 +8,7 @@ interface BookingProgressProps {
 
 export function BookingProgress({ step }: BookingProgressProps) {
   return (
-    <div className="overflow-x-auto -mr-1 pr-1">
+    <div className="overflow-x-auto -me-1 pe-1">
     <div className="flex gap-1 items-center min-w-max">
       {STEPS.map((label, i) => {
         const num = i + 1;

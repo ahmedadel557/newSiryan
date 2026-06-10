@@ -175,7 +175,7 @@ export default function RoomDetailPage() {
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <Link href="/dashboard/inventory/rooms" className="text-[12px] text-[var(--fg-3)] hover:text-[var(--fg-1)] flex items-center gap-1 mb-2">
-            <ArrowLeft size={12} /> Rooms
+            <ArrowLeft className="rtl:rotate-180" size={12} /> Rooms
           </Link>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">{roomDetail.name}</h1>
@@ -255,7 +255,7 @@ export default function RoomDetailPage() {
                   <td className={`${tdClass} text-right`}>
                     <button
                       onClick={() => setRemoveConfirmItemId(item.id)}
-                      className="btn btn-ghost text-[12px] py-[4px] flex items-center gap-1 ml-auto"
+                      className="btn btn-ghost text-[12px] py-[4px] flex items-center gap-1 ms-auto"
                       style={{ color: 'var(--critical-soft-fg)' }}
                     >
                       <Trash2 size={12} /> Remove

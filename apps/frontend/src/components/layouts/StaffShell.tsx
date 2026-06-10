@@ -171,7 +171,7 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
                     <>
                       <span className={cn('shrink-0', active ? 'text-white' : 'text-[rgba(255,255,255,0.65)]')}>{item.label}</span>
                       {item.href === '/dashboard/admin/staff-requests' && pendingStaffCount > 0 && (
-                        <span className="ml-auto min-w-[18px] h-[18px] rounded-full bg-[var(--critical)] text-white text-[10px] font-bold flex items-center justify-center px-1 shrink-0">
+                        <span className="ms-auto min-w-[18px] h-[18px] rounded-full bg-[var(--critical)] text-white text-[10px] font-bold flex items-center justify-center px-1 shrink-0">
                           {pendingStaffCount}
                         </span>
                       )}
@@ -290,9 +290,9 @@ export function StaffShell({ children, navItems, pageTitle }: StaffShellProps) {
               <Menu size={17} strokeWidth={1.75} />
             </button>
 
-            {pageTitle && <h1 className="ml-4 text-[17px] font-semibold tracking-[-0.01em] text-[var(--fg-1)]">{pageTitle}</h1>}
+            {pageTitle && <h1 className="ms-4 text-[17px] font-semibold tracking-[-0.01em] text-[var(--fg-1)]">{pageTitle}</h1>}
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ms-auto flex items-center gap-3">
               <ThemeToggle />
               <NotificationBell
                 notifications={notifications}

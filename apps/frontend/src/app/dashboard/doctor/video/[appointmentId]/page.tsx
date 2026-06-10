@@ -38,7 +38,7 @@ export default function DoctorVideoCallPage() {
         <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
           <p className="text-[15px] font-semibold" style={{ color: 'var(--fg-on-brand)' }}>{error}</p>
           <button onClick={() => router.push('/dashboard/doctor/queue')} className="btn btn-primary inline-flex items-center gap-1 text-[13px]">
-            <ArrowLeft size={14} /> Back to queue
+            <ArrowLeft className="rtl:rotate-180" size={14} /> Back to queue
           </button>
         </div>
       ) : isConnected && client && call ? (

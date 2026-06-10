@@ -29,7 +29,7 @@ export function InvoiceDetailModal({ invoice, onClose }: InvoiceDetailModalProps
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[13px] text-[var(--fg-3)] hidden sm:inline">{issuedDate}</span>
-              <button onClick={onClose} className="text-[var(--fg-3)] hover:text-[var(--fg-1)] ml-2">
+              <button onClick={onClose} className="text-[var(--fg-3)] hover:text-[var(--fg-1)] ms-2">
                 <X size={18} />
               </button>
             </div>

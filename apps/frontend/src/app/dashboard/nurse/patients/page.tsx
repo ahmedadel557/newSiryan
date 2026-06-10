@@ -128,7 +128,7 @@ export default function NursePatientsPage() {
                   </div>
 
                   {patient.blood_type && (
-                    <div className="ml-auto">
+                    <div className="ms-auto">
                       <Badge variant="neutral">{patient.blood_type}</Badge>
                     </div>
                   )}

@@ -148,7 +148,7 @@ export default function NurseDashboardPage() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <li key={i} className="flex items-center gap-3 px-5 py-3 border-t border-[var(--border-1)]">
                   <div className="h-4 w-28 rounded bg-[var(--sand-100)] animate-pulse" />
-                  <div className="h-4 w-16 rounded bg-[var(--sand-100)] animate-pulse ml-auto" />
+                  <div className="h-4 w-16 rounded bg-[var(--sand-100)] animate-pulse ms-auto" />
                 </li>
               ))}
             </ul>
@@ -190,7 +190,7 @@ export default function NurseDashboardPage() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <li key={i} className="flex items-center gap-3 px-5 py-3 border-t border-[var(--border-1)]">
                   <div className="h-4 w-28 rounded bg-[var(--sand-100)] animate-pulse" />
-                  <div className="h-4 w-16 rounded bg-[var(--sand-100)] animate-pulse ml-auto" />
+                  <div className="h-4 w-16 rounded bg-[var(--sand-100)] animate-pulse ms-auto" />
                 </li>
               ))}
             </ul>

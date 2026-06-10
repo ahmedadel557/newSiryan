@@ -60,7 +60,7 @@ export default function ReceptionistLabPage() {
               <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[var(--border-1)] last:border-0">
                 <Skeleton height="14px" width="120px" />
                 <Skeleton height="14px" width="200px" />
-                <Skeleton height="22px" width="60px" className="rounded-full ml-auto" />
+                <Skeleton height="22px" width="60px" className="rounded-full ms-auto" />
               </div>
             ))}
           </div>

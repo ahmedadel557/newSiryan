@@ -508,7 +508,7 @@ function AddDoctorModal({ cell, dept, assignedIds, onAssign, onClose, saving }: 
         <div className="px-4 pt-3 pb-2">
           <div className="relative">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-4)]" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name…" className="input h-8 pl-8 w-full text-[13px]" autoFocus />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name…" className="input h-8 ps-8 w-full text-[13px]" autoFocus />
           </div>
         </div>
         <div className="overflow-y-auto flex-1 px-3 pb-3">
@@ -740,7 +740,7 @@ function AddStaffModal({ cell, selectedRole, assignedIds, onAssign, onClose, sav
         <div className="px-4 pt-3 pb-2">
           <div className="relative">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-4)]" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name…" className="input h-8 pl-8 w-full text-[13px]" autoFocus />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name…" className="input h-8 ps-8 w-full text-[13px]" autoFocus />
           </div>
         </div>
         <div className="overflow-y-auto flex-1 px-3 pb-3">
@@ -879,7 +879,7 @@ function StaffScheduleTab() {
         {hasSelection && (
           <button
             onClick={() => setApplyDept(selectedDept)}
-            className="btn btn-ghost flex items-center gap-1.5 text-[13px] shrink-0 ml-auto"
+            className="btn btn-ghost flex items-center gap-1.5 text-[13px] shrink-0 ms-auto"
             disabled={applyTemplateMutation.isPending}
           >
             <LayoutTemplate size={14} />

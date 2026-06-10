@@ -33,7 +33,7 @@ export function Input({ label, error, hint, leftIcon, className, id, ...props }:
             'focus:outline-none focus:border-[var(--forest-500)] focus:shadow-[var(--shadow-focus)]',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             error && 'border-[var(--critical)] focus:border-[var(--critical)] focus:shadow-none',
-            leftIcon && 'pl-9',
+            leftIcon && 'ps-9',
             className
           )}
           aria-invalid={error ? true : undefined}

@@ -344,6 +344,7 @@ export default function AdminReportsPage() {
                     <EmptyState icon={null} title="No data" description="No medications dispensed yet." />
                   </div>
                 ) : (
+                  <div className="overflow-x-auto">
                   <table className="w-full text-[13px]">
                     <thead>
                       <tr className="border-b border-[var(--border-1)] text-left text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)]">
@@ -362,6 +363,7 @@ export default function AdminReportsPage() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </>

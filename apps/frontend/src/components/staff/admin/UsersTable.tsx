@@ -122,6 +122,7 @@ export function UsersTable({
             <EmptyState icon={<Users />} title="No users" description="No users match the current filter." />
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -302,6 +303,7 @@ export function UsersTable({
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

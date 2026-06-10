@@ -151,7 +151,7 @@ export default function MedicalInfoStep({
       </div>
       <div className="reg-btn-row">
         <button type="button" className="btn btn-ghost-back" onClick={onBack}>
-          <ArrowLeft size={14} strokeWidth={2} /> Back
+          <ArrowLeft className="rtl:rotate-180" size={14} strokeWidth={2} /> Back
         </button>
         <button
           type="button"
@@ -159,7 +159,7 @@ export default function MedicalInfoStep({
           className="btn btn-primary btn-lg auth-submit auth-submit-dark"
           style={{ flex: 1 }}
         >
-          Continue <ArrowRight size={15} strokeWidth={2} />
+          Continue <ArrowRight className="rtl:rotate-180" size={15} strokeWidth={2} />
         </button>
       </div>
     </div>

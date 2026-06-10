@@ -3,6 +3,11 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   compress: true,
 
+  // Monorepo: point Turbopack at the workspace root so it picks the root lockfile
+  turbopack: {
+    root: '../../',
+  },
+
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

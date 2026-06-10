@@ -4,6 +4,8 @@ import path from 'path';
 import { AuthRequest } from '../../middlewares/auth';
 import Profile from '../../models/Profile';
 import { sendSuccess, sendError } from '../../utils/response';
+import { cache } from '../../utils/cache';
+import { CACHE_KEYS } from '../../config/cacheTtl';
 
 export const uploadAvatarController = async (req: AuthRequest, res: Response) => {
   try {
@@ -24,6 +26,7 @@ export const uploadAvatarController = async (req: AuthRequest, res: Response) =>
       { upsert: true, new: true }
     );
 
+    cache.del(CACHE_KEYS.PATIENT_PROFILE(userId));
     return sendSuccess(res, { avatar_url: avatarUrl }, 'Avatar updated');
   } catch (err: any) {
     return sendError(res, err.message, 500);
@@ -42,6 +45,7 @@ export const deleteAvatarController = async (req: AuthRequest, res: Response) =>
 
     await Profile.findOneAndUpdate({ user: userId }, { avatar_url: '' });
 
+    cache.del(CACHE_KEYS.PATIENT_PROFILE(userId));
     return sendSuccess(res, { avatar_url: '' }, 'Avatar removed');
   } catch (err: any) {
     return sendError(res, err.message, 500);

@@ -336,9 +336,12 @@ export const fulfillSupplyRequest = async (req: AuthRequest, res: Response, next
 
     if (request.requested_items && request.requested_items.length > 0) {
       // Multi-item supply request — stock pre-check then FIFO deduction
+      const invIds = request.requested_items.filter((ri) => ri.item_type === 'inventory').map((ri) => ri.item_id);
+      const invItems = await InventoryItem.find({ _id: { $in: invIds } }).select('name quantity');
+      const invMap = new Map(invItems.map((i) => [i._id.toString(), i]));
       for (const ri of request.requested_items) {
         if (ri.item_type !== 'inventory') continue;
-        const item = await InventoryItem.findById(ri.item_id);
+        const item = invMap.get(ri.item_id.toString());
         if (!item || item.quantity < ri.quantity) {
           return sendError(
             res,
@@ -902,19 +905,19 @@ export const createPurchaseOrder = async (req: AuthRequest, res: Response, next:
     const supplier = await Supplier.findById(supplier_id);
     if (!supplier) return sendError(res, 'Supplier not found', 404);
 
-    const enrichedItems = await Promise.all(
-      items.map(async (i: any) => {
-        const inv = await InventoryItem.findById(i.item_id).select('name unit').lean();
-        if (!inv) throw new Error(`Item not found: ${i.item_id}`);
-        return {
-          item_id: i.item_id,
-          item_name: inv.name,
-          quantity: i.quantity,
-          unit_price: i.unit_price,
-          unit: inv.unit,
-        };
-      })
-    );
+    const invDocs = await InventoryItem.find({ _id: { $in: items.map((i: any) => i.item_id) } }).select('name unit').lean();
+    const invMap = new Map(invDocs.map((d: any) => [d._id.toString(), d]));
+    const enrichedItems = items.map((i: any) => {
+      const inv = invMap.get(String(i.item_id));
+      if (!inv) throw new Error(`Item not found: ${i.item_id}`);
+      return {
+        item_id: i.item_id,
+        item_name: inv.name,
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+        unit: inv.unit,
+      };
+    });
 
     const order = new PurchaseOrder({
       supplier: supplier_id,
@@ -978,12 +981,13 @@ export const receivePurchaseOrder = async (req: AuthRequest, res: Response, next
 
     const now = new Date();
 
+    const expiryDocs = await InventoryItem.find({ _id: { $in: order.items.map((i) => i.item_id) } }).select('expiry_date').lean();
+    const expiryMap = new Map(expiryDocs.map((d: any) => [d._id.toString(), d.expiry_date ?? null]));
     for (const item of order.items) {
       await InventoryItem.findByIdAndUpdate(item.item_id, { $inc: { quantity: item.quantity } });
-      const inv = await InventoryItem.findById(item.item_id).select('expiry_date').lean();
       await ItemBatch.create({
         item: item.item_id,
-        expiry_date: (inv as any)?.expiry_date ?? null,
+        expiry_date: expiryMap.get(String(item.item_id)) ?? null,
         quantity: item.quantity,
         purchase_order: order._id,
       });

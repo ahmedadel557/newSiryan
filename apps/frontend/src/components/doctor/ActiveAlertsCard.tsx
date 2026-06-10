@@ -85,7 +85,7 @@ function AlertRow({
       </div>
 
       {resolving && (
-        <div className="flex items-center gap-2 pl-0">
+        <div className="flex items-center gap-2 ps-0">
           <input
             className="input flex-1"
             placeholder="Resolution notes (optional)…"

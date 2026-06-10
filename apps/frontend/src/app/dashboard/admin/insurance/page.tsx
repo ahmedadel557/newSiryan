@@ -245,7 +245,7 @@ export default function AdminInsurancePage() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4">
                 <Skeleton className="h-4 w-32 rounded" />
-                <Skeleton className="h-4 w-16 rounded ml-auto" />
+                <Skeleton className="h-4 w-16 rounded ms-auto" />
                 <Skeleton className="h-4 w-20 rounded" />
               </div>
             ))}
@@ -259,6 +259,7 @@ export default function AdminInsurancePage() {
             />
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-[var(--border-1)] text-left text-[11px] uppercase tracking-[0.06em] text-[var(--fg-3)]">
@@ -312,6 +313,7 @@ export default function AdminInsurancePage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

@@ -197,7 +197,7 @@ export default function AdminAppointmentsPage() {
               <div key={i} className="flex items-center gap-4 px-4 py-4">
                 <Skeleton height="14px" width="130px" />
                 <Skeleton height="14px" width="100px" />
-                <Skeleton height="14px" width="80px" className="ml-auto" />
+                <Skeleton height="14px" width="80px" className="ms-auto" />
                 <Skeleton height="20px" width="70px" />
               </div>
             ))}

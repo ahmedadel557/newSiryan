@@ -69,7 +69,7 @@ export function HeroSection() {
           <Reveal className="hero-badge" delay={0}>
             <span className="hero-badge-pulse" />
             <span>New · AI-powered medical assistant</span>
-            <ArrowRight size={13} strokeWidth={1.75} />
+            <ArrowRight className="rtl:rotate-180" size={13} strokeWidth={1.75} />
           </Reveal>
 
           <Reveal as="h1" className="hero-title" delay={100}>
@@ -84,7 +84,7 @@ export function HeroSection() {
 
           <Reveal className="hero-actions" delay={300}>
             <Link href="/auth/register" className="btn btn-primary btn-lg hero-cta-primary">
-              Get started free <ArrowRight size={16} strokeWidth={1.75} />
+              Get started free <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} />
             </Link>
             <a href="#how" className="btn-watch">
               <span className="btn-watch-icn"><Play size={14} strokeWidth={1.75} /></span>

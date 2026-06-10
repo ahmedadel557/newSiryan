@@ -122,6 +122,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
             <EmptyState icon={<Pill />} title="No prescriptions" description="No active prescriptions found." />
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -151,6 +152,7 @@ export function OverviewTab({ record, prescriptions, labs, imaging, onNewPrescri
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

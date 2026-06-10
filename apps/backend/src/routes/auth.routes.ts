@@ -91,6 +91,9 @@ router.post('/complete-profile', authenticate, async (req, res, next) => {
     } = req.body;
     const userId = req.user!.id;
 
+    if (typeof username !== 'string' || !username.trim() || typeof password !== 'string' || !password)
+      return sendError(res, 'Username and password are required', 400);
+
     if (password !== confirm_password)
       return sendError(res, 'Passwords do not match', 400);
 

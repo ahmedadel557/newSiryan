@@ -5,6 +5,17 @@ import BlockedDate from '../../models/BlockedDate';
 import { sendSuccess, sendError } from '../../utils/response';
 import { logAudit } from '../../utils/audit';
 import { AuthRequest } from '../../middlewares/auth';
+import { cache } from '../../utils/cache';
+
+// Blocking/unblocking a date changes availability — flush the affected slot caches.
+// User scope targets one doctor; department scope may affect many, so flush all slot keys.
+function invalidateSlotCaches(scope: string, user?: string | null) {
+  if (scope === 'user' && user) {
+    cache.delPattern(`slots:${user}:*`);
+  } else {
+    cache.delPattern('slots:*');
+  }
+}
 
 const createBlockedDateSchema = z.object({
   body: z.object({
@@ -72,6 +83,8 @@ export const createBlockedDate = async (req: AuthRequest, res: Response, next: N
       created_by: req.user!.id,
     });
 
+    invalidateSlotCaches(scope, user);
+
     sendSuccess(res, block, 'Date blocked', 201);
     logAudit({ performedBy: req.user!.id, action: 'create_blocked_date', resource: 'blocked_date', resourceId: (block._id as any).toString(), req });
   } catch (err: any) {
@@ -84,6 +97,8 @@ export const deleteBlockedDate = async (req: AuthRequest, res: Response, next: N
   try {
     const block = await BlockedDate.findByIdAndDelete(req.params.id);
     if (!block) return sendError(res, 'Blocked date not found', 404);
+
+    invalidateSlotCaches(block.scope, block.user ? block.user.toString() : null);
 
     sendSuccess(res, null, 'Block removed');
     logAudit({ performedBy: req.user!.id, action: 'delete_blocked_date', resource: 'blocked_date', resourceId: req.params.id, req });

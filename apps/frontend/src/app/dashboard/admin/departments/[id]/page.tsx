@@ -76,7 +76,7 @@ export default function DepartmentStaffPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/dashboard/admin/departments" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={16} />
+          <ArrowLeft className="rtl:rotate-180" size={16} />
         </Link>
         <div>
           <h1 className="t-h2">{department?.name ?? "Department"}</h1>

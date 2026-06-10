@@ -60,7 +60,7 @@ export function CtaSection() {
         <p className="ln-cta-sub">Create a free patient account today. No credit card needed.</p>
         <div className="ln-cta-actions">
           <Link href="/auth/register" className="btn btn-primary btn-lg" style={{ background: 'var(--bg-surface)', color: 'var(--forest-800)' }}>
-            <ArrowRight size={16} strokeWidth={1.75} />
+            <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} />
             Get started free
           </Link>
           <Link

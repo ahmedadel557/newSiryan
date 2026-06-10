@@ -175,6 +175,7 @@ function MonthlyReport({ data }: { data: any }) {
       {data.top_consumed?.length > 0 && (
         <div className="card flex flex-col gap-2">
           <p className="text-[13px] font-semibold text-[var(--fg-1)]">Top Consumed Items</p>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead><tr><th className="text-[11px] uppercase tracking-wider font-medium text-[var(--fg-3)] text-left py-2 px-3 border-b border-[var(--border-1)]">Item</th><th className="text-[11px] uppercase tracking-wider font-medium text-[var(--fg-3)] text-right py-2 px-3 border-b border-[var(--border-1)]">Consumed</th></tr></thead>
             <tbody>
@@ -186,12 +187,14 @@ function MonthlyReport({ data }: { data: any }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {data.low_stock_summary?.length > 0 && (
         <div className="card flex flex-col gap-2">
           <p className="text-[13px] font-semibold text-[var(--fg-1)]">Low Stock Items</p>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead><tr>
               {['Item', 'Quantity', 'Threshold'].map((h) => <th key={h} className="text-[11px] uppercase tracking-wider font-medium text-[var(--fg-3)] text-left py-2 px-3 border-b border-[var(--border-1)]">{h}</th>)}
@@ -206,6 +209,7 @@ function MonthlyReport({ data }: { data: any }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -265,6 +269,7 @@ function WasteReport({ data }: { data: any }) {
       {data.top_wasted_items?.length > 0 && (
         <div className="card flex flex-col gap-2">
           <p className="text-[13px] font-semibold text-[var(--fg-1)]">Most Wasted Items</p>
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead><tr><th className="text-[11px] uppercase tracking-wider font-medium text-[var(--fg-3)] text-left py-2 px-3 border-b border-[var(--border-1)]">Item</th><th className="text-[11px] uppercase tracking-wider font-medium text-[var(--fg-3)] text-right py-2 px-3 border-b border-[var(--border-1)]">Quantity</th></tr></thead>
             <tbody>
@@ -276,6 +281,7 @@ function WasteReport({ data }: { data: any }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

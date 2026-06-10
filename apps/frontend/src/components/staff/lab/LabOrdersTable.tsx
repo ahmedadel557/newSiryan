@@ -46,6 +46,7 @@ export function LabOrdersTable({ orders, isLoading, onUpload, onUpdateStatus }: 
             ))}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -68,6 +69,7 @@ export function LabOrdersTable({ orders, isLoading, onUpload, onUpdateStatus }: 
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     );

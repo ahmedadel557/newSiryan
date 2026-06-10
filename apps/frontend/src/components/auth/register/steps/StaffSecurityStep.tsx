@@ -80,7 +80,7 @@ export default function StaffSecurityStep({
       )}
       <div className="reg-btn-row">
         <button type="button" className="btn btn-ghost-back" onClick={onBack}>
-          <ArrowLeft size={14} strokeWidth={2} /> Back
+          <ArrowLeft className="rtl:rotate-180" size={14} strokeWidth={2} /> Back
         </button>
         <button
           type="submit"

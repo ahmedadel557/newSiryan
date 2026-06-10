@@ -157,7 +157,7 @@ function BookingModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="field">
               <label className="field-label">Check-in date</label>
               <input
@@ -300,7 +300,7 @@ export default function PatientRoomsPage() {
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-6 w-20 rounded-full ml-auto" />
+                  <Skeleton className="h-6 w-20 rounded-full ms-auto" />
                 </div>
               ))}
             </div>

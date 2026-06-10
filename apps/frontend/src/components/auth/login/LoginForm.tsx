@@ -155,7 +155,7 @@ export default function LoginForm({ onPhoneLogin }: LoginFormProps) {
           className="btn btn-primary btn-lg auth-submit auth-submit-dark"
           disabled={isSubmitting}
         >
-          <ArrowRight size={16} strokeWidth={1.75} />
+          <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} />
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>

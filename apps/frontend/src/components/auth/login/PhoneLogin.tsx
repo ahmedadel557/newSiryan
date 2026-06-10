@@ -90,7 +90,7 @@ export default function PhoneLogin({ onBack }: PhoneLoginProps) {
             onClick={handleSendOtp}
             disabled={busy || !phoneNumber.trim()}
           >
-            <ArrowRight size={16} strokeWidth={1.75} />
+            <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} />
             {busy ? 'Sending…' : 'Send OTP'}
           </button>
         </div>
@@ -140,7 +140,7 @@ export default function PhoneLogin({ onBack }: PhoneLoginProps) {
           onClick={handleVerifyOtp}
           disabled={busy || otp.length < 4}
         >
-          <ArrowRight size={16} strokeWidth={1.75} />
+          <ArrowRight className="rtl:rotate-180" size={16} strokeWidth={1.75} />
           {busy ? 'Verifying…' : 'Verify'}
         </button>
         <button

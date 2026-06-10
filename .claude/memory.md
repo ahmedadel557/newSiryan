@@ -85,11 +85,11 @@ JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Paylo
 ### Cache keys in use (all in CACHE_KEYS):
 - `settings:pricing` (1h) — admin pricing settings; invalidated on any price/lab/radiology CRUD
 - `schedule:doctor:{id}` (15min) — doctor's own schedule; invalidated on block/unblock/admin override
-- `slots:{doctorId}:{date}` (5min) — available appointment slots; invalidated on booking/block/unblock
+- `slots:{doctorId}:{date}` (5min) — available appointment slots; invalidated on booking/block/unblock + (2026-06-10) appointment cancel/reschedule (patient/receptionist/admin), legacy admin schedule override, BlockedDate create/delete, Profile.shift edits
 - `pharmacy:medications` (30min) — medication list; invalidated on order approve + warehouse stock assign
 - `insurance:companies` (1h) — full list for admin; `insurance:companies:active` (1h) — active-only for patient
 - `rooms:availability` (5min) — unfiltered room list; invalidated on create/update/status/delete/booking
-- `profile:{userId}` (10min) — patient profile; invalidated on updateProfile
+- `profile:{userId}` (10min) — patient profile; invalidated on updateProfile + (2026-06-10) admin profile edit, avatar upload/delete
 - `blacklist:{sha256(token)}` (TTL = token remaining expiry) — logout token blacklist
 
 ### Rate limits (Redis-backed, fallback to allow on Redis down):

@@ -147,7 +147,7 @@ export default function DoctorSchedulePage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/dashboard/admin/schedules" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={16} />
+          <ArrowLeft className="rtl:rotate-180" size={16} />
         </Link>
         <div>
           <h1 className="t-h2">{schedule?.doctor_name ?? 'Doctor Schedule'}</h1>
@@ -155,7 +155,7 @@ export default function DoctorSchedulePage() {
             <p className="t-body" style={{ color: 'var(--fg-2)' }}>{schedule.department}</p>
           )}
         </div>
-        <div className="ml-auto">
+        <div className="ms-auto">
           <button className="btn btn-primary btn-sm" onClick={() => setShowBlock(true)}>
             <Plus size={14} /> Block Slot
           </button>

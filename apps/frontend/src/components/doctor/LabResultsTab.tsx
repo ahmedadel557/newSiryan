@@ -29,6 +29,7 @@ export function LabResultsTab({ labs, onNew }: LabResultsTabProps) {
           <EmptyState icon={<TestTube />} title="No lab orders" description="No lab orders placed for this patient." />
         </div>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -63,6 +64,7 @@ export function LabResultsTab({ labs, onNew }: LabResultsTabProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

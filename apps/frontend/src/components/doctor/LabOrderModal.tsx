@@ -75,7 +75,7 @@ export function LabOrderModal({ open, onClose, medicalRecordId, onSubmit }: LabO
                     {tests.map((t) => (
                       <button key={t} type="button" onClick={() => removeTest(t)}>
                         <Badge variant="info">
-                          {t} <X size={11} className="ml-1" />
+                          {t} <X size={11} className="ms-1" />
                         </Badge>
                       </button>
                     ))}

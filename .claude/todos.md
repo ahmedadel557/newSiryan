@@ -12,16 +12,16 @@
 
 ## Technical Debt
 - [x] ~~Set `connectionTimeout`/`socketTimeout` on the nodemailer transport~~ — DONE 2026-06-03 (7000ms connection/greeting/socket timeouts in `mailer.ts`); also made `createStaff` + `approveStaff` `sendEmail` fire-and-forget. ([BUG-MAIL-AWAIT])
-- [ ] Audit remaining `await sendEmail(...)` / `await sendTemplatedEmail(...)` call sites beyond register/createStaff/approveStaff (forgot-password, deletion flows). Mailer timeout now bounds them to ≤7s, but dropping inline `await` is still preferable for non-critical mail.
-- [ ] (sweep) Make `notifyRoles` in `doctor/index.ts` emit sockets like `notifyReceptionists`, so pharmacist/lab/radiology get real-time pushes (not just 30s poll). ([BUG-RT-NOTIFYROLES])
-- [ ] (sweep) Add `emitToUser(patientId, 'notification:new', …)` to `createPrescription` for parity with lab/radiology order creation. ([BUG-RT-PRESC-PATIENT])
-- [ ] (sweep) `getStaffRequests` returns the bcrypt `password` hash — add `.select('-password')`. ([BUG-SEC-STAFFREQ])
-- [ ] (sweep) Audit the repeated `?? ref.toString()` populated-ref pattern in receptionist `confirmAppointment`/`cancelAppointment`/etc. — same null-orphan crash class fixed in `getAllAppointments`. ([BUG-RECEP-APPTS-NULL])
+- [x] ~~Audit remaining `await sendEmail` call sites~~ — DONE 2026-06-10 full audit: only `rejectStaff` still awaited (made fire-and-forget); `forgotPassword` kept synchronous by design.
+- [x] ~~(sweep) `notifyRoles` socket emits~~ — DONE 2026-06-10 ([BUG-RT-NOTIFYROLES] resolved)
+- [x] ~~(sweep) `createPrescription` patient emit~~ — DONE 2026-06-10 ([BUG-RT-PRESC-PATIENT] resolved)
+- [x] ~~(sweep) `getStaffRequests` password leak~~ — verified already fixed in source 2026-06-10 ([BUG-SEC-STAFFREQ] resolved)
+- [x] ~~(sweep) `?? ref.toString()` pattern in receptionist controller~~ — DONE 2026-06-10: module-scope `refId()` + all 7 sites converted ([BUG-RECEP-APPTS-NULL] follow-up resolved)
 - [ ] No test suite exists on either BE or FE — consider adding at minimum integration tests for auth and critical API routes
-- [ ] Backend uses `ts-node` in dev and compiles to `dist/` — confirm `tsconfig.json` is optimized for production build
+- [x] ~~Confirm backend `tsconfig.json` optimized for production~~ — DONE 2026-06-10: added `sourceMap: true`; outDir/rootDir/strict/skipLibCheck verified; build/start scripts correct.
 
 ## Optimizations
-- [ ] Redis caching strategy not fully documented — audit what is and isn't cached
+- [x] ~~Redis caching strategy not fully documented~~ — full key-by-key invalidation table in `.claude/AUDIT_REPORT.md` (2026-06-10); 8 slot-cache + 2 profile-cache invalidation gaps fixed.
 - [x] Socket.io event catalog not documented — now catalogued in `.claude/memory.md`
 
 ## Future Features
@@ -31,13 +31,18 @@
 ---
 
 ## Route-Diff Gaps (from audit:routes 2026-06-02 — most resolved by B1–B8; re-verified live 2026-06-03)
-- [ ] [HIGH] cashier.service.ts calls `GET /cashier/stats/daily` but BE only has `GET /cashier/reports/daily` — either add a lightweight stats endpoint or fix the FE call to use the reports endpoint
+- [x] ~~[HIGH] cashier.service.ts `GET /cashier/stats/daily`~~ — verified 2026-06-10: FE already calls `GET /cashier/reports/daily`; no stale call remains.
 - [x] ~~Nurse vitals GET~~ — `GET /nurse/patients/:id/vitals` (B5) exists; verified 200 in sweep
 - [x] ~~Receptionist create appointment/patient~~ — `POST /receptionist/appointments` (B7) + `/patients` (B8) exist; verified 201 in sweep
 - [x] ~~Patient room booking cancel~~ — `DELETE /patient/rooms/bookings/:id` exists (route present); patient room book verified 201 in sweep
 - [x] ~~Individual lab/radiology order GET~~ — `GET /lab/orders/:id` (B1) + `/radiology/orders/:id` (B2) exist; verified 200 in sweep
 - [x] ~~Pharmacy prescription verify/reject~~ — `POST /pharmacy/prescriptions/:id/verify` (B3) + `/reject` (B4) exist; verified 200 in sweep
 - Note: `npm run audit:routes` on 2026-06-03 → **0 unmatched FE calls**, 249 matched.
+- Note: 2026-06-10 full audit — fixed `MOUNT_MAP` in `scripts/auditRoutes.ts` (4 missing mounts caused 3 false unmatched); rerun → **0 unmatched FE calls**, 281 matched, 322 BE routes.
+
+## Deferred from 2026-06-10 full audit
+- [ ] [LOW] ~50 inline `bg-[var(--brand)]` + white-text spots (non-button accents) sit at ~3.9:1 in dark mode; primary buttons fixed via `.dark .btn-primary` / Button `dark:` variants. Sweep the inline spots if strict AA across all accents is required.
+- [ ] [LOW] RTL: `rtl:rotate-180` added to ArrowLeft/ArrowRight (38 icons); chevrons skipped (mostly vertical/disclosure). Revisit pagination chevrons when an RTL locale ships; `<html dir>` is hardcoded `ltr` until i18n lands.
 
 ## Post-Launch (do after all features complete + stable)
 - [ ] [HIGH] Shared Contract — create `packages/contracts` with zod schemas for all API responses, imported by both backend (validates sendSuccess shape) and frontend (z.infer replaces manual types). Eliminates API contract drift at compile time. Pattern: @asteasolutions/zod-to-openapi or manual zod schemas per endpoint.

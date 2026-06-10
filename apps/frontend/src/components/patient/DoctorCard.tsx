@@ -29,7 +29,7 @@ export function DoctorCard({ doctor, selected, onSelect }: DoctorCardProps) {
         )}
       </div>
       {doctor.next_available && (
-        <div className="hidden sm:block text-right shrink-0 mr-2">
+        <div className="hidden sm:block text-end shrink-0 me-2">
           <p className="text-[11px] text-[var(--fg-3)]">Next available</p>
           <p className="text-[12px] font-medium text-[var(--fg-2)]">{doctor.next_available}</p>
         </div>

@@ -138,7 +138,7 @@ export function ScheduleGrid({
                         {persons.map((p) => (
                           <span
                             key={p.id}
-                            className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[11px] font-medium"
+                            className="inline-flex items-center gap-1 ps-2 pe-1 py-0.5 rounded-full text-[11px] font-medium"
                             style={{
                               background: 'var(--brand-soft)',
                               color: 'var(--fg-1)',

@@ -22,7 +22,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn(geist.variable, geistMono.variable)}>
+    <html lang="en" dir="ltr" suppressHydrationWarning className={cn(geist.variable, geistMono.variable)}>
       <body className={cn(geist.variable, geistMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <QueryProvider>

@@ -36,4 +36,8 @@ const LabOrderSchema = new Schema<ILabOrder>({
   completed_at:   { type: Date },
 }, { timestamps: true });
 
+LabOrderSchema.index({ doctor: 1, status: 1 });
+LabOrderSchema.index({ patient: 1, ordered_at: -1 });
+LabOrderSchema.index({ status: 1, ordered_at: -1 });
+
 export default mongoose.model<ILabOrder>('LabOrder', LabOrderSchema);

@@ -58,7 +58,7 @@ export default function PharmacistHistoryPage() {
               <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[var(--border-1)] last:border-0 animate-pulse">
                 <div className="h-4 bg-[var(--bg-page)] rounded w-32" />
                 <div className="h-4 bg-[var(--bg-page)] rounded w-24" />
-                <div className="h-4 bg-[var(--bg-page)] rounded w-16 ml-auto" />
+                <div className="h-4 bg-[var(--bg-page)] rounded w-16 ms-auto" />
               </div>
             ))}
           </div>
@@ -68,6 +68,7 @@ export default function PharmacistHistoryPage() {
             <p className="text-[13px] text-[var(--fg-3)]">Adjust the filters or date above</p>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="tbl w-full">
             <thead>
               <tr>
@@ -94,6 +95,7 @@ export default function PharmacistHistoryPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
       <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
