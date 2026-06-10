@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import * as Sentry from "@sentry/node";
 import Appointment from "../models/Appointment";
 import Notification from "../models/Notification";
 import User from "../models/User";
@@ -221,13 +220,7 @@ export const startAppointmentReminderJob = () => {
   _started = true;
   const task = cron.schedule(
     "*/5 * * * *",
-    () =>
-      Sentry.withMonitor("appointment-reminder", runAppointmentReminders, {
-        schedule: { type: "crontab", value: "*/5 * * * *" },
-        checkinMargin: 2,
-        maxRuntime: 4,
-        timezone: "Africa/Cairo",
-      }),
+    () => runAppointmentReminders(),
     {
       timezone: "Africa/Cairo",
     },

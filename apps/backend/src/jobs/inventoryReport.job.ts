@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import * as Sentry from "@sentry/node";
 import InventoryReport from "../models/InventoryReport";
 import { generateMonthlyReportData } from "../controllers/inventory";
 
@@ -31,13 +30,7 @@ export const startInventoryReportJob = () => {
   _started = true;
   const task = cron.schedule(
     "0 1 1 * *",
-    () =>
-      Sentry.withMonitor("inventory-report", () => generateInventoryReport(), {
-        schedule: { type: "crontab", value: "0 1 1 * *" },
-        checkinMargin: 10,
-        maxRuntime: 15,
-        timezone: "Africa/Cairo",
-      }),
+    () => generateInventoryReport(),
     { timezone: "Africa/Cairo" }
   );
 

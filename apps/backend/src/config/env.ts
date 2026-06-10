@@ -24,7 +24,6 @@ const envSchema = z.object({
 
   // Optional — features degrade gracefully when absent.
   REDIS_URL: z.string().optional(),
-  SENTRY_DSN: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

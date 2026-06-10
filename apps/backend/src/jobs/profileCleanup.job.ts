@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import * as Sentry from "@sentry/node";
 import mongoose from "mongoose";
 import Profile from "../models/Profile";
 
@@ -40,13 +39,7 @@ export const startProfileCleanupJob = () => {
   _started = true;
   const task = cron.schedule(
     "0 2 * * *",
-    () =>
-      Sentry.withMonitor("profile-cleanup", runProfileCleanup, {
-        schedule: { type: "crontab", value: "0 2 * * *" },
-        checkinMargin: 10,
-        maxRuntime: 15,
-        timezone: "Africa/Cairo",
-      }),
+    () => runProfileCleanup(),
     {
       timezone: "Africa/Cairo",
     },

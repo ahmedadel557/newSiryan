@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import * as Sentry from "@sentry/node";
 import Medication from "../models/Medication";
 import InventoryItem from "../models/InventoryItem";
 import WarehouseEntry from "../models/WarehouseEntry";
@@ -103,13 +102,7 @@ export const startInventoryAlertJob = () => {
   _started = true;
   const task = cron.schedule(
     "0 */6 * * *",
-    () =>
-      Sentry.withMonitor("inventory-alert", runInventoryCheck, {
-        schedule: { type: "crontab", value: "0 */6 * * *" },
-        checkinMargin: 5,
-        maxRuntime: 10,
-        timezone: "Africa/Cairo",
-      }),
+    () => runInventoryCheck(),
     { timezone: "Africa/Cairo" }
   );
 

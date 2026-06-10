@@ -1,5 +1,4 @@
 import cron from 'node-cron';
-import * as Sentry from '@sentry/node';
 import DispensingRecord from '../models/DispensingRecord';
 import PharmacyReport from '../models/PharmacyReport';
 import PharmacyOrder from '../models/PharmacyOrder';
@@ -84,13 +83,7 @@ export const startPharmacyReportJob = () => {
   _started = true;
   const task = cron.schedule(
     '59 23 * * *',
-    () =>
-      Sentry.withMonitor('pharmacy-report', () => generateDailyReport(), {
-        schedule: { type: 'crontab', value: '59 23 * * *' },
-        checkinMargin: 10,
-        maxRuntime: 15,
-        timezone: 'Africa/Cairo',
-      }),
+    () => generateDailyReport(),
     { timezone: 'Africa/Cairo' },
   );
   console.log('Pharmacy daily report job started');

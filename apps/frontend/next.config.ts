@@ -1,7 +1,4 @@
 import type { NextConfig } from 'next';
-import { withSentryConfig } from '@sentry/nextjs';
-
-const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {
   compress: true,
@@ -42,17 +39,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Skip the Sentry webpack plugin in dev — it wraps the entire webpack pipeline
-// (module instrumentation + source-map processing) and adds ~30-40 s to every
-// cold compile. The SDK still initialises in dev via instrumentation*.ts files.
-export default isDev
-  ? nextConfig
-  : withSentryConfig(nextConfig, {
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      widenClientFileUpload: false,
-      tunnelRoute: '/monitoring',
-      silent: !process.env.CI,
-      disableLogger: true,
-    });
+export default nextConfig;
