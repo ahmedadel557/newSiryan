@@ -36,7 +36,45 @@ app.use(helmet());
 const corsOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '')
   .split(',').map((o) => o.trim()).filter(Boolean);
 app.use(cors({ origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins, credentials: true }));
-app.use(morgan("dev"));
+const egyptTime = () =>
+  new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date());
+
+app.use(
+  morgan((tokens, req, res) => {
+    return [
+      egyptTime(),
+      `${tokens.method(req, res)} ${tokens.url(req, res)}`,
+      tokens.status(req, res),
+      `${tokens["response-time"](req, res)}ms`,
+      req.ip,
+    ].join(" | ");
+  }),
+);
+
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+
+    if (duration > 1000) {
+      console.warn(
+        `[SLOW] ${egyptTime()} | ${req.method} ${req.originalUrl} | ${duration}ms`,
+      );
+    }
+  });
+
+  next();
+});
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
@@ -44,7 +82,7 @@ app.use(rateLimiter);
 app.use(maintenanceGuard);
 app.use(
   "/uploads",
-  (req, res, next) => {
+  (_req, res, next) => {
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();
   },
