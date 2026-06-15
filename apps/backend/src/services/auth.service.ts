@@ -21,9 +21,9 @@ const fetchProfile = async (userId: string) => {
 const sign = (payload: object, secret: string, expiresIn: string) =>
   jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 
-const makeTokens = (id: string, role: string, ipc = true, pwc = true, ive = true) => ({
+const makeTokens = (id: string, role: string, ipc = true, pwc = true, ive = true, rememberMe = false) => ({
   accessToken:  sign({ id, role, ipc, pwc, ive }, process.env.JWT_SECRET!,         process.env.JWT_EXPIRES_IN         || '15m'),
-  refreshToken: sign({ id, role },               process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
+  refreshToken: sign({ id, role, rm: rememberMe }, process.env.JWT_REFRESH_SECRET!, process.env.JWT_REFRESH_EXPIRES_IN || '7d'),
 });
 
 export const registerPatient = async (data: {
@@ -150,7 +150,7 @@ export const registerStaff = async (data: {
   return { pending: true, message: 'Registration submitted. Awaiting admin approval.' };
 };
 
-export const login = async (data: { email: string; password: string; force?: boolean }, req?: Request) => {
+export const login = async (data: { email: string; password: string; force?: boolean; remember_me?: boolean }, req?: Request) => {
   const user = await User.findOne({ email: data.email });
   if (!user)           throw new Error('Invalid credentials');
   if (!user.is_active) throw new Error('Account is deactivated');
@@ -185,7 +185,8 @@ export const login = async (data: { email: string; password: string; force?: boo
 
   const pwc = user.password_changed !== false;
   const ive = user.is_email_verified ?? false;
-  const { accessToken, refreshToken } = makeTokens(userId, user.role, true, pwc, ive);
+  const rememberMe = !!data.remember_me;
+  const { accessToken, refreshToken } = makeTokens(userId, user.role, true, pwc, ive, rememberMe);
   const profile = await fetchProfile(userId);
 
   await setActiveSession(userId, clientIp);
@@ -202,9 +203,9 @@ export const login = async (data: { email: string; password: string; force?: boo
 export const refreshAccessToken = async (token: string) => {
   if (await isTokenBlacklisted(token)) throw new Error('Invalid refresh token');
 
-  let decoded: { id: string; role: string };
+  let decoded: { id: string; role: string; rm?: boolean };
   try {
-    decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { id: string; role: string };
+    decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as { id: string; role: string; rm?: boolean };
   } catch {
     throw new Error('Invalid refresh token');
   }
@@ -217,7 +218,7 @@ export const refreshAccessToken = async (token: string) => {
     process.env.JWT_SECRET!,
     process.env.JWT_EXPIRES_IN || '15m'
   );
-  return { accessToken };
+  return { accessToken, rememberMe: decoded.rm ?? false };
 };
 
 export const changePassword = async (userId: string, newPassword: string) => {

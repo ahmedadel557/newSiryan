@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodName, zodEmail } from './validation.constants';
 
 const roleEnum = z.enum([
   'patient',
@@ -36,10 +37,10 @@ export const listUsersSchema = z.object({
 export const createStaffSchema = z.object({
   body: z.object({
     username: z.string().min(3).max(50),
-    email: z.string().email(),
+    email: zodEmail(),
     role: staffRoleEnum,
-    first_name: z.string().min(1),
-    last_name: z.string().min(1),
+    first_name: zodName('First name'),
+    last_name: zodName('Last name'),
     phone: z.string().optional(),
     specialization: z.string().optional(),
     department: z.string().optional(),
@@ -121,8 +122,8 @@ export const cancelAdminAppointmentSchema = z.object({
 
 export const updateUserProfileAdminSchema = z.object({
   body: z.object({
-    first_name:     z.string().min(1).optional(),
-    last_name:      z.string().min(1).optional(),
+    first_name:     zodName('First name').optional(),
+    last_name:      zodName('Last name').optional(),
     phone:          z.string().regex(/^(010|011|012|015)\d{8}$/, 'Must be a valid Egyptian number').optional(),
     department:     z.string().optional(),
     specialization: z.string().optional(),

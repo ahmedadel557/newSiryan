@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { zodName } from './validation.constants';
 
 export const updateProfileSchema = z.object({
   body: z.object({
-    first_name: z.string().min(1).optional(),
-    last_name: z.string().min(1).optional(),
+    first_name: zodName('First name').optional(),
+    last_name: zodName('Last name').optional(),
     date_of_birth: z.coerce.date().optional(),
     gender: z.enum(['male', 'female']).optional(),
     blood_type: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional(),

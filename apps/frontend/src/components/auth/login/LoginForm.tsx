@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import {
   Mail,
@@ -16,8 +16,8 @@ import SocialLogin from '@/components/auth/login/SocialLogin';
 import { useState } from 'react';
 
 const schema = yup.object({
-  emailOrPhone: yup.string().required('Email or phone is required'),
-  password: yup.string().required('Password is required'),
+  emailOrPhone: yup.string().max(254, 'Email must be at most 254 characters').required('Email or phone is required'),
+  password: yup.string().max(128, 'Password must be at most 128 characters').required('Password is required'),
 });
 
 type FormValues = yup.InferType<typeof schema>;

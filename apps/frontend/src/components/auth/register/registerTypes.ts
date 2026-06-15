@@ -1,6 +1,38 @@
 import * as yup from 'yup';
 import { validateEgyptianNationalId, extractDOBFromNationalId } from '@/lib/validateNationalId';
 
+/* ── Shared validation constants (must match backend) ─────── */
+const MAX_NAME_LENGTH = 50;
+const MAX_PASSWORD_LENGTH = 128;
+const MAX_EMAIL_LENGTH = 254;
+
+/**
+ * Name content pattern — must start with a letter.
+ * Allows Latin, accented Latin, Arabic, spaces, hyphens, apostrophes.
+ * Rejects numeric-only, special-char-only, and whitespace-only.
+ */
+const NAME_PATTERN = /^[a-zA-Z\u00C0-\u00FF\u0600-\u06FF][\w\s'\-\u00C0-\u00FF\u0600-\u06FF]*$/;
+const NAME_PATTERN_MSG = 'Must start with a letter and contain only letters, spaces, hyphens, or apostrophes';
+
+/** Stricter email regex requiring a TLD of at least 2 chars. */
+const STRICT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/* ── Reusable Yup builders ────────────────────────────────── */
+const nameField = (label: string) =>
+  yup.string()
+    .trim()
+    .required(`${label} is required`)
+    .max(MAX_NAME_LENGTH, `${label} must be at most ${MAX_NAME_LENGTH} characters`)
+    .matches(NAME_PATTERN, `${label}: ${NAME_PATTERN_MSG}`);
+
+const emailField = () =>
+  yup.string()
+    .trim()
+    .max(MAX_EMAIL_LENGTH, `Email must be at most ${MAX_EMAIL_LENGTH} characters`)
+    .email('Enter a valid email')
+    .matches(STRICT_EMAIL_RE, 'Enter a valid email address (e.g. user@example.com)')
+    .required('Email is required');
+
 /* ── Shared field definitions ──────────────────────────────── */
 const egyptianPhone = yup
   .string()
@@ -15,18 +47,16 @@ const nationalIdField = yup
 const passwordField = yup
   .string()
   .min(8, 'At least 8 characters')
+  .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`)
   .matches(/[A-Z]/, 'Must include an uppercase letter')
   .matches(/[0-9]/, 'Must include a number')
   .required('Password is required');
 
 /* ── Patient schema ────────────────────────────────────────── */
 export const patientSchema = yup.object({
-  first_name: yup.string().required('First name is required'),
-  last_name: yup.string().required('Last name is required'),
-  email: yup
-    .string()
-    .email('Enter a valid email')
-    .required('Email is required'),
+  first_name: nameField('First name'),
+  last_name: nameField('Last name'),
+  email: emailField(),
   phone: egyptianPhone,
   username: yup
     .string()
@@ -78,12 +108,9 @@ export type PatientFields = yup.InferType<typeof patientSchema>;
 
 /* ── Staff schema ──────────────────────────────────────────── */
 export const staffSchema = yup.object({
-  first_name: yup.string().required('First name is required'),
-  last_name: yup.string().required('Last name is required'),
-  email: yup
-    .string()
-    .email('Enter a valid email')
-    .required('Email is required'),
+  first_name: nameField('First name'),
+  last_name: nameField('Last name'),
+  email: emailField(),
   phone: egyptianPhone,
   role: yup
     .string()

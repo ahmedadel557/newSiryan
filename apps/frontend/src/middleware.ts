@@ -55,11 +55,23 @@ export function middleware(req: NextRequest) {
 
   const token = getToken(req);
   if (!token) {
+    // If a refresh token is present the client-side interceptor can still
+    // silently refresh the access token, so let the request through.
+    const hasRefreshToken = !!req.cookies.get('refresh_token')?.value;
+    if (hasRefreshToken) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/auth/login', req.url));
   }
 
   const { role, ipc, pwc } = decodePayload(token);
   if (!role) {
+    // Invalid / malformed access token — but if refresh token exists,
+    // the interceptor can recover.
+    const hasRefreshToken = !!req.cookies.get('refresh_token')?.value;
+    if (hasRefreshToken) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/auth/login', req.url));
   }
 

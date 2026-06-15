@@ -72,7 +72,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const parsed = loginSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
-    const result = await authService.login({ ...parsed.data.body, force: parsed.data.body.force }, req);
+    const result = await authService.login({ ...parsed.data.body, force: parsed.data.body.force, remember_me: parsed.data.body.remember_me }, req);
 
     // Successful login — clear the failed-attempts counter
     loginRL.reset(rlKey).catch(() => {});
@@ -120,8 +120,8 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
   try {
     const token = (req as any).cookies?.refresh_token;
     if (!token) return sendError(res, 'No refresh token', 401);
-    const { accessToken } = await authService.refreshAccessToken(token);
-    setAuthCookies(res, accessToken, token);
+    const { accessToken, rememberMe } = await authService.refreshAccessToken(token);
+    setAuthCookies(res, accessToken, token, rememberMe);
     sendSuccess(res, null, 'Token refreshed');
   } catch (err: any) {
     if (err.message === 'Invalid refresh token') return sendError(res, 'Invalid refresh token', 401);

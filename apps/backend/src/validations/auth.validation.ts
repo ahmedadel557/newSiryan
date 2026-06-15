@@ -1,4 +1,13 @@
 import { z } from 'zod';
+import {
+  zodName,
+  zodEmail,
+  zodLoginPassword,
+  zodStrongPassword,
+  MAX_PASSWORD_LENGTH,
+  MAX_EMAIL_LENGTH,
+  STRICT_EMAIL_RE,
+} from './validation.constants';
 
 function validateEgyptianNationalId(id: string): boolean {
   if (!/^\d{14}$/.test(id)) return false;
@@ -37,11 +46,11 @@ const dateOfBirth = z.string().refine(val => {
 export const registerSchema = z.object({
   body: z.object({
     username: z.string().min(3).max(50),
-    email:    z.string().email(),
-    password: z.string().min(8),
+    email:    zodEmail(),
+    password: zodStrongPassword(),
     profile: z.object({
-      first_name:         z.string().optional(),
-      last_name:          z.string().optional(),
+      first_name:         zodName('First name').optional(),
+      last_name:          zodName('Last name').optional(),
       phone:              egyptianPhone.optional(),
       date_of_birth:      dateOfBirth.optional(),
       gender:             z.enum(['male', 'female']).optional(),
@@ -56,8 +65,8 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({
   body: z.object({
-    email:       z.string().email(),
-    password:    z.string().min(1),
+    email:       z.string().trim().max(MAX_EMAIL_LENGTH, `Email must be at most ${MAX_EMAIL_LENGTH} characters`).email('Enter a valid email address'),
+    password:    zodLoginPassword(),
     remember_me: z.boolean().optional(),
     force:       z.boolean().optional(),
   }),
@@ -65,19 +74,19 @@ export const loginSchema = z.object({
 
 export const forgotPasswordSchema = z.object({
   body: z.object({
-    email: z.string().email(),
+    email: zodEmail(),
   }),
 });
 
 export const registerStaffSchema = z.object({
   body: z.object({
     username:         z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores'),
-    email:            z.string().email(),
-    password:         z.string().min(8, 'At least 8 characters').regex(/[A-Z]/, 'Must contain an uppercase letter').regex(/[0-9]/, 'Must contain a number'),
+    email:            zodEmail(),
+    password:         zodStrongPassword(),
     confirm_password: z.string(),
     role:             z.enum(['doctor', 'nurse', 'receptionist', 'pharmacist', 'lab_technician', 'radiology_technician', 'cashier']),
-    first_name:       z.string().min(1),
-    last_name:        z.string().min(1),
+    first_name:       zodName('First name'),
+    last_name:        zodName('Last name'),
     phone:            egyptianPhone,
     department:       z.string().min(1),
     specialization:   z.string().optional(),
@@ -89,19 +98,17 @@ export const registerStaffSchema = z.object({
 
 export const changePasswordSchema = z.object({
   body: z.object({
-    newPassword: z.string().min(8, 'At least 8 characters'),
+    newPassword: zodStrongPassword('New password'),
   }),
 });
 
 export const completeProfileSchema = z.object({
   body: z.object({
     username:         z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, underscores'),
-    password:         z.string().min(8)
-                      .regex(/[A-Z]/, 'Must contain uppercase')
-                      .regex(/[0-9]/, 'Must contain a number'),
+    password:         zodStrongPassword(),
     confirm_password: z.string(),
-    first_name:       z.string().min(1),
-    last_name:        z.string().min(1),
+    first_name:       zodName('First name'),
+    last_name:        zodName('Last name'),
     date_of_birth:    dateOfBirth,
     gender:           z.enum(['male', 'female']),
     blood_type:       z.string().optional(),
@@ -116,28 +123,28 @@ export const completeProfileSchema = z.object({
 
 export const verifyEmailSchema = z.object({
   body: z.object({
-    email: z.string().email(),
+    email: zodEmail(),
     code:  z.string().length(6),
   }),
 });
 
 export const forgotPasswordOTPSchema = z.object({
   body: z.object({
-    email: z.string().email(),
+    email: zodEmail(),
   }),
 });
 
 export const verifyForgotPasswordOTPSchema = z.object({
   body: z.object({
-    email: z.string().email(),
+    email: zodEmail(),
     code:  z.string().length(6),
   }),
 });
 
 export const resetPasswordSchema = z.object({
   body: z.object({
-    email:        z.string().email(),
+    email:        zodEmail(),
     code:         z.string().length(6),
-    new_password: z.string().min(8).regex(/(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase and number'),
+    new_password: zodStrongPassword('New password'),
   }),
 });
