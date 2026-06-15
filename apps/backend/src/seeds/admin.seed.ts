@@ -24,7 +24,7 @@ export const seedAdmin = async () => {
     await Profile.create({
       user: admin._id,
       first_name: 'System',
-      last_name: 'Admin',
+      last_name: 'Admins',
       department: 'Administration',
     });
 

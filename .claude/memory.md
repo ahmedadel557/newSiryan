@@ -224,7 +224,11 @@ Admin real-time (full catalog):
 - Banner state: `useState<(Payload & { id: string })[]>([])` — prepend on event, filter on dismiss
 - `getSocket()` — singleton socket client, auto-connects with credentials
 
-## No test suites. Run `npm run lint` before commits.
+## Testing
+- Playwright E2E suite (2026-06-10): `apps/frontend/e2e/` — 14 spec files, 139 desktop tests (173 incl. tablet/mobile auth smoke), targets https://www.siryan.xyz. Run from apps/frontend: `npm run test:e2e` (or `test:e2e:ui` / `test:e2e:report`).
+- Test accounts seeded by `apps/backend/src/seeds/seedTestUsers.ts`: `test.{role}@siryan.xyz` / `Test@12345` (all 10 roles, `is_test_account: true`).
+- Suite handles SESSION_CONFLICT ("Sign in anyway") in `loginAs`; only mutates `E2E Test`-prefixed entities; empty-data paths annotate `skipped-step` instead of failing.
+- No unit test suite. Run `npm run lint` before commits.
 
 ## API Contract Health
 - Global Mongoose toJSON transform (_id→id) in server.ts:33 — all res.json() responses use id not _id
