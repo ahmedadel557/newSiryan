@@ -38,7 +38,7 @@ export function SettingsShell({ profileSection, extraTabs = [] }: SettingsShellP
     );
 
   return (
-    <div className="max-w-[960px]">
+    <div>
       <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[var(--fg-1)] mb-6">Settings</h1>
 
       <div className="flex flex-col md:flex-row md:items-start gap-6">

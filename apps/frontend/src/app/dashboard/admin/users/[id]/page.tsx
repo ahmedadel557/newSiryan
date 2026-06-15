@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -217,7 +217,7 @@ export default function AdminUserDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-5 max-w-[800px]">
+      <div className="flex flex-col gap-5">
         <Skeleton height="32px" width="200px" />
         <Skeleton height="96px" />
         {[1, 2, 3].map((i) => (
@@ -230,7 +230,7 @@ export default function AdminUserDetailPage() {
   if (!user) return null;
 
   return (
-    <div className="flex flex-col gap-5 max-w-[800px]">
+    <div className="flex flex-col gap-5">
       {/* Header row */}
       <div className="flex items-start flex-wrap gap-4">
         <div className="flex-1">

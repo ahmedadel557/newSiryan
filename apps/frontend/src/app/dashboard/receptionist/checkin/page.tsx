@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -87,7 +87,7 @@ export default function ReceptionistCheckinPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-[640px]">
+    <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-[var(--fg-1)]">Walk-in check-in</h1>
         <p className="text-[14px] text-[var(--fg-3)] mt-[2px]">Search for a patient and create a walk-in appointment</p>

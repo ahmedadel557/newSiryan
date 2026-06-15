@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { Inbox, Phone, CheckCircle, XCircle, Calendar } from 'lucide-react';
@@ -301,7 +301,7 @@ export default function ReceptionistRequestsPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 max-w-[720px]">
+        <div className="grid grid-cols-1 gap-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-[var(--bg-surface)] border border-[var(--border-1)] rounded-[var(--radius-lg)] p-5 flex flex-col gap-3">
               <Skeleton height="16px" width="100px" />
@@ -318,7 +318,7 @@ export default function ReceptionistRequestsPage() {
           description="All doctor-initiated requests have been handled."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 max-w-[720px]">
+        <div className="grid grid-cols-1 gap-4">
           {displayed.map((req) => (
             <RequestCard
               key={req.id}

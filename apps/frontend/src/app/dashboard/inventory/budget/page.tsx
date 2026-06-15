@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { DollarSign } from 'lucide-react';
@@ -128,7 +128,7 @@ export default function BudgetPage() {
       </div>
 
       {/* Current Month */}
-      <div className="card flex flex-col gap-4 max-w-[520px]">
+      <div className="card flex flex-col gap-4">
         <p className="text-[13px] font-semibold text-[var(--fg-1)]">
           {MONTHS[new Date().getMonth()]} {new Date().getFullYear()} Budget
         </p>

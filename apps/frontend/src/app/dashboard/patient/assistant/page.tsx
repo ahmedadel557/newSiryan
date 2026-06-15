@@ -50,7 +50,7 @@ export default function AssistantPage() {
   }
 
   return (
-    <div className="h-full flex overflow-hidden bg-[var(--bg-sunken)]">
+    <div className="absolute inset-0 flex overflow-hidden bg-[var(--bg-sunken)]">
       {/* ── Left sidebar ── */}
       <ChatSidebar
         conversations={conversations}

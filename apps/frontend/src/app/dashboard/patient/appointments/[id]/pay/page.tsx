@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -73,7 +73,7 @@ export default function MockPaymentPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-[640px]">
+    <div className="flex flex-col gap-5">
       <button onClick={() => router.back()} className="btn btn-ghost text-[13px] self-start flex items-center gap-1">
         <ArrowLeft className="rtl:rotate-180" size={14} /> Back
       </button>

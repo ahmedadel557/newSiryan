@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -290,8 +290,8 @@ export function PatientShell({ children, navItems = patientNav }: PatientShellPr
         {user && user.is_email_verified === false && <EmailVerificationBanner />}
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className={cn('max-w-[1280px]', isMobile ? 'px-4 py-4 pb-[80px]' : 'px-8 py-7')}>{children}</div>
+        <main className="flex-1 overflow-y-auto min-h-0 relative">
+          <div className={cn(isMobile ? 'px-4 py-4 pb-[80px]' : 'px-8 py-7')}>{children}</div>
         </main>
       </div>
 

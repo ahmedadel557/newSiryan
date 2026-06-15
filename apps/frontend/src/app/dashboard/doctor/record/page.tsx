@@ -89,7 +89,7 @@ export default function DoctorRecordSearchPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-[520px]">
+      <div className="relative max-w-xl">
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-3)]"
