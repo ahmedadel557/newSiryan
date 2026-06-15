@@ -1,5 +1,19 @@
 # Changelog
 
+## [2026-06-15] Bugfix — Remove axios from aiModel.service.ts (Docker build failure)
+
+### Problem
+Production Docker build failed with `TS2307: Cannot find module 'axios'` in `apps/backend/src/services/aiModel.service.ts`. The `axios` package was imported but never added to `apps/backend/package.json`, so the cached npm-install Docker layer didn't have it.
+
+### Fix
+Rewrote `aiModel.service.ts` to use Node 20's built-in global `fetch` instead of axios — no new dependency required. 30s timeout via `AbortController`, one retry on network-level errors (AbortError, system errors, ECONNREFUSED, ENOTFOUND), defensive `reply`/`content`/`message` response parsing all preserved.
+
+### Changed files
+- `apps/backend/src/services/aiModel.service.ts` — removed `import axios`; replaced `axios.post()` with `fetch()` + `AbortController`; network-error retry uses `err.name === 'AbortError'` / `err.cause` / `err.code` instead of axios-specific `err.code && !err.response`
+
+---
+
+
 ## [2026-06-15] AI Chatbot Tool Catalog — verification + count correction
 
 Reviewed `docs/ai-chatbot-tools.md` against actual route files. All 29 tools confirmed against real backend routes. Corrected tool count from 18 → 29 in `feature-map.md`. Prior tracking entry had understated the count.

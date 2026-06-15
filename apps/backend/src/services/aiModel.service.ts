@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 // ADAPTER CONTRACT — adjust here if AI team's API differs
 // Request:  POST AI_MODEL_API_URL
 //   headers: Authorization: Bearer <AI_MODEL_API_KEY>
@@ -17,18 +15,32 @@ async function doRequest(
   const key = process.env.AI_MODEL_API_KEY;
   if (!url) throw new Error('AI_MODEL_API_URL is not configured');
 
-  const { data } = await axios.post(
-    url,
-    { messages, session_id: sessionId },
-    {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(key ? { Authorization: `Bearer ${key}` } : {}),
       },
-      timeout: AI_TIMEOUT_MS,
-    },
-  );
+      body: JSON.stringify({ messages, session_id: sessionId }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 
+  if (!res.ok) {
+    throw Object.assign(
+      new Error(`AI model responded with HTTP ${res.status}`),
+      { status: res.status },
+    );
+  }
+
+  const data: any = await res.json();
   const reply = data?.reply ?? data?.content ?? data?.message;
   if (typeof reply !== 'string' || !reply.trim()) {
     throw new Error('AI model returned an unexpected response shape');
@@ -43,8 +55,8 @@ export async function getChatCompletion(
   try {
     return await doRequest(messages, sessionId);
   } catch (err: any) {
-    // Retry once on network-level errors only (no HTTP response received)
-    if (err.code && !err.response) {
+    // Retry once on network-level errors only (fetch failures, aborts — no HTTP response)
+    if (err.name === 'AbortError' || err.cause || err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND' || err.type === 'system') {
       return await doRequest(messages, sessionId);
     }
     throw err;
