@@ -9,7 +9,7 @@ import {
 } from '../controllers/auth';
 import { authenticate } from '../middlewares/auth';
 import { validateRequest } from '../middlewares/validateRequest';
-import { registerSchema, loginSchema, forgotPasswordSchema, verifyEmailSchema, verifyForgotPasswordOTPSchema, resetPasswordSchema } from '../validations/auth.validation';
+import { registerSchema, registerStaffSchema, loginSchema, forgotPasswordSchema, verifyEmailSchema, verifyForgotPasswordOTPSchema, resetPasswordSchema } from '../validations/auth.validation';
 import { setAuthCookies } from '../utils/cookies';
 import { sendSuccess, sendError } from '../utils/response';
 import User from '../models/User';
@@ -28,11 +28,38 @@ const registerRateLimiter = createRedisRateLimiter({
   windowSeconds: 60 * 60, // 1 hour
 });
 
+// 50 attempts per 15 minutes per IP — blocks credential-stuffing across many accounts
+const loginIpRateLimiter = createRedisRateLimiter({
+  keyPrefix: 'auth:login:ip',
+  max: 50,
+  windowSeconds: 15 * 60,
+  // Uses default key (req.ip) — no getKey override needed
+});
+
+// 5 attempts per 15 minutes keyed by IP + email — blocks per-account brute force
+const loginRateLimiter = createRedisRateLimiter({
+  keyPrefix: 'auth:login:route',
+  max: 5,
+  windowSeconds: 15 * 60,
+  getKey: (req) => {
+    const ip = req.ip ?? 'unknown';
+    const email = (typeof req.body?.email === 'string' ? req.body.email : '').toLowerCase().trim();
+    return `${ip}:${email}`;
+  },
+});
+
+// 20 requests per minute per IP for username availability probing
+const checkUsernameRateLimiter = createRedisRateLimiter({
+  keyPrefix: 'auth:check-username',
+  max: 20,
+  windowSeconds: 60,
+});
+
 const router = Router();
 
 router.post('/register', registerRateLimiter, validateRequest(registerSchema), register);
-router.post('/register/staff', registerRateLimiter, registerStaff);
-router.post('/login', validateRequest(loginSchema), login);
+router.post('/register/staff', registerRateLimiter, validateRequest(registerStaffSchema), registerStaff);
+router.post('/login', loginIpRateLimiter, loginRateLimiter, validateRequest(loginSchema), login);
 router.post('/logout', authenticate, logout);
 router.post('/refresh-token', refreshToken);
 router.post('/forgot-password', validateRequest(forgotPasswordSchema), forgotPassword);
@@ -44,7 +71,7 @@ router.post('/verify-email', validateRequest(verifyEmailSchema), verifyEmail);
 router.post('/verify-reset-otp', validateRequest(verifyForgotPasswordOTPSchema), verifyForgotPasswordOTP);
 router.post('/reset-password', validateRequest(resetPasswordSchema), resetPassword);
 
-router.get('/check-username', async (req, res, next) => {
+router.get('/check-username', checkUsernameRateLimiter, async (req, res, next) => {
   try {
     const { username } = req.query as { username?: string };
     if (!username) return sendError(res, 'Username required', 400);

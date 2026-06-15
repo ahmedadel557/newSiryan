@@ -2,6 +2,20 @@ import { Request, Response, NextFunction } from "express";
 import { redisClient } from "../config/redis";
 import { sendError } from "../utils/response";
 
+// IP DETECTION STRATEGY
+// app.ts sets `trust proxy: 1` (single Nginx hop). Express resolves req.ip to the
+// leftmost untrusted IP in X-Forwarded-For — i.e. the real client IP as forwarded
+// by Nginx. Spoofing is not possible because only the rightmost XFF entry (added by
+// Nginx) is trusted; arbitrary client-supplied XFF headers are ignored beyond the
+// trusted proxy count.
+//
+// FAIL-OPEN RATIONALE (Redis unavailable)
+// When Redis is down all rate limiters allow requests through. The trade-off is
+// intentional for a hospital system: a Redis outage during a shift handover must
+// never lock clinical staff out of the system. The global express-rate-limit
+// middleware (rateLimiter.ts, 500 req/15 min) always runs in-process and provides
+// a safety net even without Redis. Review this policy if stricter SLAs are adopted.
+
 const DEV_LOCALHOST = ["127.0.0.1", "::1", "::ffff:127.0.0.1"];
 
 interface RateLimitOptions {

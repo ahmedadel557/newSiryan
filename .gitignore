@@ -30,6 +30,9 @@ next-env.d.ts
 apps/backend/uploads/avatars/*
 !apps/backend/uploads/avatars/.gitkeep
 
+# Seed credentials — generated once for dev seeding, must never be committed
+apps/backend/seed-credentials.txt
+
 # Misc
 .DS_Store
 *.pem
