@@ -94,3 +94,10 @@ export const bookRoomSchema = z.object({
     check_out: z.coerce.date().optional(),
   }),
 });
+
+export const chatbotSendMessageSchema = z.object({
+  body: z.object({
+    text: z.string().min(1, 'Message text is required').max(4000),
+    conversation_id: z.string().optional(),
+  }),
+});

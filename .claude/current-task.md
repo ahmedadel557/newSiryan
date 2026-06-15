@@ -1,6 +1,55 @@
 # Current Task
 
 ## Task
+AI Chatbot Tool Catalog review + count correction (2026-06-15). COMPLETE.
+
+## Status
+COMPLETE. Verified all 29 endpoints in `docs/ai-chatbot-tools.md` against real route files. Corrected tool count from 18 → 29 in feature-map.md. No code modified.
+
+---
+
+## Previous Task
+Voice Input for Chatbot (2026-06-15). COMPLETE.
+
+## Status
+COMPLETE. `npx tsc --noEmit` → 0 errors.
+
+## What was done
+- `useVoiceInput.ts` — new hook; MediaRecorder (audio/webm) + Web Speech API (ar-EG, continuous, interimResults); `stopRecording()` awaits both APIs then returns `{ transcript, audioBlob }`; permission-denied → toast; no-speech → silent; unmount cleanup
+- `ChatInput.tsx` — file picker replaced with mic button (`Mic`/`MicOff`); pulsing error-soft-bg while recording; textarea shows live interimTranscript (readOnly) with `dir` tracking; final transcript populates editable textarea; blob → File on send; hidden on `!isSupported`
+- `hooks/shared/index.ts` — added `useVoiceInput` export
+
+## Known limitation
+Requires Chromium browser. `isSupported=false` on Firefox/Safari → mic button hidden, text input unaffected.
+
+---
+
+## Previous Task
+AI Chatbot Backend Implementation (2026-06-15). COMPLETE.
+
+## Status
+COMPLETE. `npx tsc --noEmit` → 0 errors.
+
+## What was done
+- **Models**: ChatbotConversation, ChatbotMessage (both registered in models/index.ts)
+- **AI adapter**: `services/aiModel.service.ts` — getChatCompletion; parses reply/content/message; 30s timeout + network-error retry
+- **Audio upload**: `uploadChatbotAudio` added to config/upload.ts (webm/ogg/mp3/wav, 10MB, stored in uploads/chatbot-audio/)
+- **Controller**: `controllers/patient/chatbot.ts` — sendMessage, getHistory, listConversations
+- **Validation**: chatbotSendMessageSchema added to patient.validation.ts
+- **Routes**: POST /chatbot → sendMessage (+ Multer + validation, email-verify + rate-limit preserved); GET /chatbot/history; GET /chatbot/conversations
+- **Env**: AI_MODEL_API_URL, AI_MODEL_API_KEY added to .env.example
+
+---
+
+## Previous Task
+AI Chatbot Tool Catalog — handoff document for external team (2026-06-15). COMPLETE.
+
+## Status
+COMPLETE. Generated `docs/ai-chatbot-tools.md` — 18 documented tools across 9 feature areas, plus a Gaps section listing 7 missing endpoints. No code was modified.
+
+---
+
+## Previous Task
 EC2 #2 Frontend Server Setup — siryan.xyz (2026-06-06). Part 1 DONE (assets created).
 
 ## Status

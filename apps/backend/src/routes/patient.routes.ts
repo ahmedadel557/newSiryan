@@ -4,7 +4,7 @@ import { requireCompleteProfile } from '../middlewares/requireCompleteProfile';
 import { requireEmailVerified } from '../middlewares/requireEmailVerified';
 import { createRedisRateLimiter } from '../middlewares/redisRateLimiter';
 import { validateRequest } from '../middlewares/validateRequest';
-import { updateProfileSchema, bookAppointmentSchema, createPharmacyOrderSchema, bookRoomSchema } from '../validations/patient.validation';
+import { updateProfileSchema, bookAppointmentSchema, createPharmacyOrderSchema, bookRoomSchema, chatbotSendMessageSchema } from '../validations/patient.validation';
 import {
   getProfile,
   updateProfile,
@@ -32,9 +32,10 @@ import {
   shareMedicalRecord,
   listMyShares,
   revokeShare,
-  chatbot,
   getInsuranceCompanies,
 } from '../controllers/patient';
+import { sendMessage, getHistory, listConversations } from '../controllers/patient/chatbot';
+import { uploadChatbotAudio } from '../config/upload';
 import { getNotifications, markOneRead, markAllRead } from '../controllers/notification';
 import { getDepartments } from '../controllers/admin';
 
@@ -80,6 +81,8 @@ router.get('/departments', getDepartments);
 router.get('/notifications', getNotifications);
 router.patch('/notifications/read-all', markAllRead);
 router.patch('/notifications/:id/read', markOneRead);
-router.post('/chatbot', requireEmailVerified, chatbotRateLimiter, chatbot);
+router.post('/chatbot', requireEmailVerified, chatbotRateLimiter, uploadChatbotAudio.single('audio'), validateRequest(chatbotSendMessageSchema), sendMessage);
+router.get('/chatbot/history', getHistory);
+router.get('/chatbot/conversations', listConversations);
 
 export default router;

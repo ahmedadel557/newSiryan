@@ -962,10 +962,3 @@ export const getAppointment = async (req: AuthRequest, res: Response, next: Next
   }
 };
 
-export const chatbot = async (_req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    sendSuccess(res, { message: "Siryan Assistant coming soon", is_placeholder: true });
-  } catch (err) {
-    next(err);
-  }
-};

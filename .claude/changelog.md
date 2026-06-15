@@ -1,5 +1,73 @@
 # Changelog
 
+## [2026-06-15] AI Chatbot Tool Catalog — verification + count correction
+
+Reviewed `docs/ai-chatbot-tools.md` against actual route files. All 29 tools confirmed against real backend routes. Corrected tool count from 18 → 29 in `feature-map.md`. Prior tracking entry had understated the count.
+
+---
+
+## [2026-06-15] Voice Input — ChatInput mic recording flow
+
+### New files
+- `apps/frontend/src/hooks/shared/useVoiceInput.ts` — `useVoiceInput()` hook; wraps MediaRecorder (audio/webm) + Web Speech API (lang=ar-EG, continuous, interimResults); exposes `isRecording`, `isSupported`, `interimTranscript`, `startRecording()`, `stopRecording()` → `Promise<{ transcript, audioBlob }>` ; handles permission-denied (toast) and no-speech (silent); cleanup on unmount; local SpeechRec interface declarations (not in this TypeScript DOM version)
+
+### Modified files
+- `apps/frontend/src/components/patient/chatbot/ChatInput.tsx` — replaced file-picker (Paperclip + hidden input) with mic recording; mic button shows Mic/MicOff icon; pulsing `var(--error-soft-bg)` active state while recording; textarea shows live `interimTranscript` (readOnly) with `dir` from `detectTextDirection`; on stop → value set to transcript, blob held as state; on send → converts blob to `File` with correct mime/ext; `isSupported` guard hides button on non-Chromium browsers
+- `apps/frontend/src/hooks/shared/index.ts` — exports `useVoiceInput` + `VoiceInputResult`
+
+### Known limitation
+Voice input (`useVoiceInput`) requires a Chromium-based browser (Chrome, Edge) because `SpeechRecognition` is only reliably available there. On Firefox/Safari the hook sets `isSupported=false` and the mic button is hidden; text input continues to work normally.
+
+---
+
+## [2026-06-15] AI Chatbot Frontend — Full Implementation
+
+### New files
+- `apps/frontend/src/services/chatbot.service.ts` — sendMessage (multipart), getHistory, listConversations; normalizes `_id→id` for lean() responses
+- `apps/frontend/src/lib/textDirection.ts` — `detectTextDirection(text)` — Arabic Unicode range test, defaults 'ltr'
+- `apps/frontend/src/components/patient/chatbot/ChatMessageBubble.tsx` — per-message `dir` from detectTextDirection; user/assistant styling via design tokens
+- `apps/frontend/src/components/patient/chatbot/ChatMessageList.tsx` — maps history to bubbles; auto-scrolls on new message; skeleton + empty states
+- `apps/frontend/src/components/patient/chatbot/ChatInput.tsx` — per-keystroke `dir` detection on textarea; audio attach; send disabled while pending
+
+### Modified files
+- `apps/frontend/src/hooks/shared/useChatbot.ts` — rewritten with 3 TanStack Query hooks: `useChatbotHistory`, `useSendChatbotMessage` (optimistic user msg + loading placeholder), `useChatbotConversations`
+- `apps/frontend/src/hooks/shared/index.ts` — re-exported the 3 new hook names (replaced old `useChatbot`)
+- `apps/frontend/src/lib/queryKeys.ts` — renamed `chatbotHistory` param `conversationId`; added `chatbotConversations()`
+- `apps/frontend/src/types/index.ts` — added `ChatbotMessage`, `ChatbotConversation` interfaces
+- `apps/frontend/src/app/dashboard/patient/assistant/page.tsx` — full chat UI; conversations list (no active conv); medical disclaimer; wires all 3 hooks
+
+---
+
+## [2026-06-15] AI Chatbot Backend — Full Implementation
+
+### New files
+- `apps/backend/src/models/ChatbotConversation.ts` — patient_id, started_at, last_message_at, status
+- `apps/backend/src/models/ChatbotMessage.ts` — conversation_id, role, content_text, audio_url, language, created_at; compound index on (conversation_id, created_at)
+- `apps/backend/src/services/aiModel.service.ts` — `getChatCompletion()` adapter; parses reply/content/message; 30s timeout + one network-error retry
+- `apps/backend/src/controllers/patient/chatbot.ts` — sendMessage, getHistory, listConversations
+
+### Modified files
+- `apps/backend/.env.example` — added AI_MODEL_API_URL, AI_MODEL_API_KEY
+- `apps/backend/src/models/index.ts` — registered ChatbotConversation + ChatbotMessage
+- `apps/backend/src/config/upload.ts` — added uploadChatbotAudio (audio/webm|ogg|mpeg|wav, 10MB)
+- `apps/backend/src/validations/patient.validation.ts` — added chatbotSendMessageSchema
+- `apps/backend/src/controllers/patient/index.ts` — removed placeholder chatbot stub
+- `apps/backend/src/routes/patient.routes.ts` — POST /chatbot now wired to sendMessage + Multer + validation; GET /chatbot/history, GET /chatbot/conversations added
+
+---
+
+## [2026-06-15] AI Chatbot Tool Catalog
+
+Created `docs/ai-chatbot-tools.md` — handoff document for the external team building the AI model's tool-calling layer.
+
+- 18 tools documented across 9 feature areas: Appointments, Medical Records, Billing, Pharmacy, Rooms, Lab/Radiology, Notifications, Profile, Supplementary Lookup
+- All tools verified against real route + controller files (no endpoints invented)
+- Execution classes assigned: `direct_with_confirmation` (7), `read_only` (10), `request_from_doctor` (1)
+- Gaps section documents 7 missing endpoints including `create_assistance_request`, new lab/radiology order requests, and real payment gateway
+- No code modified; pure documentation
+
+---
+
 ## [2026-06-08] Mobile-First Responsive Fix — Phase 2 (Full Sweep)
 
 ### What changed (CSS/layout only — no data logic or hooks touched)

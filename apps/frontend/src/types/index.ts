@@ -758,6 +758,26 @@ export interface ChatMessage {
   isLoading?: boolean;
 }
 
+export interface ChatbotMessage {
+  id: string;
+  _id?: string;
+  conversation_id: string;
+  role: 'user' | 'assistant';
+  content_text: string;
+  audio_url?: string;
+  language?: 'ar' | 'en';
+  created_at: string;
+  isLoading?: boolean;
+}
+
+export interface ChatbotConversation {
+  id: string;
+  started_at: string;
+  last_message_at: string;
+  status: 'active' | 'closed';
+  preview: string;
+}
+
 export interface CartItem {
   medicationId: string;
   name: string;

@@ -1,5 +1,16 @@
 # File Index
 
+## Frontend — AI Chatbot (2026-06-15)
+apps/frontend/src/services/chatbot.service.ts                    — sendMessage/getHistory/listConversations; _id→id normalization
+apps/frontend/src/lib/textDirection.ts                           — detectTextDirection(text): 'rtl'|'ltr' via Arabic Unicode ranges
+apps/frontend/src/hooks/shared/useChatbot.ts                     — useChatbotHistory / useSendChatbotMessage / useChatbotConversations (TanStack Query)
+apps/frontend/src/components/patient/chatbot/ChatMessageBubble.tsx — per-message dir; user (brand) vs assistant (sunken) styling
+apps/frontend/src/components/patient/chatbot/ChatMessageList.tsx   — auto-scroll, skeleton, empty state
+apps/frontend/src/components/patient/chatbot/ChatInput.tsx         — per-keystroke dir on textarea; audio attach; send guard
+apps/frontend/src/app/dashboard/patient/assistant/page.tsx         — full chat page with conversation list, disclaimer, all 3 hooks wired
+apps/frontend/src/types/index.ts                                   — ChatbotMessage + ChatbotConversation added (ChatMessage kept for legacy)
+apps/frontend/src/lib/queryKeys.ts                                 — chatbotHistory(conversationId) + chatbotConversations()
+
 ## Frontend — System Health Page (2026-06-06)
 apps/frontend/src/app/dashboard/admin/system/health/page.tsx  — 4-row health dashboard: Core Services, System Resources (CPU/Memory/Heap), Application (Uptime/DB Connections/Last Deploy), Background Jobs grid
 apps/frontend/src/types/index.ts                              — SystemHealth interface expanded; CronJobStatus type added

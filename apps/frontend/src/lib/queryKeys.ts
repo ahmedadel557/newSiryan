@@ -148,9 +148,10 @@ export const queryKeys = {
   // Notifications
   notifications: () => ['notifications'] as const,
 
-  // Chatbot (placeholder — session history future use)
-  chatbotHistory: (sessionId?: string) =>
-    (sessionId ? ['chatbot', 'history', sessionId] : ['chatbot', 'history']) as readonly unknown[],
+  // Chatbot
+  chatbotHistory: (conversationId?: string) =>
+    (conversationId ? ['chatbot', 'history', conversationId] : ['chatbot', 'history']) as readonly unknown[],
+  chatbotConversations: () => ['chatbot', 'conversations'] as const,
 
   // Schedule — staff self-view
   scheduleMe: () => ['schedule', 'me'] as const,

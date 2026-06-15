@@ -8,7 +8,7 @@
  ├── rooms (book, view)
  ├── lab results (view)
  ├── requests (staff assistance requests)
- ├── AI assistant (chatbot)
+ ├── AI assistant (chatbot)  [tool catalog at docs/ai-chatbot-tools.md — 29 tools documented 2026-06-15]
  └── settings (profile, notifications)
 
 ## Doctor

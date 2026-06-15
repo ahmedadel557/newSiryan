@@ -57,9 +57,22 @@ JWT stored as HttpOnly cookies (`access_token` 15min, `refresh_token` 7d). Paylo
 - IMPORTANT: project icons are **lucide-react** (not react-icons); data fields are snake_case.
 - E2E needs real Stream creds; in-call chat needs the Chat product enabled on the Stream app.
 
+## AI Chatbot (2026-06-15) — Backend COMPLETE
+- `models/ChatbotConversation.ts` — patient_id (ref User), started_at, last_message_at, status ('active'|'closed')
+- `models/ChatbotMessage.ts` — conversation_id, role ('user'|'assistant'), content_text, audio_url?, language?, created_at; index on (conversation_id, created_at)
+- `services/aiModel.service.ts` — `getChatCompletion(messages, sessionId?)` — POSTs to AI_MODEL_API_URL, parses reply/content/message, 30s timeout + 1 network-error retry
+- `config/upload.ts` — `uploadChatbotAudio` Multer config (audio/webm|ogg|mpeg|wav, 10MB) → uploads/chatbot-audio/
+- `controllers/patient/chatbot.ts` — sendMessage, getHistory, listConversations
+- Env vars: AI_MODEL_API_URL, AI_MODEL_API_KEY
+- Routes (all under /api/patient, authenticate + authorize('patient') applied):
+  - `POST /chatbot` — requireEmailVerified + 20/1h rate-limit + Multer audio + validateRequest(chatbotSendMessageSchema) → sendMessage
+  - `GET /chatbot/history?conversation_id=` → getHistory (403 if not owner)
+  - `GET /chatbot/conversations` → listConversations (sorted by last_message_at desc, with 120-char preview)
+- Frontend not yet built
+
 ## Backend State
 - Entry: `src/server.ts` → Mongo → seed → Redis → cron → initSocket → attachRedisAdapter → listen
-- 14 route files, 14 controller folders, 8 service files, 26 Mongoose models
+- 14 route files, 14 controller folders, 9 service files, 28 Mongoose models
 - Validation: Zod. Response helpers: `sendSuccess` / `sendError`
 - 3 cron jobs: inventoryAlert, appointmentReminder, profileCleanup
 - Audit logging is fire-and-forget (never blocks)
