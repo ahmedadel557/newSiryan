@@ -1,4 +1,4 @@
-Route-Diff Report — 2026-06-15T13:28:49.890Z
+Route-Diff Report — 2026-06-15T14:57:55.233Z
 ────────────────────────────────────────────────────────────────
 Backend routes:  324
 Frontend calls:  306 parsed, 8 unparseable

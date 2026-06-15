@@ -30,6 +30,48 @@ import { seedShiftDefinitions } from "./seeds/shiftDefinitions.seed";
 
 const PORT = process.env.PORT || 5000;
 
+// ─── JWT Secret Audit ────────────────────────────────────────────────────────
+const JWT_MIN_LENGTH = 32;
+
+if (process.env.JWT_SECRET && process.env.JWT_SECRET === process.env.JWT_REFRESH_SECRET) {
+  console.warn(
+    '\n⚠️  [SECURITY WARNING]\n' +
+    '   JWT_SECRET and JWT_REFRESH_SECRET are identical.\n' +
+    '   Access tokens and refresh tokens must use different secrets.\n' +
+    '   Update JWT_REFRESH_SECRET in your .env file before going to production.\n',
+  );
+}
+
+if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < JWT_MIN_LENGTH) {
+  console.warn(
+    `\n⚠️  [SECURITY WARNING]\n` +
+    `   JWT_SECRET is too short (${process.env.JWT_SECRET.length} chars, minimum ${JWT_MIN_LENGTH}).\n` +
+    '   Use a strong, randomly-generated secret of at least 32 characters.\n',
+  );
+}
+
+if (process.env.JWT_REFRESH_SECRET && process.env.JWT_REFRESH_SECRET.length < JWT_MIN_LENGTH) {
+  console.warn(
+    `\n⚠️  [SECURITY WARNING]\n` +
+    `   JWT_REFRESH_SECRET is too short (${process.env.JWT_REFRESH_SECRET.length} chars, minimum ${JWT_MIN_LENGTH}).\n` +
+    '   Use a strong, randomly-generated secret of at least 32 characters.\n',
+  );
+}
+
+// ─── Weak Bootstrap Credential Check ─────────────────────────────────────────
+const WEAK_BOOTSTRAP_PASSWORDS = ['Admin@123', 'Inventory@123'];
+if (
+  WEAK_BOOTSTRAP_PASSWORDS.includes(process.env.ADMIN_PASSWORD ?? '') ||
+  WEAK_BOOTSTRAP_PASSWORDS.includes(process.env.INVENTORY_MANAGER_PASSWORD ?? '')
+) {
+  console.warn(
+    '\n⚠️  [SECURITY WARNING]\n' +
+    '   Using default bootstrap credentials.\n' +
+    '   Testing only.\n' +
+    '   Rotate before production launch.\n',
+  );
+}
+
 const start = async () => {
   await connectDB();
 

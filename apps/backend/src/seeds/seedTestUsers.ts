@@ -126,6 +126,13 @@ function printTable(rows: ResultRow[]): void {
 // ─── Exported seed function (called by server.ts or standalone runner) ─────────
 
 export const seedTestUsers = async (): Promise<void> => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'seedTestUsers cannot run in production. ' +
+      'This command creates test accounts with known passwords and must never be executed against a production database.',
+    );
+  }
+
   const results: ResultRow[] = [];
 
   for (const account of TEST_ACCOUNTS) {

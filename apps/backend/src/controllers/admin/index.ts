@@ -131,6 +131,11 @@ export const changeRole = async (req: AuthRequest, res: Response, next: NextFunc
     const parsed = changeRoleSchema.safeParse({ body: req.body });
     if (!parsed.success) return sendError(res, parsed.error.errors[0].message, 422);
 
+    const target = await User.findById(req.params.id).select('isSystemAccount isRootAdmin').lean();
+    if (target?.isSystemAccount || target?.isRootAdmin) {
+      return sendError(res, 'Cannot change the role of a system account.', 403);
+    }
+
     const user = await User.findByIdAndUpdate(req.params.id, { role: parsed.data.body.role }, { new: true });
     if (!user) return sendError(res, 'User not found', 404);
 
@@ -150,6 +155,11 @@ export const setActive = async (req: AuthRequest, res: Response, next: NextFunct
     const { is_active } = parsed.data.body;
     if (req.params.id === req.user!.id && !is_active)
       return sendError(res, 'Cannot deactivate your own account', 403);
+
+    const target = await User.findById(req.params.id).select('isSystemAccount isRootAdmin').lean();
+    if (target?.isSystemAccount || target?.isRootAdmin) {
+      return sendError(res, 'Cannot change the active status of a system account.', 403);
+    }
 
     const user = await User.findByIdAndUpdate(req.params.id, { is_active }, { new: true });
     if (!user) return sendError(res, 'User not found', 404);
@@ -177,6 +187,11 @@ export const getUserById = async (req: AuthRequest, res: Response, next: NextFun
 export const deleteUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (req.params.id === req.user!.id) return sendError(res, 'Cannot delete your own account', 403);
+
+    const target = await User.findById(req.params.id).select('isSystemAccount isRootAdmin').lean();
+    if (target?.isSystemAccount || target?.isRootAdmin) {
+      return sendError(res, 'System accounts cannot be deleted.', 403);
+    }
 
     const user = await User.findOneAndDelete({ _id: req.params.id });
     if (!user) return sendError(res, 'User not found', 404);
@@ -1906,6 +1921,11 @@ export const approveDeletion = async (req: AuthRequest, res: Response, next: Nex
     if (request.status !== 'pending') return sendError(res, 'Request already processed', 400);
 
     const patientId = (request.patient as any)._id ?? request.patient;
+
+    const patientUser = await User.findById(patientId).select('isSystemAccount isRootAdmin').lean();
+    if (patientUser?.isSystemAccount || patientUser?.isRootAdmin) {
+      return sendError(res, 'System accounts cannot be deleted.', 403);
+    }
 
     const pendingAppts = await Appointment.countDocuments({
       patient: patientId,

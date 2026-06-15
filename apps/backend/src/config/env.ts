@@ -22,6 +22,17 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
 
+  // Bootstrap accounts — required so seed failures are loud crashes, not silent no-ops.
+  // Values live in .env.development / .env.production (never in .env.example).
+  // TODO: rotate ADMIN_* and INVENTORY_MANAGER_* credentials before going to production.
+  // TODO: ensure JWT_SECRET and JWT_REFRESH_SECRET differ between dev and prod environments.
+  ADMIN_EMAIL:                  z.string().email('ADMIN_EMAIL must be a valid email'),
+  ADMIN_USERNAME:               z.string().min(1, 'ADMIN_USERNAME is required'),
+  ADMIN_PASSWORD:               z.string().min(8, 'ADMIN_PASSWORD must be at least 8 characters'),
+  INVENTORY_MANAGER_EMAIL:      z.string().email('INVENTORY_MANAGER_EMAIL must be a valid email'),
+  INVENTORY_MANAGER_USERNAME:   z.string().min(1, 'INVENTORY_MANAGER_USERNAME is required'),
+  INVENTORY_MANAGER_PASSWORD:   z.string().min(8, 'INVENTORY_MANAGER_PASSWORD must be at least 8 characters'),
+
   // Optional — features degrade gracefully when absent.
   REDIS_URL: z.string().optional(),
 });
